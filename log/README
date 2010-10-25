@@ -1,0 +1,3 @@
+any Logger instance will log to a .log file in this directory.
+
+see lib.log for more details on the Logger class

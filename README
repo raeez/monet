@@ -1,0 +1,46 @@
+Styx environment
+----------------
+
+run `sudo ./bootstrap` from the project's root directory in order to setup your
+production environment, or instead similarly run 'sudo ./dev.[ARCH]' in order to
+set up a development environment.
+
+once bootstrapped, activate your environment with '. styx/bin/activate' or
+'. styx-dev/bin/activate' as appropriate.
+
+
+root folder 
+-----------
+
+cerberus/
+	cerberus server - handles all incoming api requests from the outside world
+
+gaia/
+	gaia server - server placeholder
+
+hermes/
+	hermes server - serves the admin interface to processors
+
+fcgi/
+	contains the FastCGI scripts hosting cerberus, gaia and hermes through a flup FastCGI WSGI server
+lib/
+	the manhattan library: implements everything from db access to processor and bank interfaces
+
+nginx/
+	nginx configuration scripts
+
+styx/
+styx-dev/
+	virtualenv environments are stored in these respective folders
+
+upstart/
+	upstart scripts for the fcgi servers
+
+bootstrap
+dev.[ARCH]
+	bootstrap scripts for fetching required resources. bootstrap is written for solely for ubuntu.
+
+cerberus.py
+gaia.py
+hermes.py
+	development helper scripts for launching the servers using flask in development mode (as opposed to fcgi)

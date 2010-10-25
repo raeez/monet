@@ -1,0 +1,47 @@
+#!/bin/bash
+
+if [ `whoami` != root ]; then
+	echo Please run this script as root, or using sudo
+	exit
+fi
+
+# clean current env, if any
+rm -rf styx-dev
+
+echo ""
+echo "**********************************"
+echo "* Setting up styx-dev environment *"
+echo "**********************************"
+echo ""
+
+# system and python dependencies
+port install python27 \
+			 python_select \
+
+# ensure python27 is the active python
+python_select python27
+
+port install git-core +svn \
+			 mongodb +python27 \
+
+port install vim +python27 \
+			 MacVim +python27 \
+
+# styx-dev env
+easy_install virtualenv
+virtualenv styx-dev
+. styx-dev/bin/activate
+
+# python dependencies
+easy_install Flask \
+				flup \
+				sphinx \
+				ipython \
+				pymongo \
+				pyflakes \
+
+echo ""
+echo "*******************"
+echo "* styx-dev::Done! *"
+echo "*******************"
+echo ""
