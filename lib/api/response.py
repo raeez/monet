@@ -106,7 +106,7 @@ class Response:
           if request.args.has_key('_id'):
             request.query['_id'] = get_container_id(request.args['_id'])
 
-          self.log['request'].debug("%s on %s with params %s" % (request.method, (str(type), str(request.args))))
+          self.log['request'].debug("%s on %s with params %s" % (request.method, str(type), str(request.args)))
 
           for key in request.args:
             if key != PROCESSOR_KEY and  type.safe_member(key):

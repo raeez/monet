@@ -20,6 +20,9 @@ def login():
     log['login'].debug("request %s" % repr(request.form))
     #auth
     m = Merchant.find_one({'email' : request.form['email']})
+    if m is None:
+      return redirect(url_for('login'))
+
     if str(m.password) == str(request.form['password']):
       session['email'] = request.form['email']
       log['login'].debug(session['email'])
