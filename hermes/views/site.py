@@ -6,24 +6,29 @@ site = Module(__name__)
 
 @site.route('/')
 def index():
-    if 'email' in session:
-      return render_template('greeting.html')
-    return render_template('index.html')
+  log['request'].debug("request %s" % repr(request.path))
+  if 'email' in session:
+    return render_template('greeting.html')
+  return render_template('index.html')
 
 @site.route('/login', methods=['GET', 'POST'])
 def login():
-    if 'email' in session:
+  log['request'].debug("request %s" % repr(request.path))
+  if 'email' in session:
+    return redirect(url_for('index'))
+  elif request.method == 'POST':
+    log['login'].debug("request %s" % repr(request.form))
+    #auth
+    m = Merchant.find_one({'email' : request.form['email']})
+    if str(m.password) == str(request.form['password']):
+      session['email'] = request.form['email']
+      log['login'].debug(session['email'])
       return redirect(url_for('index'))
-    elif request.method == 'POST':
-      #auth
-      m = Merchant.find_one({'email' : request.form['email']})
-      if str(m.password) == str(request.form['password']):
-        session['email'] = request.form['email']
-        return redirect(url_for('index'))
-    return render_template('login.html')
+  return render_template('login.html')
 
 @site.route('/logout')
 def logout():
-    # remove the username from the session if its there
-    session.pop('email', None)
-    return redirect(url_for('index'))
+  log['request'].debug("request %s" % repr(request.path))
+  log['logout'].debug(session['email'])
+  session.pop('email', None)
+  return redirect(url_for('index'))
