@@ -62,21 +62,24 @@ class Logger(dict):
     #self.handlers.append(self.email_handlers) #TODO get the mail server up and running
 
     self.create_logger('system')
-    self['system'].debug('Created an instance of Logger!')
 
   def create_logger(self, logname):
-    new_logger = logging.getLogger(logname)
-    new_logger.setLevel(logging.DEBUG)
-  
-    for h in self.handlers:
-      new_logger.addHandler(h)
+    if self.has_key(logname) is False:
+      new_logger = logging.getLogger(logname)
+      new_logger.setLevel(logging.DEBUG)
+    
+      for h in self.handlers:
+        new_logger.addHandler(h)
 
-    self[logname] = new_logger
+      self[logname] = new_logger
+      self['system'].debug('created logger %s' % repr(logname))
 
   def add_logger(self, logname, logger):
-    logger.setLevel(logging.DEBUG)
+    if self.has_key(logname) is False:
+      logger.setLevel(logging.DEBUG)
 
-    for h in self.handlers:
-      logger.addHandler(h)
+      for h in self.handlers:
+        logger.addHandler(h)
 
-    self[logname] = logger
+      self['system'].debug('added logger %s' % repr(logname))
+      self[logname] = logger

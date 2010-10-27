@@ -1,11 +1,14 @@
 from flask import Module, abort
-from lib.api.response import api_request, api_get
+from lib.api.response import Response
 from lib.db import ProcessorKey
+from cerberus.log import log
 
 processor_key_module = Module(__name__)
 
+resp = Response(log)
+
 @processor_key_module.route('/key/processor', methods=['GET'])
-@api_request
-@api_get(ProcessorKey)
+@resp.api_request
+@resp.api_get(ProcessorKey)
 def processor_key():
   abort(404)

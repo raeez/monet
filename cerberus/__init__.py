@@ -1,6 +1,6 @@
 from flask import Flask
 from lib.api.response import out, RequestError
-from lib.log import Logger
+from log import log
 
 from cerberus.views.bankaccount import bank_account_module
 from cerberus.views.bankcard import bank_card_module
@@ -10,9 +10,7 @@ from cerberus.views.processorkey import processor_key_module
 from cerberus.views.refund import refund_module
 
 cerberus = Flask('cerberus')
-cerberus.manhattan_logger = Logger('cerberus')
-cerberus.manhattan_logger.add_logger('flask', cerberus.logger)
-
+log.add_logger('flask', cerberus.logger)
 cerberus.register_module(bank_account_module)
 cerberus.register_module(bank_card_module)
 cerberus.register_module(charge_module)

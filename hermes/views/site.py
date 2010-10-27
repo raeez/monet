@@ -1,5 +1,6 @@
 from flask import Module, session, redirect, url_for, request, render_template
 from lib.db import *
+from hermes.log import log
 
 site = Module(__name__)
 

@@ -1,12 +1,15 @@
 from flask import Module, request, abort
-from lib.api.response import out, api_request, api_get
+from lib.api.response import out, Response
 from lib.db import Refund
+from cerberus.log import log
 
 refund_module = Module(__name__)
 
+resp = Response(log)
+
 @refund_module.route('/transaction/refund', methods=['GET', 'POST'])
-@api_request
-@api_get(Refund)
+@resp.api_request
+@resp.api_get(Refund)
 def refund():
   if request.method == 'POST':
     r = Refund()

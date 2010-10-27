@@ -1,12 +1,15 @@
 from flask import Module, request, abort
-from lib.api.response import out, api_request, api_get
+from lib.api.response import out, Response
 from lib.db import Charge
+from cerberus.log import log
 
 charge_module = Module(__name__)
 
+resp = Response(log)
+
 @charge_module.route('/transaction/charge', methods=['GET', 'POST'])
-@api_request
-@api_get(Charge)
+@resp.api_request
+@resp.api_get(Charge)
 def charge():
   if request.method == 'POST':
     c = Charge()

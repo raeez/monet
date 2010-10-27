@@ -1,11 +1,14 @@
 from flask import Module, abort
-from lib.api.response import api_request, api_resource
+from lib.api.response import Response
 from lib.db import Customer
+from cerberus.log import log
 
 customer_module = Module(__name__)
 
+resp = Response(log)
+
 @customer_module.route('/customer', methods=['GET', 'POST', 'PUT'])
-@api_request
-@api_resource(Customer)
+@resp.api_request
+@resp.api_resource(Customer)
 def customer():
   abort(404)
