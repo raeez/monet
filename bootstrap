@@ -53,6 +53,9 @@ mkdir /data/db #mongodb
 
 cp upstart/*.conf /etc/init/
 
+cp nginx/cert.crt /var/www/
+cp nginx/cert.key /var/www/
+
 cp fcgi/cerberus.fcgi /var/www/cerberus.fcgi
 cp fcgi/hermes.fcgi /var/www/hermes.fcgi
 cp fcgi/gaia.fcgi /var/www/gaia.fcgi
