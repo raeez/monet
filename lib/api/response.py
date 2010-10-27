@@ -40,16 +40,18 @@ class Response:
     def _api_request(*args, **kw):
 
       #decipher this merchant
+
+      self.log['request'].debug("%s incoming request" % request.method)
       request.merchant = None
       request.query = {}
       if request.method == 'GET':
         if request.args.has_key(PROCESSOR_KEY) is False:
-          self.log['request'].debug("GET MISSING_PROCESSOR_KEY")
+          self.log['request'].debug("%s MISSING_PROCESSOR_KEY" % request.method)
           abort(400)
         request.processor_key = ProcessorKey.find_one({"key" : request.args.get(PROCESSOR_KEY)})
       elif request.method == 'POST' or request.method == 'PUT':
         if request.form.has_key(PROCESSOR_KEY) is False:
-          self.log['request'].debug("POST MISSING_PROCESSOR_KEY")
+          self.log['request'].debug("%s MISSING_PROCESSOR_KEY" % request.method)
           abort(400)
         request.processor_key = ProcessorKey.find_one({"key" : request.form[PROCESSOR_KEY]})
 
@@ -104,7 +106,7 @@ class Response:
           if request.args.has_key('_id'):
             request.query['_id'] = get_container_id(request.args['_id'])
 
-          self.log['request'].debug("GET on %s with params %s" % ((str(type), str(request.args))))
+          self.log['request'].debug("%s on %s with params %s" % (request.method, (str(type), str(request.args))))
 
           for key in request.args:
             if key != PROCESSOR_KEY and  type.safe_member(key):
@@ -113,7 +115,7 @@ class Response:
               r = type.valid_member(key, data)
               if r is not None:
                 if r.valid is False:
-                  self.log['request'].debug("GET VALIDATION_FAILED")
+                  self.log['request'].debug("%s VALIDATION_FAILED" % request.method)
                   return out(TypeError(r.args)), 404
                 else:
                   data = r.data
@@ -123,10 +125,10 @@ class Response:
           obj = type.find(request.query)
 
           if obj is None:
-            self.log['request'].debug("GET INVALID_OBJECT")
+            self.log['request'].debug("%s INVALID_OBJECT" % request.method)
             abort(404)
           else:
-            self.log['request'].debug("GET SUCCESS")
+            self.log['request'].debug("%s SUCCESS" % request.method)
             return out(obj)
         return function(*args, **kw)
       return __api_get
@@ -149,17 +151,17 @@ class Response:
             if key != PROCESSOR_KEY and type.safe_member(key):
               obj[key] = request.form[key]
 
-          self.log['request'].debug("POST on %s with params %s" % ((str(type), str(obj))))
+          self.log['request'].debug("%s on %s with params %s" % (request.method, (str(type), str(obj))))
 
           try:
             obj._validate()
           except Exception as e:
-            self.log['request'].debug("POST VALIDATION_FAILED on type %s with params %s" % (str(type), str(obj)))
+            self.log['request'].debug("%s VALIDATION_FAILED on type %s with params %s" % (request.method, str(type), str(obj)))
             return out(e), 400
 
           obj.save()
           
-          self.log['request'].debug("POST SUCCESS")
+          self.log['request'].debug("%s SUCCESS" % request.method)
 
           return out(obj)
         return function(*args, **kw)
@@ -174,21 +176,21 @@ class Response:
 
         if request.method == 'PUT':
 
-          self.log['request'].debug("PUT on %s with params %s" % ((str(type), str(request.form))))
+          self.log['request'].debug("%s on %s with params %s" % (request.method, (str(type), str(request.form))))
 
           if request.form.has_key('_id') is False:
-            self.log['request'].debug("PUT MISSING_ID")
+            self.log['request'].debug("%s MISSING_ID" % request.method)
             return out(RequestError("member '_id' is required to resolve to a valid object")), 400
 
           obj = type.find_one({"_id" : get_container_id(request.form['_id'])})
 
           if obj is None:
-            self.log['request'].debug("PUT INVALID_OBJECT")
+            self.log['request'].debug("%s INVALID_OBJECT" % request.method)
             return out(RequestError("member '_id' is required to resolve to a valid object")), 400
           try:
             assert obj['_merchant'] == request.merchant._id
           except:
-            self.log['request'].debug("PUT INVALID_MERCHANT")
+            self.log['request'].debug("%s INVALID_MERCHANT" % request.method)
             abort(400)
 
           for key in request.form:
@@ -198,12 +200,12 @@ class Response:
           try:
             obj._validate()
           except Exception as e:
-            self.log['request'].debug("PUT VALIDATION_FAILED of type %s on params %s" % (str(type), str(obj)))
+            self.log['request'].debug("%s VALIDATION_FAILED of type %s on params %s" % (request.method, str(type), str(obj)))
             return out(e), 400
 
           obj.save()
 
-          self.log['request'].debug("PUT SUCCESS")
+          self.log['request'].debug("%s SUCCESS" % request.method)
           
           return out(obj)
         return function(*args, **kw)
@@ -217,33 +219,33 @@ class Response:
         # TODO assert type is a container
 
         if request.method == 'DELETE':
-          self.log['request'].debug("DELETE on %s with params %s" % ((str(type), str(request.form))))
+          self.log['request'].debug("%s on %s with params %s" % (request.method, (str(type), str(request.form))))
 
           if request.form.has_key('_id') is False:
-            self.log['request'].debug("DELETE MISSING_ID")
+            self.log['request'].debug("%s MISSING_ID" % request.method)
             return out(RequestError("member '_id' is required to resolve to a valid object")), 400
 
           obj = type.find_one({"_id" : get_container_id(request.form['_id'])})
 
           if obj is None:
-            self.log['request'].debug("DELETE INVALID_OBJECT")
+            self.log['request'].debug("%s INVALID_OBJECT" % request.method)
             return out(RequestError("member '_id' is required to resolve to a valid object")), 400
           try:
             assert obj['_merchant'] == request.merchant._id
           except:
-            self.log['request'].debug("DELETE INVALID_MERCHANT")
+            self.log['request'].debug("%s INVALID_MERCHANT" % request.method)
             abort(400)
 
           try: # TODO is this necessary?
             obj._validate()
           except Exception as e:
-            self.log['request'].debug("DELETE VALIDATION_FAILED of type %s on params %s" % (str(type), str(obj)))
+            self.log['request'].debug("%s VALIDATION_FAILED of type %s on params %s" % (request.method, str(type), str(obj)))
             return out(e), 400
 
           obj.delete()
 
 
-          self.log['request'].debug("DELETE SUCCESS")
+          self.log['request'].debug("%s SUCCESS" % request.method)
           
           return out(obj)
         return function(*args, **kw)
