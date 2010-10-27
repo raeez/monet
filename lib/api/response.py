@@ -151,7 +151,7 @@ class Response:
             if key != PROCESSOR_KEY and type.safe_member(key):
               obj[key] = request.form[key]
 
-          self.log['request'].debug("%s on %s with params %s" % (request.method, (str(type), str(obj))))
+          self.log['request'].debug("%s on %s with params %s" % (request.method, str(type), str(obj)))
 
           try:
             obj._validate()
@@ -176,7 +176,7 @@ class Response:
 
         if request.method == 'PUT':
 
-          self.log['request'].debug("%s on %s with params %s" % (request.method, (str(type), str(request.form))))
+          self.log['request'].debug("%s on %s with params %s" % (request.method, str(type), str(request.form)))
 
           if request.form.has_key('_id') is False:
             self.log['request'].debug("%s MISSING_ID" % request.method)
@@ -219,7 +219,7 @@ class Response:
         # TODO assert type is a container
 
         if request.method == 'DELETE':
-          self.log['request'].debug("%s on %s with params %s" % (request.method, (str(type), str(request.form))))
+          self.log['request'].debug("%s on %s with params %s" % (request.method, str(type), str(request.form)))
 
           if request.form.has_key('_id') is False:
             self.log['request'].debug("%s MISSING_ID" % request.method)
