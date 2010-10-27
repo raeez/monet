@@ -2,6 +2,8 @@ import logging
 import logging.handlers
 from os import mkdir
 
+LOG_PREFIX = '/var/www/log/'
+
 LOG_LEVELS = { 'none' : logging.NOTSET,
                'debug' : logging.DEBUG,
                'info' : logging.INFO,
@@ -22,11 +24,11 @@ class Logger(dict):
 
     self.system_name = str(system_name)
     try:
-      mkdir('log')
+      mkdir(LOG_PREFIX)
     except OSError:
       pass # directory exists
 
-    self.filename = 'log/' + self.system_name + '.log'
+    self.filename = LOG_PREFIX + self.system_name + '.log'
     
     #formatters
     self.email_formatter = logging.Formatter('''
