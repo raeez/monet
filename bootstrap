@@ -39,6 +39,7 @@ rm /etc/nginx/sites-enabled/default
 rm /etc/nginx/sites-available/default
 mkdir /var/manhattan
 mkdir /var/manhattan/log
+mkdir /var/manhattan/log/nginx
 
 echo ""
 echo "***************************"
