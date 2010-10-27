@@ -41,6 +41,7 @@ mkdir /var/manhattan
 mkdir /var/manhattan/log
 mkdir /var/manhattan/log/nginx
 mkdir /var/www/log
+chown -R ubuntu /var/www
 
 echo ""
 echo "***************************"
