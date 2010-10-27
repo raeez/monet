@@ -1,3 +1,6 @@
+import lib.config
+lib.config.DEBUG = True
+
 from cerberus import cerberus
 
 if __name__ == '__main__':

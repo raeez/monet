@@ -1,3 +1,5 @@
+import lib.config
+lib.config.DEBUG = True
 from gaia import gaia
 
 if __name__ == '__main__':

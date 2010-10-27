@@ -1,3 +1,5 @@
+import lib.config
+lib.config.DEBUG = True
 from hermes import hermes
 
 if __name__ == '__main__':

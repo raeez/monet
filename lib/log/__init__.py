@@ -1,8 +1,12 @@
 import logging
 import logging.handlers
 from os import mkdir
+import lib.config
 
 LOG_PREFIX = '/var/www/log/'
+
+if lib.config.DEBUG is True:
+  LOG_PREFIX = 'log/'
 
 LOG_LEVELS = { 'none' : logging.NOTSET,
                'debug' : logging.DEBUG,
