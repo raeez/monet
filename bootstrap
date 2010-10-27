@@ -40,6 +40,7 @@ rm /etc/nginx/sites-available/default
 mkdir /var/manhattan
 mkdir /var/manhattan/log
 mkdir /var/manhattan/log/nginx
+mkdir /var/www/log
 
 echo ""
 echo "***************************"
