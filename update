@@ -6,6 +6,6 @@ if [ `whoami` != root ]; then
 fi
 
 sh stop
-git pull
+sudo ubuntu git pull
 sh bootstrap
 sh start
