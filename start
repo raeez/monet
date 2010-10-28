@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ `whoami` != root ]; then
+	echo Please run this script as root, or using sudo
+	exit
+fi
+
+start nginx.styx
+start hermes.styx
+start gaia.styx
+start cerberus.styx
