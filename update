@@ -6,5 +6,6 @@ if [ `whoami` != root ]; then
 fi
 
 sh stop
+git pull
 sh bootstrap
 sh start
