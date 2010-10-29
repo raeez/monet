@@ -1,46 +1,54 @@
 Styx environment
 ----------------
 
-run `sudo ./bootstrap` from the project's root directory in order to setup your
+run `sudo ./production` from the project's root directory in order to setup your
 production environment, or instead similarly run 'sudo ./dev.[ARCH]' in order to
 set up a development environment.
 
 once bootstrapped, activate your environment with '. styx/bin/activate' or
-'. styx-dev/bin/activate' as appropriate.
+'. styx-dev/bin/activate' as appropriate. Any calls to python from within the
+virtual environment will use a clean python environment contained within the
+'styx/' (production mode) or 'styx-dev' (development mode).
 
+Mythology
+---------
+
+The river styx is the boundary between heaven and hell. styx is our virtual python environment.
+Gaia is the earth goddess. Gaia does nothing useful (yet).
+Cerberus is the three headed dog that guards the gates of hades. cerberus implements a gateway to paymentech.
 
 root folder 
 -----------
 
 cerberus/
-	cerberus server - handles all incoming api requests from the outside world
-
-gaia/
-	gaia server - server placeholder
+	cerberus server - parses, validates and dispatches to lib/ all incoming api requests from the outside world.
 
 hermes/
-	hermes server - serves the admin interface to processors
+	hermes server - serves an admin interface to access information regarding merchants boarded and transactions processed.
+
+gaia/
+	gaia server - server placeholder.
 
 fcgi/
-	contains the FastCGI scripts hosting cerberus, gaia and hermes through a flup FastCGI WSGI server
+	contains the FastCGI scripts hosting cerberus, gaia and hermes through a flup FastCGI WSGI server.
 lib/
-	the manhattan library: implements everything from db access to processor and bank interfaces
+	the manhattan library: implements everything from db access to processor and bank interfaces.
 
 nginx/
 	nginx configuration scripts, temporary certs etc.
 
 styx/
 styx-dev/
-	virtualenv environments are stored in these respective folders
+	virtualenv environments for development and production modes.
 
 upstart/
-	upstart scripts for the fcgi servers
+	upstart scripts for starting, managing and monitoring the fcgi servers.
 
-bootstrap
+production
 dev.[ARCH]
-	bootstrap scripts for fetching required resources. bootstrap is written solely for  ubuntu 10.10.
+	bootstrap scripts for fetching required resources. production and dev.ubuntu require ubuntu 10.10 and dev.osx requires OSX 10.6.
 
 cerberus.py
 gaia.py
 hermes.py
-	development helper scripts for launching the servers using flask in development mode (as opposed to fcgi)
+	development helper scripts for launching the servers using flask in development mode (as opposed to fcgi).
