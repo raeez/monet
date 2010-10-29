@@ -28,17 +28,21 @@ port install vim +python27 \
 			 MacVim +python27 \
 
 # styx-dev env
-easy_install virtualenv
+pip install virtualenv
 virtualenv styx-dev
 . styx-dev/bin/activate
 
 # python dependencies
-easy_install Flask \
+pip install Flask \
 				flup \
 				sphinx \
 				ipython \
 				pymongo \
 				pyflakes \
+
+git clone git clone git://fabfile.org/fabric.git fabric
+python fabric/setup.py build
+python fabric/setup.py install
 
 echo ""
 echo "*******************"

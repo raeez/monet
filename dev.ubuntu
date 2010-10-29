@@ -15,7 +15,7 @@ echo "**********************************"
 echo ""
 
 #mongodb snapshot sources
-echo "deb http://downloads.mongodb.org/distros/ubuntu 10.4 10gen" > /etc/apt/sources.list
+apt-add-repository 'deb http://downloads.mongodb.org/distros/ubuntu 10.10 10gen'
 apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
 apt-get update
 apt-get upgrade
@@ -27,16 +27,21 @@ apt-get -y install git \
 					python-setuptools \
 
 # styx env
-easy_install virtualenv
+pip install virtualenv
 virtualenv styx-dev
 . styx/bin/activate
 
 # python dependencies
-easy_install Flask \
+pip install Flask \
 				flup \
 				sphinx \
 				pymongo \
 				ipython \
+				pyflakes \
+
+git clone git clone git://fabfile.org/fabric.git fabric
+python fabric/setup.py build
+python fabric/setup.py install
 
 echo ""
 echo "***************"
