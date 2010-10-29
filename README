@@ -27,7 +27,7 @@ lib/
 	the manhattan library: implements everything from db access to processor and bank interfaces
 
 nginx/
-	nginx configuration scripts
+	nginx configuration scripts, temporary certs etc.
 
 styx/
 styx-dev/
@@ -38,7 +38,7 @@ upstart/
 
 bootstrap
 dev.[ARCH]
-	bootstrap scripts for fetching required resources. bootstrap is written for solely for ubuntu.
+	bootstrap scripts for fetching required resources. bootstrap is written solely for  ubuntu 10.10.
 
 cerberus.py
 gaia.py
