@@ -28,8 +28,12 @@ def resource_forbidden(error):
 
 @cerberus.errorhandler(404)
 def resource_missing(error):
-  return out(RequestError("resource missing - %s" % str(error))), 403
+  return out(RequestError("resource missing - %s" % str(error))), 404
+
+@cerberus.errorhandler(405)
+def method_not_allowed(error):
+  return out(RequestError("method not allowed - %s" % str(error))), 405
 
 @cerberus.errorhandler(500)
 def server_error(error):
-  return out(RequestError("server error - %s" % str(error))), 403
+  return out(RequestError("server error - %s" % str(error))), 500
