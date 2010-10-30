@@ -1,0 +1,69 @@
+#!/bin/bash
+
+if [ `whoami` != root ]; then
+	echo Please run this script as root, or using sudo
+	exit
+fi
+
+echo ""
+echo "**********************************"
+echo "* Bootstrapping Styx Environment *"
+echo "**********************************"
+echo ""
+
+# system dependencies
+apt-get -y install git \
+					nginx \
+					mongodb \
+					python-setuptools \
+
+# styx env
+easy_install virtualenv
+virtualenv styx
+. styx/bin/activate
+
+# python dependencies
+easy_install Flask \
+				flup \
+				sphinx \
+				pymongo \
+				ipython \
+
+ln -s $(pwd)/styx/bin/python /usr/bin/styx.python
+
+chown -R ubuntu .
+
+# deploy nginx configuration
+cp nginx/nginx.conf /etc/nginx/nginx.conf
+rm /etc/nginx/sites-enabled/default
+rm /etc/nginx/sites-available/default
+mkdir /var/manhattan
+mkdir /var/manhattan/log
+mkdir /var/manhattan/log/nginx
+mkdir /var/www/log
+chown -R ubuntu /var/www
+
+echo ""
+echo "***************************"
+echo "* Deploying core services *"
+echo "***************************"
+echo ""
+
+mkdir /data/db #mongodb
+
+cp upstart/*.conf /etc/init/
+
+cp nginx/cert.crt /var/www/
+cp nginx/cert.key /var/www/
+
+cp fcgi/cerberus.fcgi /var/www/cerberus.fcgi
+cp fcgi/hermes.fcgi /var/www/hermes.fcgi
+cp fcgi/gaia.fcgi /var/www/gaia.fcgi
+
+sh start
+
+echo ""
+echo "***************"
+echo "* styx::Done! *"
+echo "***************"
+echo ""

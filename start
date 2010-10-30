@@ -5,7 +5,13 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-start nginx.styx
-start hermes.styx
-start gaia.styx
+echo "*** styx *** starting cerberus..."
 start cerberus.styx
+echo "*** styx *** starting hermes..."
+start hermes.styx
+echo "*** styx *** starting gaia..."
+start gaia.styx
+echo "*** styx *** starting nginx..."
+start nginx.styx
+echo "*** styx *** starting mongodb..."
+start mongodb.styx
