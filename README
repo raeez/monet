@@ -7,7 +7,7 @@ Cerberus is the three headed dog that guards the gates of hades. cerberus implem
 Hermes is the messenger god—hermes implements an administrative interface transactions processed.
 
 Development environment
-----------------
+-----------------------
 
 run `sudo ./dev/dev.[ARCH]` from the project's root directory in order to setup your
 development environment. The appropriate dev script for your architecture will install
@@ -18,16 +18,52 @@ once bootstrapped, activate your environment with '. styx-dev/bin/activate' or. 
 calls to python from within the virtual environment will use the virgin python executable
 contained within 'styx-dev/'.
 
+Production environment
+----------------------
+
+Production environments are managed through ssh deployments (see 'Deploying to Production').
+A minimal environment of dependancy software, bootstrap scripts + configuration files is required before 'bootstrap'
+can be called. Bootstrap then installs required service configuration files, as well as upstart scripts as follows:
+
+nginx/ -> /etc/nginx/
+fcgi/ -> /var/wwww/
+upstart/ -> /etc/init/
+* -> /home/ubuntu/manhattan
+
+Logging
+-------
+
+Service and application logs can be found in /var/www/log
+
+Deploying to Production
+-----------------------
+Deploy to production is automated via ssh**
+
+fab pack
+	pack software into a python egg, store in dist
+
+fab deploy
+	install the python egg in dist to production servers, halt, upgrade and restart core services
+
+fab reconfig
+	reinstall all configuration files in target production environment, halt and restart core services
+
+fab bootstrap
+	install production environment, deploy current python egg and start core services
+
+*	ensure your virtualenv is active before attempting to use any fabric deployment commands
+**	ensure your .ssh/config is correctly configured to automatically authenticate/select the correct user
+
 root folder 
 -----------
 cerberus/
 	cerberus server - parses, validates and dispatches to lib/ all incoming api requests from the outside world. Exposes the following RESTful resources:
-	[GET|POST|PUT|DELETE]		customer
-	[GET|POST|PUT|DELETE]		instrument/bank_card
-	[GET|POST|PUT|DELETE]		instrument/bank_account
+	[GET|POST|PUT|DELETE]					customer
+	[GET|POST|PUT|DELETE]					instrument/bank_card
+	[GET|POST|PUT|DELETE]					instrument/bank_account
 	[GET|POST]					transaction/charge
 	[GET|POST]					transaction/refund
-	[GET]						key/processor
+	[GET]					key/processor
 
 hermes/
 	hermes server - serves an admin interface to access information regarding merchants boarded and transactions processed.
