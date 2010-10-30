@@ -28,7 +28,6 @@ pip install Flask \
 				flup \
 				sphinx \
 				pymongo \
-				ipython \
 
 ln -s $(pwd)/styx/bin/python /usr/bin/styx.python
 
