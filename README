@@ -70,10 +70,10 @@ cerberus/
 	Exposes the following RESTful resources:
 
 	[GET|POST|PUT|DELETE]	instrument/bank_card		[bank card store]
-	[GET|POST|PUT|DELETE]	instrument/bank_accoun	t [bank account store]
-	[GET|POST]		transaction/charg	e	[pull money to a merchant via bank card or ach transfer]
-	[GET|POST]		transaction/refun	d	[refund a bank card or ach transfer]
-	[GET]			key/processo	r	[merchant processor keys]
+	[GET|POST|PUT|DELETE]	instrument/bank_account		 [bank account store]
+	[GET|POST]		transaction/charge		[pull money to a merchant via bank card or ach transfer]
+	[GET|POST]		transaction/refund		[refund a bank card or ach transfer]
+	[GET]			key/processor		[merchant processor keys]
 	[POST]			merchant		[board merchants]
 
 hermes/
