@@ -17,8 +17,8 @@ echo ""
 #mongodb snapshot sources
 apt-add-repository 'deb http://downloads.mongodb.org/distros/ubuntu 10.10 10gen'
 apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
-apt-get update
-apt-get upgrade
+apt-get -y update
+apt-get -y upgrade
 
 # system and python dependencies
 apt-get -y install git \
