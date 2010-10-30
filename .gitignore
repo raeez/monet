@@ -4,3 +4,7 @@
 *.log
 styx/
 styx-dev/
+Fabric.egg-info/
+build/
+dist/
+fabric/
