@@ -18,7 +18,7 @@ once bootstrapped, activate your environment with '. styx-dev/bin/activate'. Any
 calls to python from within the virtual environment will use the virgin python executable
 contained within 'styx-dev/'.
 
-launch the servers in DEBUG mode (lib.config.DEBUG=True) wit the helper scripts
+launch the servers in DEBUG mode (lib.config.DEBUG=True) with the helper scripts
 
 cerberus.py	->	localhost:5100
 hermes.py	->	localhost:5200
