@@ -9,9 +9,9 @@ fi
 rm -rf styx-dev
 
 echo ""
-echo "**********************************"
+echo "***********************************"
 echo "* Setting up styx-dev environment *"
-echo "**********************************"
+echo "***********************************"
 echo ""
 
 # system and python dependencies
@@ -41,8 +41,9 @@ pip install Flask \
 				pyflakes \
 
 git clone git://fabfile.org/fabric.git fabric
-python fabric/setup.py build
-python fabric/setup.py install
+cd fabric
+python setup.py build
+python setup.py install
 
 echo ""
 echo "*******************"
