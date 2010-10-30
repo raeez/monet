@@ -49,7 +49,11 @@ fab reconfig
 	reinstall all configuration files in target production environment, halt and restart core services
 
 fab bootstrap
-	install production environment, deploy current python egg and start core services
+	install production environment onto a clean ubuntu instance; deploy current python egg and start core services
+
+your typical software upgrade is a 'fab pack deploy'.
+bootstrapping a clean machine is a 'fab pack boostrap'
+in order to target a specific host, simply do 'fab -i hostname pack deploy' etc.
 
 *	ensure your virtualenv is active before attempting to use any fabric deployment commands
 **	ensure your .ssh/config is correctly configured to automatically authenticate/select the correct user
