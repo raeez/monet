@@ -14,7 +14,7 @@ development environment. The appropriate dev script for your architecture will i
 the required software for your development environment, bootstrap a python virtualenv
 into 'styx-dev/' and fetch and install any required dependancies into the virtualenv.
 
-once bootstrapped, activate your environment with '. styx-dev/bin/activate' or. Any
+once bootstrapped, activate your environment with '. styx-dev/bin/activate'. Any
 calls to python from within the virtual environment will use the virgin python executable
 contained within 'styx-dev/'.
 
