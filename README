@@ -12,11 +12,19 @@ Development environment
 run `sudo ./dev/dev.[ARCH]` from the project's root directory in order to setup your
 development environment. The appropriate dev script for your architecture will install
 the required software for your development environment, bootstrap a python virtualenv
-into 'styx-dev/' andfetch and install any required dependancies into the virtualenv.
+into 'styx-dev/' and fetch and install any required dependancies into the virtualenv.
 
 once bootstrapped, activate your environment with '. styx-dev/bin/activate' or. Any
 calls to python from within the virtual environment will use the virgin python executable
 contained within 'styx-dev/'.
+
+launch the servers in DEBUG mode (lib.config.DEBUG=True) wit the helper scripts
+
+cerberus.py			->			localhost:5100
+hermes.py			->			localhost:5200
+gaia.py				->			localhost:5300
+
+all logging in debug is done in /log, no logmails will be sent on ERROR and CRITICAL exceptions.
 
 Production environment
 ----------------------
@@ -26,14 +34,11 @@ A minimal environment of dependancy software, bootstrap scripts + configuration 
 can be called. Bootstrap then installs required service configuration files, as well as upstart scripts as follows:
 
 nginx/ -> /etc/nginx/
-fcgi/ -> /var/wwww/
+fcgi/ -> /var/www/
 upstart/ -> /etc/init/
 * -> /home/ubuntu/manhattan
 
-Logging
--------
-
-Service and application logs can be found in /var/www/log
+Service and application logs can be found in /var/www/log, logmails will be sent or ERROR and CRITICAL exceptions.
 
 Deploying to Production
 -----------------------
@@ -65,9 +70,9 @@ cerberus/
 	[GET|POST|PUT|DELETE]					customer
 	[GET|POST|PUT|DELETE]					instrument/bank_card
 	[GET|POST|PUT|DELETE]					instrument/bank_account
-	[GET|POST]					transaction/charge
-	[GET|POST]					transaction/refund
-	[GET]					key/processor
+	[GET|POST]								transaction/charge
+	[GET|POST]								transaction/refund
+	[GET]									key/processor
 
 hermes/
 	hermes server - serves an admin interface to access information regarding merchants boarded and transactions processed.
