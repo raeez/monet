@@ -22,8 +22,9 @@ apt-get upgrade
 
 # system and python dependencies
 apt-get -y install git \
+					nginx \
 					mongodb \
-					python-virtualenv \
+					python-pip \
 					python-setuptools \
 
 # styx env

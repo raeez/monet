@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-setup
+setup(
   name='manhattan',
   version='0.14',
   long_description=__doc__,
