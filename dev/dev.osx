@@ -9,9 +9,9 @@ fi
 rm -rf styx-dev
 
 echo ""
-echo "***********************************"
-echo "* Setting up styx-dev environment *"
-echo "***********************************"
+echo "******************************"
+echo "* Setting up dev environment *"
+echo "******************************"
 echo ""
 
 # system and python dependencies
@@ -27,10 +27,10 @@ port install git-core +svn \
 port install vim +python27 \
 			 MacVim +python27 \
 
-# styx-dev env
+# dev env
 pip install virtualenv
-virtualenv styx-dev
-. styx-dev/bin/activate
+virtualenv dev
+. dev/bin/activate
 
 # python dependencies
 pip install Flask \
