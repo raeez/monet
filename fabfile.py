@@ -53,26 +53,40 @@ def _deploy():
     run('sudo sh production')
     run('sudo sh list')
 
-def deploy():
-  _deploy()
-
 def seed_db():
   with cd(DEPLOY_DIR):
     run('styx.python seed.py')
 
-
-def bootstrap():
+def rebase(new=False):
   ITEMS = ['start', 'stop', 'restart', 'list', 'seed.py', 'bootstrap', 'production', 'fcgi', 'upstart', 'nginx']
   ARCHIVE = 'core.tar.gz'
   local('tar cvzf %s %s' % (ARCHIVE, string.join(ITEMS)))
-  run('mkdir %s' % DEPLOY_DIR)
+  if new:
+    run('mkdir %s' % DEPLOY_DIR)
   put(ARCHIVE, DEPLOY_DIR)
   local('rm %s' % ARCHIVE)
 
   with cd(DEPLOY_DIR):
     run('tar xf %s' % ARCHIVE)
     run('rm %s' % ARCHIVE)
+
+def reconfig():
+  rebase()
+  with cd(DEPLOY_DIR):
+    run('sudo sh production')
+    run('sudo sh list')
+
+def deploy():
+  _deploy()
+
+def bootstrap():
+  rebase(new=True)
+
+  with cd(DEPLOY_DIR):
     run('sudo sh bootstrap')
 
   _deploy()
   seed_db()
+
+  with cd(DEPLOY_DIR):
+    run('sudo sh list')
