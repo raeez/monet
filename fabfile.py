@@ -46,7 +46,7 @@ def _deploy():
     run('tar xzf %s/%s -C .' % (TEMP_DIR, ARCHIVE))
 
     with cd(DIST):
-      run('styx.python setup.py install')
+      run('manhattan.python setup.py install')
   run('rm -rf %s' % TEMP_DIR)
 
   with cd(DEPLOY_DIR):
@@ -55,7 +55,7 @@ def _deploy():
 
 def seed_db():
   with cd(DEPLOY_DIR):
-    run('styx.python seed.py')
+    run('manhattan.python seed.py')
 
 def rebase(new=False):
   ITEMS = ['start', 'stop', 'restart', 'list', 'seed.py', 'bootstrap', 'production', 'fcgi', 'upstart', 'nginx']
