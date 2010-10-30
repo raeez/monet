@@ -1,11 +1,11 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
-setup(
+setup
   name='manhattan',
-  version='0.1',
+  version='0.14',
   long_description=__doc__,
-  packages=['cerberus', 'hermes', 'gaia', 'lib'],
+  packages=find_packages(),
   include_package_data=True,
   zip_safe=False,
-  install_requires=['Flask>=0.6']
+  install_requires=['Flask>=0.6', 'pymongo']
      )

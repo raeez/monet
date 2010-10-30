@@ -1,7 +1,2 @@
 recursive-include hermes/templates *
 recursive-include hermes/static *
-
-recursive-include fcgi *
-recursive-include upstart *
-
-include production

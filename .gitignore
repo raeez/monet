@@ -5,6 +5,7 @@
 styx/
 styx-dev/
 Fabric.egg-info/
+manhattan.egg-info/
 build/
 dist/
 fabric/
