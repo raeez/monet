@@ -7,7 +7,7 @@ customer_module = Module(__name__)
 
 resp = Response(log)
 
-@customer_module.route('/customer', methods=['GET', 'POST', 'PUT'])
+@customer_module.route('/customer', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @resp.api_request
 @resp.api_resource(Customer)
 def customer():
