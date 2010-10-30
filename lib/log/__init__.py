@@ -15,11 +15,11 @@ LOG_LEVELS = { 'none' : logging.NOTSET,
                'error' : logging.ERROR,
                'critical' : logging.CRITICAL }
 
-MAIL_HOST = 'mail.authsmtp.com'
+MAIL_HOST = ('mail.authsmtp.com', 2525)
 FROM_ADDR = 'raeez@mit.edu'
 TO_ADDR = 'raeez@mit.edu'
 SUBJECT = 'Breakage in Manhattan!'
-MAIL_ADMINS = ['admin@domain.com']
+MAIL_ADMINS = ['raeez@mit.edu']
 AUTH = ('ac53391', 'ezanqkp4gfzjbj')
 
 class Logger(dict):
@@ -60,7 +60,7 @@ class Logger(dict):
     self.email_handler = logging.handlers.SMTPHandler(MAIL_HOST, FROM_ADDR, MAIL_ADMINS, SUBJECT, credentials=AUTH)
     self.email_handler.setLevel(logging.ERROR)
     self.email_handler.setFormatter(self.email_formatter)
-    self.handlers.append(self.email_handlers) #TODO get the mail server up and running
+    self.handlers.append(self.email_handler) #TODO get the mail server up and running
 
     self.create_logger('system')
 

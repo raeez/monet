@@ -11,3 +11,7 @@ hermes.secret_key = "\x85\\w\xf9\xb0\x9eR\xb4\xdd\xfcD\x91\xfb\x01T\xecE\x9b\xa2
 @hermes.errorhandler(404)
 def page_not_found(error):
   return render_template('404.html'), 404
+
+@hermes.errorhandler(500)
+def server_error(error):
+  return render_template('500.html'), 404

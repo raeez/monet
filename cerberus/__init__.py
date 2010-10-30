@@ -20,12 +20,16 @@ cerberus.register_module(refund_module)
 
 @cerberus.errorhandler(400)
 def malformed_request(error):
-  return out(RequestError("malformed request")), 400
+  return out(RequestError("malformed request - %s" % str(error))), 400
 
 @cerberus.errorhandler(403)
 def resource_forbidden(error):
-  return out(RequestError("request forbidden")), 403
+  return out(RequestError("request forbidden - %s" % str(error))), 403
 
 @cerberus.errorhandler(404)
 def resource_missing(error):
-  return out(RequestError("resource missing")), 403
+  return out(RequestError("resource missing - %s" % str(error))), 403
+
+@cerberus.errorhandler(500)
+def server_error(error):
+  return out(RequestError("server error - %s" % str(error))), 403
