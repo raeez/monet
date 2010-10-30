@@ -6,7 +6,6 @@ from lib.instrument.bankcard import BankCard
 from lib.instrument.bankaccount import BankAccount
 
 from lib.entity.merchant import Merchant
-from lib.entity.customer import Customer
 
 from lib.key.base import Key
 from lib.processor.key import ProcessorKey
