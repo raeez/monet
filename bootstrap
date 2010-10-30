@@ -32,7 +32,6 @@ virtualenv dev
 # python dependencies
 pip install Flask \
 				flup \
-				sphinx \
 				pymongo \
 
 ln -s $(pwd)/dev/bin/python /usr/bin/manhattan.python
