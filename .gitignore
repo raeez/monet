@@ -2,7 +2,6 @@
 *.pyc
 *.pyo
 *.log
-styx/
 dev/.Python
 dev/bin/
 dev/include/
