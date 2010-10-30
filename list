@@ -1,1 +1,3 @@
-initctl list | grep styx
+#!/bin/bash
+
+initctl list | grep manhattan

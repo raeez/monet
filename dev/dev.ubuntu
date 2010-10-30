@@ -6,12 +6,12 @@ if [ `whoami` != root ]; then
 fi
 
 # clean current env, if any
-rm -rf styx-dev
+rm -rf dev
 
 echo ""
-echo "**********************************"
-echo "* Setting up styx-dev environment *"
-echo "**********************************"
+echo "****************************************"
+echo "* Setting up Manhattan-dev environment *"
+echo "****************************************"
 echo ""
 
 #mongodb snapshot sources
@@ -27,10 +27,10 @@ apt-get -y install git \
 					python-pip \
 					python-setuptools \
 
-# styx env
+# manhattan env
 pip install virtualenv
-virtualenv styx-dev
-. styx/bin/activate
+virtualenv dev
+. manhattan/bin/activate
 
 # python dependencies
 pip install Flask \
@@ -41,11 +41,12 @@ pip install Flask \
 				pyflakes \
 
 git clone git://fabfile.org/fabric.git fabric
-python fabric/setup.py build
-python fabric/setup.py install
+cd fabric
+python setup.py build
+python setup.py install
 
 echo ""
-echo "***************"
-echo "* styx::Done! *"
-echo "***************"
+echo "***********************"
+echo "* Manhattan-dev::Done! *"
+echo "***********************"
 echo ""

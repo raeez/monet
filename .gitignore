@@ -3,7 +3,10 @@
 *.pyo
 *.log
 styx/
-styx-dev/
+dev/.Python
+dev/bin/
+dev/include/
+dev/lib/
 Fabric.egg-info/
 manhattan.egg-info/
 build/

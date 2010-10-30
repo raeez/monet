@@ -5,7 +5,7 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-stop nginx.styx
-stop hermes.styx
-stop gaia.styx
-stop cerberus.styx
+stop nginx.manhattan
+stop hermes.manhattan
+stop gaia.manhattan
+stop cerberus.manhattan

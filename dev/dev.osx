@@ -6,12 +6,12 @@ if [ `whoami` != root ]; then
 fi
 
 # clean current env, if any
-rm -rf styx-dev
+rm -rf dev
 
 echo ""
-echo "******************************"
-echo "* Setting up dev environment *"
-echo "******************************"
+echo "****************************************"
+echo "* Setting up Manhattan-dev environment *"
+echo "****************************************"
 echo ""
 
 # system and python dependencies
@@ -46,7 +46,7 @@ python setup.py build
 python setup.py install
 
 echo ""
-echo "*******************"
-echo "* styx-dev::Done! *"
-echo "*******************"
+echo "************************"
+echo "* Manhattan-dev::Done! *"
+echo "************************"
 echo ""

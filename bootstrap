@@ -6,10 +6,16 @@ if [ `whoami` != root ]; then
 fi
 
 echo ""
-echo "**********************************"
-echo "* Bootstrapping Styx Environment *"
-echo "**********************************"
+echo "***************************************"
+echo "* Bootstrapping Manhattan Environment *"
+echo "***************************************"
 echo ""
+
+#mongodb snapshot sources
+apt-add-repository 'deb http://downloads.mongodb.org/distros/ubuntu 10.10 10gen'
+apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
+apt-get update
+apt-get upgrade
 
 # system dependencies
 apt-get -y install git \
@@ -20,8 +26,8 @@ apt-get -y install git \
 
 # styx env
 pip install virtualenv
-virtualenv styx
-. styx/bin/activate
+virtualenv dev
+. dev/bin/activate
 
 # python dependencies
 pip install Flask \
@@ -29,7 +35,7 @@ pip install Flask \
 				sphinx \
 				pymongo \
 
-ln -s $(pwd)/styx/bin/python /usr/bin/styx.python
+ln -s $(pwd)/dev/bin/python /usr/bin/manhattan.python
 
 chown -R ubuntu /home/ubuntu/
 
@@ -56,12 +62,10 @@ cp upstart/*.conf /etc/init/
 cp nginx/cert.crt /var/www/
 cp nginx/cert.key /var/www/
 
-cp fcgi/cerberus.fcgi /var/www/cerberus.fcgi
-cp fcgi/hermes.fcgi /var/www/hermes.fcgi
-cp fcgi/gaia.fcgi /var/www/gaia.fcgi
+cp fcgi/*.fcgi /var/www/
 
 echo ""
-echo "***************"
-echo "* styx::Done! *"
-echo "***************"
+echo "********************"
+echo "* Manhattan::Done! *"
+echo "********************"
 echo ""
