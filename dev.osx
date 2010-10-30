@@ -40,7 +40,7 @@ pip install Flask \
 				pymongo \
 				pyflakes \
 
-git clone git clone git://fabfile.org/fabric.git fabric
+git clone git://fabfile.org/fabric.git fabric
 python fabric/setup.py build
 python fabric/setup.py install
 
