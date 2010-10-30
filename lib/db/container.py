@@ -107,7 +107,7 @@ class Container(dict):
 
   @classmethod
   def __internal(cls):
-    return ['_validated', '_type', '_created', '_merchant', '_id']
+    return ['_validated', '_type', '_created', '_merchant']
 
   @classmethod
   def safe_member(cls, member):
