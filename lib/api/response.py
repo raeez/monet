@@ -7,7 +7,9 @@ from lib.db import ProcessorKey, Merchant
 FORBIDDEN_GET_ARGS = ['merchant']
 FORBIDDEN_POST_ARGS = ['merchant', '_id']
 FORBIDDEN_PUT_ARGS = ['merchant']
+
 REQUIRED_PUT_ARGS = ['_id']
+REQUIRED_DELETE_ARGS = ['_id']
 
 PROCESSOR_KEY = '_key'
 OBJECT_ID = '_id'
@@ -49,6 +51,7 @@ class Response:
           self.log['request'].debug("%s MISSING_PROCESSOR_KEY" % request.method)
           abort(400)
         request.processor_key = ProcessorKey.find_one({"key" : request.args.get(PROCESSOR_KEY)})
+
       elif request.method == 'POST' or request.method == 'PUT':
         if request.form.has_key(PROCESSOR_KEY) is False:
           self.log['request'].debug("%s MISSING_PROCESSOR_KEY" % request.method)
@@ -86,6 +89,12 @@ class Response:
             self.log['request'].debug("%s INVALID_KEY %s" % (request.method, repr(arg)))
             abort(403)
         for arg in REQUIRED_PUT_ARGS:
+          if request.form.has_key(arg) is False:
+            self.log['request'].debug("%s INVALID_KEY %s" % (request.method, repr(arg)))
+            abort(400)
+
+      elif request.method == 'DELETE':
+        for arg in REQUIRED_DELETE_ARGS:
           if request.form.has_key(arg) is False:
             self.log['request'].debug("%s INVALID_KEY %s" % (request.method, repr(arg)))
             abort(400)

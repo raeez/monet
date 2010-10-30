@@ -9,6 +9,6 @@ resp = Response(log)
 
 @merchant_module.route('/merchant', methods=['POST'])
 @resp.api_request
-@resp.api_put(Merchant)
-def processor_key():
+@resp.api_post(Merchant)
+def merchant():
   abort(404)
