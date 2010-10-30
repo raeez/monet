@@ -75,6 +75,7 @@ cerberus/
 	[GET|POST]			transaction/charge
 	[GET|POST]			transaction/refund
 	[GET]				key/processor
+	[POST]				merchant
 
 hermes/
 	hermes server - serves an admin interface to access information regarding merchants boarded and transactions processed.
