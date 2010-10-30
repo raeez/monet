@@ -7,5 +7,5 @@ fi
 
 sh stop
 sudo -u ubuntu git pull
-sh bootstrap
+sh production
 sh start

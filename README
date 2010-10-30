@@ -19,7 +19,6 @@ Cerberus is the three headed dog that guards the gates of hades. cerberus implem
 
 root folder 
 -----------
-
 cerberus/
 	cerberus server - parses, validates and dispatches to lib/ all incoming api requests from the outside world.
 
