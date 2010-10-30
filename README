@@ -68,6 +68,7 @@ root folder
 cerberus/
 	cerberus server - parses, validates and dispatches to lib/ all incoming api requests from the outside world.
 	Exposes the following RESTful resources:
+
 	[GET|POST|PUT|DELETE]		customer
 	[GET|POST|PUT|DELETE]		instrument/bank_card
 	[GET|POST|PUT|DELETE]		instrument/bank_account
