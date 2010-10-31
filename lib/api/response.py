@@ -49,7 +49,7 @@ class RequiredArgumentError(RequestError):
 class ForbiddenArgumentError(RequestError):
   def __init__(self, arg):
     super(ForbiddenArgumentError, self).__init__()
-    self['message'] = "%s: '%s'" % (self.__class_, arg)
+    self['message'] = "%s: '%s'" % (self.__class__.__name__, arg)
 
 class InvalidArgumentError(RequestError):
   def __init__(self, arg):
@@ -173,8 +173,8 @@ class Response:
   def api_get(self, t):
     def _api_get(function):
       @wraps(function)
-      @self.args_required([])
-      @self.args_forbidden(['_merchant'])
+      @self.args_required([], method="GET")
+      @self.args_forbidden(['_merchant'], method="GET")
       def __api_get(*args, **kw):
 
         if request.method == 'GET':
@@ -217,8 +217,8 @@ class Response:
   def api_post(self, t):
     def _api_post(function):
       @wraps(function)
-      @self.args_required([])
-      @self.args_forbidden(['_merchant', '_id'])
+      @self.args_required([], method="POST")
+      @self.args_forbidden(['_merchant'], method="POST")
       def __api_post(*args, **kw):
 
         if request.method == 'POST':
@@ -255,8 +255,8 @@ class Response:
   def api_put(self, t):
     def _api_put(function):
       @wraps(function)
-      @self.args_required(['_id'])
-      @self.args_forbidden(['_merchant'])
+      @self.args_required(['_id'], method="PUT")
+      @self.args_forbidden(['_merchant'], method="PUT")
       @self.selects_one(t)
       def __api_put(*args, **kw):
 
@@ -286,8 +286,8 @@ class Response:
   def api_delete(self, t):
     def _api_delete(function):
       @wraps(function)
-      @self.args_required(['_id'])
-      @self.args_forbidden([])
+      @self.args_required(['_id'], method="DELETE")
+      @self.args_forbidden([], method="DELETE")
       @self.selects_one(t)
       def __api_delete(*args, **kw):
 
@@ -302,32 +302,34 @@ class Response:
       return __api_delete
     return _api_delete
 
-  def args_required(self, args):
+  def args_required(self, required_args, method):
     def _args_required(function):
       @wraps(function)
       def __args_required(*args, **kw):
-
-        for arg in args:
-          if request._items.has_key(arg) is False:
-            error = RequiredArgumentError(arg)
-            self.log['request'].debug(error.log())
-            return out(), 400
+       
+        if request.method == method:
+          for arg in required_args:
+            if request._items.has_key(arg) is False:
+              error = RequiredArgumentError(arg)
+              self.log['request'].debug(error.log())
+              return out(error), 400
 
         return function(*args, **kw)
       return __args_required
     return _args_required
 
 
-  def args_forbidden(self, args):
+  def args_forbidden(self, forbidden_args, method):
     def _args_forbidden(function):
       @wraps(function)
       def __args_forbidden(*args, **kw):
-
-        for arg in args:
-          if request._items.has_key(arg):
-            error = ForbiddenArgumentError(arg)
-            self.log['request'].debug(error.log())
-            return out(error), 400
+        
+        if request.method == method:
+          for arg in forbidden_args:
+            if request._items.has_key(arg):
+              error = ForbiddenArgumentError(arg)
+              self.log['request'].debug(error.log())
+              return out(error), 400
 
         if request._items.has_key(OBJECT_ID):
           request.query['_id'] = request._items[OBJECT_ID]
