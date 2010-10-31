@@ -29,7 +29,7 @@ class RequestError(dict):
 class MissingKeyError(RequestError):
   def __init__(self):
     super(MissingKeyError, self).__init__()
-    self['message'] = "%s" % self.__class__.__name__
+    self['message'] = "%s: supplied key: ('%s' : %s)" % (self.__class__.__name__, PROCESSOR_KEY, request._items.get(PROCESSOR_KEY))
 
 class InvalidKeyError(RequestError):
   def __init__(self):
@@ -158,19 +158,19 @@ class Response:
       return function(*args, **kw)
     return _api_request
 
-  def api_resource(self, type):
+  def api_resource(self, t):
     def _api_resource(function):
       @wraps(function)
-      @self.api_get(type)
-      @self.api_post(type)
-      @self.api_put(type)
-      @self.api_delete(type)
+      @self.api_get(t)
+      @self.api_post(t)
+      @self.api_put(t)
+      @self.api_delete(t)
       def __api_resource(*args, **kw):
         return function(*args, **kw)
       return __api_resource
     return _api_resource
 
-  def api_get(self, type):
+  def api_get(self, t):
     def _api_get(function):
       @wraps(function)
       @self.args_required([])
@@ -182,10 +182,10 @@ class Response:
           
           errors = []
           for key in request._items:
-            if key != PROCESSOR_KEY and key != OBJECT_ID and type.safe_member(key):
+            if key != PROCESSOR_KEY and key != OBJECT_ID and t.safe_member(key):
               data = request._items[key]
 
-              r = type.valid_member(key, data)
+              r = t.valid_member(key, data)
               if r is not None:
                 if r.valid is False:
                   error = ValidationError(TypeError(r.args))
@@ -201,7 +201,7 @@ class Response:
 
           self.log['request'].debug("%s[%s]: %s on %s with query %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request.query)))
 
-          obj = type.find(request.query)
+          obj = t.find(request.query)
 
           if obj is None:
             error = RequestError()
@@ -214,7 +214,7 @@ class Response:
       return __api_get
     return _api_get
 
-  def api_post(self, type):
+  def api_post(self, t):
     def _api_post(function):
       @wraps(function)
       @self.args_required([])
@@ -224,14 +224,14 @@ class Response:
         if request.method == 'POST':
           self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
 
-          obj = type()
+          obj = t()
           obj['_merchant'] = request.merchant._id
 
           if request.query.has_key('_id'):
             obj['_id'] = request.query['_id']
 
           for key in request._items:
-            if key != PROCESSOR_KEY and type.safe_member(key):
+            if key != PROCESSOR_KEY and t.safe_member(key):
               obj[key] = request._items[key]
 
           self.log['request'].debug("%s[%s]: %s on %s with query %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(obj)))
@@ -252,19 +252,19 @@ class Response:
       return __api_post
     return _api_post
 
-  def api_put(self, type):
+  def api_put(self, t):
     def _api_put(function):
       @wraps(function)
       @self.args_required(['_id'])
       @self.args_forbidden(['_merchant'])
-      @self.selects_one
+      @self.selects_one(t)
       def __api_put(*args, **kw):
 
         if request.method == 'PUT':
           self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
 
           for key in request._items:
-            if key != PROCESSOR_KEY and type.safe_member(key):
+            if key != PROCESSOR_KEY and t.safe_member(key):
               request.selected_object[key] = request._items[key]
 
           try:
@@ -283,12 +283,12 @@ class Response:
       return __api_put
     return _api_put
 
-  def api_delete(self, type):
+  def api_delete(self, t):
     def _api_delete(function):
       @wraps(function)
       @self.args_required(['_id'])
       @self.args_forbidden([])
-      @self.selects_one
+      @self.selects_one(t)
       def __api_delete(*args, **kw):
 
         if request.method == 'DELETE':
@@ -336,24 +336,26 @@ class Response:
       return __args_forbidden
     return _args_forbidden
 
-  def selects_one(self, function):
-    @wraps(function)
-    def _select_one(*args, **kw):
+  def selects_one(self, t):
+    def _selects_one(function):
+      @wraps(function)
+      def __selects_one(*args, **kw):
 
-      obj = type.find_one({"_id" : request.query[OBJECT_ID]})
+        obj = t.find_one({"_id" : request.query[OBJECT_ID]})
 
-      if obj is None:
-        error = InvalidArgumentError('_id')
-        self.log['request'].debug(error.log())
-        return out(error), 400
-      try:
-        assert obj['_merchant'] == request.merchant._id
-      except:
-        error = InvalidArgumentError('_id')
-        self.log['request'].critical(error.log())
-        return out(error), 400
+        if obj is None:
+          error = InvalidArgumentError('_id')
+          self.log['request'].debug(error.log())
+          return out(error), 400
+        try:
+          assert obj['_merchant'] == request.merchant._id
+        except:
+          error = InvalidArgumentError('_id')
+          self.log['request'].critical(error.log())
+          return out(error), 400
 
-      request.selected_object = obj
-      return function(*args, **kw)
-    return _select_one
+        request.selected_object = obj
+        return function(*args, **kw)
+      return __selects_one
+    return _selects_one
 
