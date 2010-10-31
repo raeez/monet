@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from flask import Flask
 from lib.api.response import out, RequestError
 from log import log

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from processor import Processor
 from lib.db import BankCard
 

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from pymongo.son_manipulator import SONManipulator
 #from pymongo.bson.binary import Binary # TODO implement binary transform
 from lib.db import mongo_adapter as default_adapter
@@ -36,7 +38,13 @@ class NoAdapterError(Exception):
 class InvalidContainer(Exception):
   pass
 
-def get_container_id(id):
+def get_container_pointer(id):
+  if isinstance(id, ObjectId):
+    return id
+
+  assert isinstance(id, unicode)
+  id = str(id)
+  print "getting id: %s" % id
   try:
     obj = ObjectId(id)
   except Exception:
@@ -155,6 +163,9 @@ class Container(dict):
   def save(self):
     self._validate()
     self._save()
+
+  def delete(self):
+    default_adapter.delete(self["_type"], self._id)
 
   def _validate(self):
     for v in self.validators():

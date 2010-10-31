@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from lib.db.container import Container, register_container
 from lib.db.model import mandatory, optional, pointer, is_container
 from time import time

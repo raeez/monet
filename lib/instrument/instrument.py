@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from lib.db.container import Container
 from lib.db.model import pointer
 

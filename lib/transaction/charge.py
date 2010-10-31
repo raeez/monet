@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
+
 from transaction import Transaction
 from lib.db.container import register_container
 from lib.db.model import pointer, valid
-from lib.processor.key import ProcessorKey
+from lib.model.processor_key import ProcessorKey
 
 class Charge(Transaction):
   """docstring for Refund"""

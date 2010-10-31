@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from flask import Module, request, abort
 from lib.api.response import out, Response
 from lib.db import Refund

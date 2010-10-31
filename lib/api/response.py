@@ -1,14 +1,70 @@
-from flask import request, abort
+# -*- coding: utf-8 -*-
+
+from flask import request
 from functools import wraps
 import json
-from lib.db.container import ResponseEncoder, get_container_id
+from lib.db.container import ResponseEncoder, get_container_pointer
 from lib.db import ProcessorKey, Merchant, BankCard, BankAccount
 
 PROCESSOR_KEY = '_key'
 OBJECT_ID = '_id'
 
-class RequestError(Exception):
-  pass
+class RequestError(dict):
+  def __init__(self):
+    super(RequestError, self).__init__()
+    self.request = request
+    self['resource'] = request.path
+    self['method'] = request.method
+    self['error'] = "%s" % self.__class__.__name__
+    self['message'] = "%s: something went wrong" % self.__class__.__name__
+
+  def log(self):
+    if request.merchant:
+      return "%s[%s]: %s on %s with %s: %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items), self.__class__.__name__)
+    return "%s on %s with %s: %s" % (request.method, request.path, repr(request._items), self.__class__.__name__)
+
+  def to_json(self):
+    return json.dumps(self, sort_keys=True, indent=2, cls=ResponseEncoder)+"\n"
+
+class MissingKeyError(RequestError):
+  def __init__(self):
+    super(MissingKeyError, self).__init__()
+    self['message'] = "%s" % self.__class__.__name__
+
+class InvalidKeyError(RequestError):
+  def __init__(self):
+    super(InvalidKeyError, self).__init__()
+    self['message'] = "%s: supplied key: ('%s' : %s)" % (self.__class__.__name__, PROCESSOR_KEY, request._items.get(PROCESSOR_KEY))
+
+class DanglingKeyError(RequestError):
+  def __init__(self):
+    super(DanglingKeyError, self).__init__()
+    self['message'] = "%s: supplied key: ('%s : %s) has no associated merchant" % (self.__class__.__name__, PROCESSOR_KEY, request._items.get(PROCESSOR_KEY))
+
+class RequiredArgumentError(RequestError):
+  def __init__(self, arg):
+    super(RequiredArgumentError, self).__init__()
+    self['message'] = "%s: '%s' argument is missing" % (self.__class__.__name__, arg)
+
+class ForbiddenArgumentError(RequestError):
+  def __init__(self, arg):
+    super(ForbiddenArgumentError, self).__init__()
+    self['message'] = "%s: '%s'" % (self.__class_, arg)
+
+class InvalidArgumentError(RequestError):
+  def __init__(self, arg):
+    super(InvalidArgumentError, self).__init__()
+    self['message'] = "%s: '%s'" % (self.__class__.__name__, arg)
+
+class ValidationError(RequestError):
+  def __init__(self, exception):
+    super(ValidationError, self).__init__()
+    self['message'] = "%s: %s " % (self.__class__.__name__, exception)
+
+class InternalError(RequestError):
+  def __init__(self):
+    super(InternalError, self).__init__()
+    self['message'] = "%s: Something broke" % self.__class__.__name__
 
 def sanitize(data, safe_chars):
   safe = ""
@@ -34,19 +90,25 @@ def sanitize_container(input):
   return input
 
 def out(input):
+  base = {}
+
   if isinstance(input, list):
     o = []
     for element in input:
       o.append(sanitize_container(element).to_dict())
     return json.dumps(o, sort_keys=True, indent=2, cls=ResponseEncoder)+"\n"
 
+  elif isinstance(input, RequestError):
+    return input.to_json()
+
   elif isinstance(input, Exception):
     errors = []
     for item in input.args:
       errors.append(item)
 
-    return json.dumps({"errors" : errors}, sort_keys=True, indent=2, cls=ResponseEncoder)+"\n"
+    base["errors"] = errors
 
+    return json.dumps(base, sort_keys=True, indent=2, cls=ResponseEncoder)+"\n"
 
   return sanitize_container(input).to_json()+"\n"
 
@@ -64,34 +126,34 @@ class Response:
       for key in request.form:
         request._items[key] = request.form[key]
 
-
-      #decipher this merchant
-
-      self.log['request'].debug("%s incoming request" % request.method)
+      if request._items.has_key(OBJECT_ID):
+        request._items[OBJECT_ID] = get_container_pointer(request._items[OBJECT_ID])
 
       request.merchant = None
       request.query = {}
 
       if request._items.has_key(PROCESSOR_KEY) is False:
-        self.log['request'].debug("%s on %s with %s: MISSING_PROCESSOR_KEY" % (request.method, request.path, repr(request._items)))
-        return out(RequestError("a valid processor_key is required for request type %s on resource %s" % (request.method, request.path))), 400
+        error = MissingKeyError()
+        self.log['request'].debug(error.log())
+        return out(error), 400
 
       request.processor_key = ProcessorKey.find_one({"key" : request._items.get(PROCESSOR_KEY)})
 
       if request.processor_key is None:
-        self.log['request'].debug("%s on %s with %s: INVALID_PROCESSOR_KEY" % (request.method, request.path, repr(request._items)))
-        return out(RequestError("supplied processor key ('_key') is invalid")), 400
+        error = InvalidKeyError()
+        self.log['request'].debug(error.log())
+        return out(error), 400
       else:
-        request.merchant = Merchant.find_one({"_id" : get_container_id(request.processor_key._merchant)})
+        request.merchant = Merchant.find_one({"_id" : get_container_pointer(request.processor_key._merchant)})
 
       if request.merchant is None:
-        self.log['request'].critical("%s on %s with %s: MISSING_MERCHANT found processor key but could not find corresponding merchant: key: %s" % (request.method, request.path, repr(request._items), repr(request.processor_key)))
-        return out(RequestError("supplied processor_key is valid, but has no associated merchant account")), 500
+        error = DanglingKeyError()
+        self.log['request'].critical(error.log())
+        return out(error), 500
       else:
         request.query['_merchant'] = request.merchant._id
-   
 
-      self.log['request'].debug("%s MERCHANT: %s - %s" % (request.method, request.merchant._id, repr(request.merchant.email)))
+      del request._items['_key']
 
       return function(*args, **kw)
     return _api_request
@@ -114,31 +176,37 @@ class Response:
       @self.args_required([])
       @self.args_forbidden(['_merchant'])
       def __api_get(*args, **kw):
-        # TODO assert type is a container
 
         if request.method == 'GET':
           self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
-
+          
+          errors = []
           for key in request._items:
-            if key != PROCESSOR_KEY and type.safe_member(key):
+            if key != PROCESSOR_KEY and key != OBJECT_ID and type.safe_member(key):
               data = request._items[key]
 
               r = type.valid_member(key, data)
               if r is not None:
                 if r.valid is False:
-                  self.log['request'].debug("%s[%s]: %s on %s with %s VALIDATION FAILED on key %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items), key))
-                  return out(TypeError(r.args)), 404
+                  error = ValidationError(TypeError(r.args))
+                  self.log['request'].debug(error.log())
+                  errors.append(error)
+                  continue
                 else:
                   data = r.data
               request.query[key] = data
+
+          if len(errors) > 0:
+            return out(errors), 400
 
           self.log['request'].debug("%s[%s]: %s on %s with query %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request.query)))
 
           obj = type.find(request.query)
 
           if obj is None:
-            self.log['request'].debug("%s[%s]: %s on %s with %s INVALID_OBJECT" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items), key))
-            abort(404)
+            error = RequestError()
+            self.log['request'].critical(error.log())
+            return out(error), 400
           else:
             self.log['request'].debug("%s[%s]: %s on %s with query %s SUCCESS" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
             return out(obj)
@@ -152,7 +220,6 @@ class Response:
       @self.args_required([])
       @self.args_forbidden(['_merchant', '_id'])
       def __api_post(*args, **kw):
-        # TODO assert type is a container
 
         if request.method == 'POST':
           self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
@@ -172,8 +239,9 @@ class Response:
           try:
             obj._validate()
           except Exception as e:
-            self.log['request'].debug("%s[%s]: %s on %s VALIDATION_FALIED with query %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(obj)))
-            return out(e), 400
+            error = ValidationError(e)
+            self.log['request'].debug(error.log())
+            return out(error), 400
 
           obj.save()
           
@@ -191,7 +259,6 @@ class Response:
       @self.args_forbidden(['_merchant'])
       @self.selects_one
       def __api_put(*args, **kw):
-        # TODO assert type is a container
 
         if request.method == 'PUT':
           self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
@@ -203,8 +270,9 @@ class Response:
           try:
             request.selected_object._validate()
           except Exception as e:
-            self.log['request'].debug("%s[%s]: %s on %s with items %s VALIDATION FAILED" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
-            return out(e), 400
+            error = ValidationError(e)
+            self.log['request'].debug(error.log())
+            return out(error), 400
 
           request.selected_object.save()
 
@@ -222,7 +290,6 @@ class Response:
       @self.args_forbidden([])
       @self.selects_one
       def __api_delete(*args, **kw):
-        # TODO assert type is a container
 
         if request.method == 'DELETE':
           self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
@@ -230,7 +297,6 @@ class Response:
           request.selected_object.delete()
 
           self.log['request'].debug("%s[%s]: %s on %s with query %s SUCCESS" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
-          
           return out(request.selected_object)
         return function(*args, **kw)
       return __api_delete
@@ -243,8 +309,9 @@ class Response:
 
         for arg in args:
           if request._items.has_key(arg) is False:
-            self.log['request'].debug("%s[%s]: %s on %s MISSING_KEY %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(arg)))
-            return out(RequestError("member %s is required for request type %s on resource %s" % (arg, request.method, request.path))), 400
+            error = RequiredArgumentError(arg)
+            self.log['request'].debug(error.log())
+            return out(), 400
 
         return function(*args, **kw)
       return __args_required
@@ -258,11 +325,12 @@ class Response:
 
         for arg in args:
           if request._items.has_key(arg):
-            self.log['request'].debug("%s[%s]: %s on %s FORBIDDEN_KEY %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(arg)))
-            return out(RequestError("member %s is forbidden for request type %s on resource %s" % (arg, request.method, request.path))), 400
+            error = ForbiddenArgumentError(arg)
+            self.log['request'].debug(error.log())
+            return out(error), 400
 
-        if request._items.has_key('_id'):
-          request.query['_id'] = get_container_id(request._items['_id'])
+        if request._items.has_key(OBJECT_ID):
+          request.query['_id'] = request._items[OBJECT_ID]
 
         return function(*args, **kw)
       return __args_forbidden
@@ -272,17 +340,20 @@ class Response:
     @wraps(function)
     def _select_one(*args, **kw):
 
-      obj = type.find_one({"_id" : request.query["_id"]})
+      obj = type.find_one({"_id" : request.query[OBJECT_ID]})
 
       if obj is None:
-        self.log['request'].debug("%s[%s]: %s on %s with %s INVALID_OBJECT" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
-        return out(RequestError("'_id' supplied resolves to an invalid object")), 400
+        error = InvalidArgumentError('_id')
+        self.log['request'].debug(error.log())
+        return out(error), 400
       try:
         assert obj['_merchant'] == request.merchant._id
       except:
-        self.log['request'].critical("%s[%s]: %s on %s with %s INVALID_MERCHANT" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
-        return out(RequestError("'_id' supplied resolves to an invalid object")), 400
+        error = InvalidArgumentError('_id')
+        self.log['request'].critical(error.log())
+        return out(error), 400
 
       request.selected_object = obj
       return function(*args, **kw)
     return _select_one
+

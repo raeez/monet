@@ -1,20 +1,30 @@
+# -*- coding: utf-8 -*-
+
+import random
 from lib.db.container import Container, register_container
 from lib.db.model import mandatory, pointer
+
+CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_*(),'
+KEY_SIZE = 50
 
 class Key(Container):
   """Logical Key Object"""
   
   def _defaults(self):
-    # TODO generate a random key here
-    self.key = "RANDOM_KEY_HERE_TODO_FIX_ME"
+    # TODO do better with randomness garuntee here
+    self.key = "".join(random.sample(CHARS, KEY_SIZE))
 
   def _internal(self):
     return super(Key, self)._internal().append(['merchant'])
 
+  @mandatory(bool)
+  def _val_live(selF):
+    pass
+
   @mandatory(str)
   def _val_key(self):
     try:
-      assert len(self.key) > 0
+      assert len(self.key) == KEY_SIZE 
     except AssertionError:
       raise AssertionError("member 'key' must be a valid key identifier")
 

@@ -1,4 +1,6 @@
-from instrument import Instrument
+# -*- coding: utf-8 -*-
+
+from lib.instrument.instrument import Instrument
 from lib.db.container import register_container
 from lib.db.model import mandatory
 

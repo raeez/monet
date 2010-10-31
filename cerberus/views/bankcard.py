@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from flask import Module, abort
 from lib.db import BankCard
 from lib.api.response import Response

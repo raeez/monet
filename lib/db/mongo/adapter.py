@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pymongo
 
 from lib.db.adapter import Adapter, AdapterConnectionError
@@ -53,4 +55,3 @@ class MongoAdapter(Adapter):
       if group in collection:
         self.delete(collection, _id)
     return
-

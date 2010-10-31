@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import logging
 import logging.handlers
 from os import mkdir
@@ -31,7 +33,7 @@ class Logger(dict):
     try:
       mkdir(LOG_PREFIX)
     except OSError:
-      pass # directory exists
+      pass # TODO directory exists OR can't make due to permissions—make sure to handle this properly
 
     self.filename = LOG_PREFIX + self.system_name + '.log'
     
@@ -57,10 +59,11 @@ class Logger(dict):
     self.file_handler.setFormatter(self.file_formatter)
     self.handlers.append(self.file_handler)
 
-    self.email_handler = logging.handlers.SMTPHandler(MAIL_HOST, FROM_ADDR, MAIL_ADMINS, SUBJECT, credentials=AUTH)
-    self.email_handler.setLevel(logging.ERROR)
-    self.email_handler.setFormatter(self.email_formatter)
-    self.handlers.append(self.email_handler) #TODO get the mail server up and running
+    if lib.config.DEBUG is False:
+      self.email_handler = logging.handlers.SMTPHandler(MAIL_HOST, FROM_ADDR, MAIL_ADMINS, SUBJECT, credentials=AUTH)
+      self.email_handler.setLevel(logging.ERROR)
+      self.email_handler.setFormatter(self.email_formatter)
+      self.handlers.append(self.email_handler) #TODO get the mail server up and running
 
     self.create_logger('system')
 

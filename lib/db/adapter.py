@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 class Adapter(object):
   """Abstraction over a database connection"""
   def __init__(self):

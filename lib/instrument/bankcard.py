@@ -1,5 +1,7 @@
-from instrument import Instrument
+# -*- coding: utf-8 -*-
+
 from datetime import datetime
+from lib.instrument.instrument import Instrument
 from lib.db.model import mandatory, optional, valid
 from lib.db.container import register_container
 from lib.associations import VISA, MASTERCARD, AMEX, JCB, DISCOVER, UNKNOWN

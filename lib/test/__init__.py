@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from lib.db import *
 from bson.objectid import ObjectId
 
@@ -10,11 +12,9 @@ def seed_test_db():
   m.save()
 
   pk = ProcessorKey()
-  pk.key = 'a123'
   pk._merchant = m._id
-  pk.live = True
   pk.processor = 'fdc'
-  pk.merchant_id = 'a123'
+  pk.live = False
   pk.save()
 
   m.processor_keys.append(pk._id)

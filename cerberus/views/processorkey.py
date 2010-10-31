@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from flask import Module, abort
 from lib.api.response import Response
 from lib.db import ProcessorKey

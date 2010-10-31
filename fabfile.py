@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from os.path import expanduser
 from fabric.api import env, local, run, put, cd
 from paramiko.config import SSHConfig

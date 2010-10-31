@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import lib.config
 lib.config.DEBUG = True
 from hermes import hermes
