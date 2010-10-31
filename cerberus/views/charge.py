@@ -10,7 +10,7 @@ charge_module = Module(__name__)
 resp = Response(log)
 
 @charge_module.route('/transaction/charge', methods=['GET', 'POST'])
-@resp.api_request
+@resp.api_request()
 @resp.api_get(Charge)
 def charge():
   if request.method == 'POST':

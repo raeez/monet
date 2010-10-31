@@ -43,8 +43,8 @@ class Merchant(Container):
     assert self.legal >= 0
 
   @mandatory(list)
-  def _val_processor_keys(self):
-    for key in self.processor_keys:
+  def _val_keys(self):
+    for key in self.keys:
       assert is_container('ProcessorKey', key)
 
   @mandatory(dict)

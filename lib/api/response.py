@@ -4,7 +4,7 @@ from flask import request
 from functools import wraps
 import json
 from lib.db.container import ResponseEncoder, get_container_pointer
-from lib.db import ProcessorKey, Merchant, BankCard, BankAccount
+from lib.db import Admin, Merchant, BankCard, BankAccount, ProcessorKey, AdminKey
 
 PROCESSOR_KEY = '_key'
 OBJECT_ID = '_id'
@@ -19,9 +19,9 @@ class RequestError(dict):
     self['message'] = "%s: something went wrong" % self.__class__.__name__
 
   def log(self):
-    if request.merchant:
-      return "%s[%s]: %s on %s with %s: %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items), self.__class__.__name__)
-    return "%s on %s with %s: %s" % (request.method, request.path, repr(request._items), self.__class__.__name__)
+    if request.user:
+      return "%s[%s]: %s on %s with %s: %s" % (request.user.email, request.user._id, request.method, request.path, repr(request._items), self.__class__.__name__)
+    return "%s on %s with %s: %s" % (request.method, request.path, repr(request._items), self['message'])
 
   def to_json(self):
     return json.dumps(self, sort_keys=True, indent=2, cls=ResponseEncoder)+"\n"
@@ -62,9 +62,9 @@ class ValidationError(RequestError):
     self['message'] = "%s: %s " % (self.__class__.__name__, exception)
 
 class InternalError(RequestError):
-  def __init__(self):
+  def __init__(self, msg):
     super(InternalError, self).__init__()
-    self['message'] = "%s: Something broke" % self.__class__.__name__
+    self['message'] = "%s: %s" % (self.__class__.__name__, msg)
 
 def sanitize(data, safe_chars):
   safe = ""
@@ -116,46 +116,57 @@ class Response:
   def __init__(self, log):
     self.log = log
 
-  def api_request(self, function):
-    @wraps(function)
-    def _api_request(*args, **kw):
+  def api_request(self, key_type=ProcessorKey):
+    def _api_request(function):
+      @wraps(function)
+      def __api_request(*args, **kw):
 
-      request._items = {}
-      for key in request.args:
-        request._items[key] = request.args[key]
-      for key in request.form:
-        request._items[key] = request.form[key]
+        try:
+          assert key_type in [AdminKey, ProcessorKey]
+        except:
+          error = InternalError("Supplied key type %s not a valid key for an api_request" % key_type.__name__)
+          self.log['request'].critical(error.log())
+          return out(error), 500
 
-      if request._items.has_key(OBJECT_ID):
-        request._items[OBJECT_ID] = get_container_pointer(request._items[OBJECT_ID])
+        request._items = {}
+        for key in request.args:
+          request._items[key] = request.args[key]
+        for key in request.form:
+          request._items[key] = request.form[key]
 
-      request.merchant = None
-      request.query = {}
+        if request._items.has_key(OBJECT_ID):
+          request._items[OBJECT_ID] = get_container_pointer(request._items[OBJECT_ID])
 
-      if request._items.has_key(PROCESSOR_KEY) is False:
-        error = MissingKeyError()
-        self.log['request'].debug(error.log())
-        return out(error), 400
+        request.user = None
+        request.query = {}
 
-      request.processor_key = ProcessorKey.find_one({"key" : request._items.get(PROCESSOR_KEY)})
+        if request._items.has_key(PROCESSOR_KEY) is False:
+          error = MissingKeyError()
+          self.log['request'].debug(error.log())
+          return out(error), 400
 
-      if request.processor_key is None:
-        error = InvalidKeyError()
-        self.log['request'].debug(error.log())
-        return out(error), 400
-      else:
-        request.merchant = Merchant.find_one({"_id" : get_container_pointer(request.processor_key._merchant)})
+        request.processor_key = key_type.find_one({"key" : request._items.get(PROCESSOR_KEY)})
 
-      if request.merchant is None:
-        error = DanglingKeyError()
-        self.log['request'].critical(error.log())
-        return out(error), 500
-      else:
-        request.query['_merchant'] = request.merchant._id
+        if request.processor_key is None:
+          error = InvalidKeyError()
+          self.log['request'].debug(error.log())
+          return out(error), 400
+        elif request.processor_key.has_key('_merchant'):
+          request.user = Merchant.find_one({"_id" : get_container_pointer(request.processor_key._merchant)})
+        elif request.processor_key.has_key('_admin'):
+          request.user = Admin.find_one({"_id" : get_container_pointer(request.processor_key._admin)})
 
-      del request._items['_key']
+        if request.user is None:
+          error = DanglingKeyError()
+          self.log['request'].critical(error.log())
+          return out(error), 500
+        else:
+          request.query['_merchant'] = request.user._id
 
-      return function(*args, **kw)
+        del request._items['_key']
+
+        return function(*args, **kw)
+      return __api_request
     return _api_request
 
   def api_resource(self, t):
@@ -178,7 +189,7 @@ class Response:
       def __api_get(*args, **kw):
 
         if request.method == 'GET':
-          self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
+          self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.user.email, request.user._id, request.method, request.path, repr(request._items)))
           
           errors = []
           for key in request._items:
@@ -199,7 +210,7 @@ class Response:
           if len(errors) > 0:
             return out(errors), 400
 
-          self.log['request'].debug("%s[%s]: %s on %s with query %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request.query)))
+          self.log['request'].debug("%s[%s]: %s on %s with query %s" % (request.user.email, request.user._id, request.method, request.path, repr(request.query)))
 
           obj = t.find(request.query)
 
@@ -208,7 +219,7 @@ class Response:
             self.log['request'].critical(error.log())
             return out(error), 400
           else:
-            self.log['request'].debug("%s[%s]: %s on %s with query %s SUCCESS" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
+            self.log['request'].debug("%s[%s]: %s on %s with query %s SUCCESS" % (request.user.email, request.user._id, request.method, request.path, repr(request._items)))
             return out(obj)
         return function(*args, **kw)
       return __api_get
@@ -222,10 +233,10 @@ class Response:
       def __api_post(*args, **kw):
 
         if request.method == 'POST':
-          self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
+          self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.user.email, request.user._id, request.method, request.path, repr(request._items)))
 
           obj = t()
-          obj['_merchant'] = request.merchant._id
+          obj['_merchant'] = request.user._id
 
           if request.query.has_key('_id'):
             obj['_id'] = request.query['_id']
@@ -234,7 +245,7 @@ class Response:
             if key != PROCESSOR_KEY and t.safe_member(key):
               obj[key] = request._items[key]
 
-          self.log['request'].debug("%s[%s]: %s on %s with query %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(obj)))
+          self.log['request'].debug("%s[%s]: %s on %s with query %s" % (request.user.email, request.user._id, request.method, request.path, repr(obj)))
 
           try:
             obj._validate()
@@ -245,7 +256,7 @@ class Response:
 
           obj.save()
           
-          self.log['request'].debug("%s[%s]: %s on %s with query %s SUCCESS" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
+          self.log['request'].debug("%s[%s]: %s on %s with query %s SUCCESS" % (request.user.email, request.user._id, request.method, request.path, repr(request._items)))
 
           return out(obj)
         return function(*args, **kw)
@@ -261,7 +272,7 @@ class Response:
       def __api_put(*args, **kw):
 
         if request.method == 'PUT':
-          self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
+          self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.user.email, request.user._id, request.method, request.path, repr(request._items)))
 
           for key in request._items:
             if key != PROCESSOR_KEY and t.safe_member(key):
@@ -276,7 +287,7 @@ class Response:
 
           request.selected_object.save()
 
-          self.log['request'].debug("%s[%s]: %s on %s with query %s SUCCESS" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
+          self.log['request'].debug("%s[%s]: %s on %s with query %s SUCCESS" % (request.user.email, request.user._id, request.method, request.path, repr(request._items)))
           
           return out(request.selected_object)
         return function(*args, **kw)
@@ -292,11 +303,11 @@ class Response:
       def __api_delete(*args, **kw):
 
         if request.method == 'DELETE':
-          self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
+          self.log['request'].debug("%s[%s]: %s on %s with items %s" % (request.user.email, request.user._id, request.method, request.path, repr(request._items)))
 
           request.selected_object.delete()
 
-          self.log['request'].debug("%s[%s]: %s on %s with query %s SUCCESS" % (request.merchant.email, request.merchant._id, request.method, request.path, repr(request._items)))
+          self.log['request'].debug("%s[%s]: %s on %s with query %s SUCCESS" % (request.user.email, request.user._id, request.method, request.path, repr(request._items)))
           return out(request.selected_object)
         return function(*args, **kw)
       return __api_delete
@@ -350,7 +361,7 @@ class Response:
           self.log['request'].debug(error.log())
           return out(error), 400
         try:
-          assert obj['_merchant'] == request.merchant._id
+          assert obj['_merchant'] == request.user._id
         except:
           error = InvalidArgumentError('_id')
           self.log['request'].critical(error.log())

@@ -10,7 +10,7 @@ refund_module = Module(__name__)
 resp = Response(log)
 
 @refund_module.route('/transaction/refund', methods=['GET', 'POST'])
-@resp.api_request
+@resp.api_request()
 @resp.api_get(Refund)
 def refund():
   if request.method == 'POST':

@@ -2,8 +2,17 @@
 
 import pymongo
 
+from lib.config import DEBUG, syslog
 from lib.db.adapter import Adapter, AdapterConnectionError
 from config import HOST, PORT, SAFE, REPLICATE_MIN
+
+if syslog is None:
+  from lib.log import Logger
+  log_name = 'db'
+  if DEBUG is False:
+    log_name += '.DEBUG'
+  syslog = Logger(log_name)
+syslog.create_logger('db')
 
 class MongoAdapter(Adapter):
   """Abstraction and management of MongoDB instances"""
@@ -14,16 +23,15 @@ class MongoAdapter(Adapter):
     try:
       self.db = pymongo.Connection(HOST, PORT).manhattan
     except pymongo.errors.AutoReconnect:
-      # TODO add logging "appopriately" -> propogate message
+      syslog['db'].critical("Could not connect to MongoDB")
       raise AdapterConnectionError
 
-    # TODO add logging
-    print("Created a MongoDB connection to db:manhattan")
+    syslog['db'].debug("Created a MongoDB connection to db:manhattan")
 
   def save(self, collection, document):
     super(MongoAdapter, self).insert(collection, document)
     self.db[collection].save(document, safe=SAFE, w=REPLICATE_MIN)
-    # TODO add logging
+    syslog['db'].critical("Added a document to a mongo database")
     print("Added a document to a mongo database")
 
   def find(self, collection, params={}):

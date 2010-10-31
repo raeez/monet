@@ -10,7 +10,7 @@ bank_card_module = Module(__name__)
 resp = Response(log)
 
 @bank_card_module.route('/instrument/bank_card', methods=['GET', 'POST', 'PUT', 'DELETE'])
-@resp.api_request
+@resp.api_request()
 @resp.api_resource(BankCard)
 def bank_card():
   abort(404)

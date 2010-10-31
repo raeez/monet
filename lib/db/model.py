@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 
 VALIDATION_SIGNATURE = "_val_"
 
-def is_container(container, key):
+def is_container(container, type):
   # TODO implement
   return True
 

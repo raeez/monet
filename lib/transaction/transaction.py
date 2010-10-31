@@ -2,13 +2,14 @@
 
 from lib.db.container import Container, register_container
 from lib.db.model import mandatory, pointer, valid
+from lib.db import  ProcessorKey
 from lib.currencies import CURRENCIES
 
 class Transaction(Container):
   """Transaction Logical Object"""
 
   def _internal(self):
-    return super(Transaction, self)._internal().append(['merchant'])
+    return super(Transaction, self)._internal().append(['_merchant'])
 
   @mandatory(int)
   def _val_amount(self):
@@ -18,7 +19,7 @@ class Transaction(Container):
   def _val_currency(self):
     assert self.currency.upper() in CURRENCIES
 
-  @pointer('ProcessorKey')
+  @pointer(ProcessorKey)
   def _val_processer_key(self):
     pass
 

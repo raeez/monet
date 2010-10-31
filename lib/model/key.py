@@ -2,7 +2,7 @@
 
 import random
 from lib.db.container import Container, register_container
-from lib.db.model import mandatory, pointer
+from lib.db.model import mandatory
 
 CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_*(),'
 KEY_SIZE = 50
@@ -13,9 +13,6 @@ class Key(Container):
   def _defaults(self):
     # TODO do better with randomness garuntee here
     self.key = "".join(random.sample(CHARS, KEY_SIZE))
-
-  def _internal(self):
-    return super(Key, self)._internal().append(['merchant'])
 
   @mandatory(bool)
   def _val_live(selF):
@@ -30,7 +27,4 @@ class Key(Container):
     except AssertionError:
       raise AssertionError("member 'key' must be a valid key identifier")
 
-  @pointer('Merchant')
-  def _val__merchant(self):
-    pass
 register_container(Key)

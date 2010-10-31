@@ -10,7 +10,7 @@ processor_key_module = Module(__name__)
 resp = Response(log)
 
 @processor_key_module.route('/key/processor', methods=['GET'])
-@resp.api_request
+@resp.api_request()
 @resp.api_get(ProcessorKey)
 def processor_key():
   abort(404)

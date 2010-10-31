@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from processor import Processor
-from lib.db import BankCard
+from lib.instrument.bankcard import BankCard
 
 class CardProcessor(Processor):
   """docstring for CardProcessor"""
