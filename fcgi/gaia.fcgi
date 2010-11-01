@@ -7,10 +7,10 @@ import sys
 import lib.config
 lib.config.DEBUG = False
 
-from lib.log import Logger
-lib.config.syslog = Logger('gaia')
+import lib.log
+lib.log.syslog = lib.log.Logger('gaia')
 
 from flup.server.fcgi import WSGIServer
-from gaia import gaia
+from gaia.app import gaia
 
 WSGIServer(gaia, bindAddress='/tmp/gaia-fcgi.sock').run()

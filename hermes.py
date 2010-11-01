@@ -3,10 +3,10 @@
 import lib.config
 lib.config.DEBUG = True
 
-from lib.log import Logger
-lib.config.syslog = Logger('hermes')
+import lib.log
+lib.log.syslog = lib.log.Logger('hermes')
 
-from hermes import hermes
+from hermes.app import hermes
 
 if __name__ == '__main__':
   hermes.debug = True

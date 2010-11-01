@@ -39,6 +39,7 @@ pip install Flask \
 				pymongo \
 				ipython \
 				pyflakes \
+				py-bcrypt \
 
 git clone git://fabfile.org/fabric.git fabric
 cd fabric

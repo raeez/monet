@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from lib.config import DEBUG, syslog
+from lib.config import DEBUG
+from lib.log import syslog
 
 if syslog is None:
   from lib.log import Logger

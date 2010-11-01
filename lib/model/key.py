@@ -13,6 +13,7 @@ class Key(Container):
   def _defaults(self):
     # TODO do better with randomness garuntee here
     self.key = "".join(random.sample(CHARS, KEY_SIZE))
+    self.live = False
 
   @mandatory(bool)
   def _val_live(selF):

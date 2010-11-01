@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
+
 from flask import Module, session, redirect, url_for, request, render_template
-from lib.db import *
+from lib.db import Admin
+import bcrypt
 from hermes.log import log
 
 site = Module(__name__)
@@ -19,11 +22,11 @@ def login():
   elif request.method == 'POST':
     log['login'].debug("request %s" % repr(request.form))
     #auth
-    m = Merchant.find_one({'email' : request.form['email']})
-    if m is None:
+    admin = Admin.find_one({'email' : request.form['email']})
+    if admin is None:
       return redirect(url_for('login'))
 
-    if str(m.password) == str(request.form['password']):
+    if bcrypt.hashpw(request.form['password'], admin.password) == admin.password:
       session['email'] = request.form['email']
       log['login'].debug(session['email'])
       return redirect(url_for('index'))

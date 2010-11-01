@@ -22,6 +22,8 @@ apt-get -y install git \
 					nginx \
 					mongodb \
 					python-pip \
+					python-dev \
+					build-essential \
 					python-setuptools \
 
 # virtual env
@@ -33,6 +35,7 @@ virtualenv dev
 pip install Flask \
 				flup \
 				pymongo \
+				py-bcrypt \
 
 ln -s $(pwd)/dev/bin/python /usr/bin/manhattan.python
 

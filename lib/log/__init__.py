@@ -87,3 +87,5 @@ class Logger(dict):
 
       self['system'].debug('added logger %s' % repr(logname))
       self[logname] = logger
+
+syslog = Logger('default_syslog')

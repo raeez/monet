@@ -10,7 +10,7 @@ class Admin(Container):
     self.legal = 0
     self.keys = []
 
-  @mandatory(str)
+  @mandatory(unicode)
   def _val_email(self):
     try:
       assert "@" in self.email
@@ -18,11 +18,11 @@ class Admin(Container):
     except AssertionError:
       raise AssertionError('member email must be a valid email address')
 
-  @mandatory(str)
+  @mandatory(unicode)
   def _val_password(self):
     pass
 
-  @mandatory(str)
+  @mandatory(unicode)
   def _val_name(self):
     assert len(self.name) < 255
 

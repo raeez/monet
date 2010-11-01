@@ -41,7 +41,11 @@ def _deploy():
   DIST = local ('python setup.py --fullname').strip() # release name and version
   print "Deploying %s" % DIST
 
-  run('mkdir %s' % TEMP_DIR)
+  try:
+    run('mkdir %s' % TEMP_DIR)
+  except:
+    pass # no biggie
+
   put('dist/%s.tar.gz' % DIST, '%s/%s' % (TEMP_DIR, ARCHIVE))
 
   with cd(TEMP_DIR):

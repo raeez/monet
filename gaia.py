@@ -3,10 +3,10 @@
 import lib.config
 lib.config.DEBUG = True
 
-from lib.log import Logger
-lib.config.syslog = Logger('gaia')
+import lib.log
+lib.log.syslog = lib.log.Logger('gaia')
 
-from gaia import gaia
+from gaia.app import gaia
 
 if __name__ == '__main__':
   gaia.debug = True

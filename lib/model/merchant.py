@@ -11,7 +11,7 @@ class Merchant(Container):
     self.parent = 'ROOT_MERCHANT'
     self.invites = 0
     self.legal = 0
-    self.processor_keys = []
+    self.keys = []
     self.settings = {}
 
   @mandatory(str)

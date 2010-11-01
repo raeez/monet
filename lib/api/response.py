@@ -160,7 +160,7 @@ class Response:
           error = DanglingKeyError()
           self.log['request'].critical(error.log())
           return out(error), 500
-        else:
+        elif isinstance(request.user, Merchant):
           request.query['_merchant'] = request.user._id
 
         del request._items['_key']
@@ -371,4 +371,3 @@ class Response:
         return function(*args, **kw)
       return __selects_one
     return _selects_one
-
