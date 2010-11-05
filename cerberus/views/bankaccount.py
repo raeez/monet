@@ -14,3 +14,6 @@ resp = Response(log)
 @resp.api_resource(BankAccount)
 def bank_account():
   abort(404)
+
+def test(self):
+  pass

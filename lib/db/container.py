@@ -39,6 +39,8 @@ class InvalidContainer(Exception):
   pass
 
 def get_container_pointer(id):
+  # TODO actually implement, potentially as a SON Transform
+
   if isinstance(id, ObjectId):
     return id
 

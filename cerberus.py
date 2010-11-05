@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import lib.config
-lib.config.DEBUG = True
-
-import lib.log
-lib.log.syslog = lib.log.Logger('cerberus')
+from lib.config import configure
+configure({
+  'debug' : True,
+  'syslog' : 'cerberus'
+})
 
 from cerberus.app import cerberus
 
