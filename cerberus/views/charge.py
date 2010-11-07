@@ -33,3 +33,6 @@ def charge():
         c.save() # save to db with result
     return out(c)
   abort(404)
+
+def test(app, test_params):
+  pass

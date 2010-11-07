@@ -44,4 +44,4 @@ def method_not_allowed(error):
 
 @cerberus.errorhandler(500)
 def server_error(error):
-  return out(RequestError("server error - %s" % str(error))), 500
+  return out(RequestError("server error - %s" % error)), 500

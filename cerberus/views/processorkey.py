@@ -14,3 +14,6 @@ resp = Response(log)
 @resp.api_get(ProcessorKey)
 def processor_key():
   abort(404)
+
+def test(app, test_params):
+  pass

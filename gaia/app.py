@@ -5,7 +5,7 @@ from gaia.views.example import example
 from log import log
 
 gaia = Flask('gaia')
-log.add_logger('flask', gaia.logger)
+log.add_logger('app', gaia.logger)
 gaia.log = log
 gaia.register_module(example)
 

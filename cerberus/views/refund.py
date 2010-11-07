@@ -33,3 +33,6 @@ def refund():
         r.save() # save to db with result
     return out(r)
   abort(404)
+
+def test(app, test_params):
+  pass

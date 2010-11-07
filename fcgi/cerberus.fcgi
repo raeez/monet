@@ -5,10 +5,10 @@ import os
 import sys
 
 from lib.config import configure
-configure({
-  'debug' : False,
-  'syslog' : 'cerberus'
-})
+configure(
+  debug = False,
+  syslog = 'cerberus'
+)
 
 from flup.server.fcgi import WSGIServer
 from cerberus.app import cerberus

@@ -3,7 +3,8 @@
 import pymongo
 
 from lib.config import DEBUG
-from lib.log import syslog
+from lib.log import Logger
+syslog = Logger.system_log()
 from lib.db.adapter import Adapter, AdapterConnectionError
 from config import HOST, PORT, SAFE, REPLICATE_MIN
 

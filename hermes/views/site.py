@@ -38,3 +38,6 @@ def logout():
   log['logout'].debug(session['email'])
   session.pop('email', None)
   return redirect(url_for('index'))
+
+def test(app, test_params):
+  pass

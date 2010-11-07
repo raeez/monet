@@ -17,18 +17,19 @@ apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
 apt-get -y update
 apt-get -y upgrade
 
-# system dependencies
+# system and python dependencies
 apt-get -y install git \
 					nginx \
 					mongodb \
+					python2.7 \
 					python-pip \
-					python-dev \
+					python2.7-dev \
 					build-essential \
 					python-setuptools \
 
 # virtual env
 pip install virtualenv
-virtualenv dev
+virtualenv -p python2.7 --no-site-packages --distribute --clear dev
 . dev/bin/activate
 
 # python dependencies
@@ -49,7 +50,6 @@ mkdir /var/manhattan
 mkdir /var/manhattan/log
 mkdir /var/manhattan/log/nginx
 mkdir /var/www/log
-chown -R ubuntu /var/www
 
 echo ""
 echo "***************************"
@@ -65,6 +65,8 @@ cp nginx/cert.crt /var/www/
 cp nginx/cert.key /var/www/
 
 cp fcgi/*.fcgi /var/www/
+
+chown -R ubuntu /var/www
 
 echo ""
 echo "********************"

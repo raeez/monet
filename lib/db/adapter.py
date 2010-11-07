@@ -1,14 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from lib.config import DEBUG
-from lib.log import syslog
-
-if syslog is None:
-  from lib.log import Logger
-  log_name = 'db'
-  if DEBUG is False:
-    log_name += '.DEBUG'
-  syslog = Logger(log_name)
+from lib.log import Logger
+syslog = Logger.system_log()
 syslog.create_logger('db')
 
 class Adapter(object):

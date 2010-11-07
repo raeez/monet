@@ -46,7 +46,6 @@ def get_container_pointer(id):
 
   assert isinstance(id, unicode)
   id = str(id)
-  print "getting id: %s" % id
   try:
     obj = ObjectId(id)
   except Exception:

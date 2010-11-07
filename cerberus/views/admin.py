@@ -2,18 +2,18 @@
 
 from flask import Module, abort
 from lib.api.response import Response
-from lib.db import Merchant, AdminKey
+from lib.db import AdminKey, Admin
 from cerberus.log import log
 
-merchant_module = Module(__name__)
+admin_module = Module(__name__)
 
 resp = Response(log)
 
-@merchant_module.route('/merchant', methods=['GET', 'POST'])
+@admin_module.route('/', methods=['GET', 'POST'])
 @resp.api_request(key_type=AdminKey)
-@resp.api_get(Merchant)
-@resp.api_post(Merchant)
-def merchant():
+@resp.api_get(Admin)
+@resp.api_post(Admin)
+def admin():
   abort(404)
 
 def test(app, test_params):

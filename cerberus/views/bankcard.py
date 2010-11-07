@@ -14,3 +14,6 @@ resp = Response(log)
 @resp.api_resource(BankCard)
 def bank_card():
   abort(404)
+
+def test(app, test_params):
+  pass

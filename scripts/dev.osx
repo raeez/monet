@@ -1,12 +1,9 @@
 #!/bin/bash
 
-if [ `whoami` != root ]; then
-	echo Please run this script as root, or using sudo
+if [ `whoami` == root ]; then
+	echo Please DONT run this script as root, or using sudo
 	exit
 fi
-
-# clean current env, if any
-rm -rf dev
 
 echo ""
 echo "****************************************"
@@ -15,21 +12,21 @@ echo "****************************************"
 echo ""
 
 # system and python dependencies
-port install python27 \
+sudo port install python27 \
 			 python_select \
 
 # ensure python27 is the active python
-python_select python27
+sudo python_select python27
 
-port install git-core +svn \
+sudo port install git-core +svn \
 			 mongodb +python27 \
 
-port install vim +python27 \
+sudo port install vim +python27 \
 			 MacVim +python27 \
 
 # dev env
 pip install virtualenv
-virtualenv dev
+virtualenv --no-site-packages --distribute --clear dev
 . dev/bin/activate
 
 # python dependencies

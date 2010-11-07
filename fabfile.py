@@ -3,14 +3,24 @@
 from os.path import expanduser
 from fabric.api import env, local, run, put, cd
 from paramiko.config import SSHConfig
-import string
 
 DEPLOY_DIR = '~/manhattan'
 TEMP_DIR = '/tmp/manhattan'
 
-env.hosts = ['project-manhattan.com']
+def load_hosts(filename='hosts'):
+  host_list = []
+  with open(filename, 'r') as hosts:
+      for h in hosts:
+        if not h.startswith("#"):
+          host_list.append(h.rstrip())
+  return host_list
 
-def annotate_hosts_with_ssh_config_info():
+env.hosts = load_hosts()
+
+def script(script_name):
+  return 'sudo sh scripts/%s' % script_name
+
+def load_ssh_conf():
   def hostinfo(host, config):
     hive = config.lookup(host)
     if 'user' in hive:
@@ -30,8 +40,7 @@ def annotate_hosts_with_ssh_config_info():
     env.key_filename = [key for key in keys if key is not None]
     env.hosts = [hostinfo(host, config) for host in env.hosts]
 
-annotate_hosts_with_ssh_config_info()
-
+load_ssh_conf()
 
 def pack():
   local('python setup.py sdist --formats=gztar', capture=False)
@@ -39,7 +48,11 @@ def pack():
 def _deploy():
   ARCHIVE = 'manhattan.tar.gz'
   DIST = local ('python setup.py --fullname').strip() # release name and version
-  print "Deploying %s" % DIST
+
+  header = "Deploying %s" % DIST
+  print "*" * len(header)
+  print header
+  print "*" * len(header)
 
   try:
     run('mkdir %s' % TEMP_DIR)
@@ -56,17 +69,18 @@ def _deploy():
   run('rm -rf %s' % TEMP_DIR)
 
   with cd(DEPLOY_DIR):
-    run('sudo sh production')
-    run('sudo sh list')
+    run(script('production'))
+    run(script('list'))
 
 def seed_db():
   with cd(DEPLOY_DIR):
-    run('manhattan.python seed.py')
+    run('manhattan.python scripts/seed.py')
 
 def rebase(new=False):
-  ITEMS = ['start', 'stop', 'restart', 'list', 'seed.py', 'bootstrap', 'production', 'fcgi', 'upstart', 'nginx']
+  ITEMS = ['upstart', 'nginx', 'scripts', 'fcgi']
   ARCHIVE = 'core.tar.gz'
-  local('tar cvzf %s %s' % (ARCHIVE, string.join(ITEMS)))
+
+  local('tar cvzf %s %s' % (ARCHIVE, " ".join(ITEMS)))
   if new:
     run('mkdir %s' % DEPLOY_DIR)
   put(ARCHIVE, DEPLOY_DIR)
@@ -79,8 +93,8 @@ def rebase(new=False):
 def reconfig():
   rebase()
   with cd(DEPLOY_DIR):
-    run('sudo sh production')
-    run('sudo sh list')
+    run(script('production'))
+    run(script('list'))
 
 def deploy():
   _deploy()
@@ -89,10 +103,10 @@ def bootstrap():
   rebase(new=True)
 
   with cd(DEPLOY_DIR):
-    run('sudo sh bootstrap')
+    run(script('bootstrap'))
 
   _deploy()
   seed_db()
 
   with cd(DEPLOY_DIR):
-    run('sudo sh list')
+    run(script('list'))

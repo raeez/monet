@@ -5,10 +5,10 @@ import os
 import sys
 
 from lib.config import configure
-configure({
-  'debug' : False,
-  'syslog' : 'hermes'
-})
+configure(
+  debug = False,
+  syslog = 'hermes'
+)
 
 from flup.server.fcgi import WSGIServer
 from hermes.app import hermes

@@ -10,13 +10,13 @@ PROCESSOR_KEY = '_key'
 OBJECT_ID = '_id'
 
 class RequestError(dict):
-  def __init__(self):
+  def __init__(self, msg=''):
     super(RequestError, self).__init__()
     self.request = request
     self['resource'] = request.path
     self['method'] = request.method
     self['error'] = "%s" % self.__class__.__name__
-    self['message'] = "%s: something went wrong" % self.__class__.__name__
+    self['message'] = "%s: %s" % (self.__class__.__name__, msg)
 
   def log(self):
     if request.user:

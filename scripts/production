@@ -25,13 +25,13 @@ echo "* Updating core services *"
 echo "**************************"
 echo ""
 
-sh stop
+sh scripts/stop
 
 cp upstart/*.conf /etc/init/
 
 cp fcgi/*.fcgi /var/www/
 
-sh start
+sh scripts/start
 
 echo ""
 echo "********************"

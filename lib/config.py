@@ -10,14 +10,17 @@ def enforce_type(d, key, type):
     raise ConfigurationError('%s key should be of type %s' % (key, type))
   
 
-def configure(settings):
+def configure(**kw):
   KEY = 'debug'
-  if settings.has_key(KEY):
-    enforce_type(settings, KEY, bool)
-    DEBUG = settings[KEY]
+  if kw.has_key(KEY):
+    enforce_type(kw, KEY, bool)
+    print 'config: setting debug to %s' % kw[KEY]
+    import lib.config
+    lib.config.DEBUG = kw[KEY]
 
   KEY = 'syslog'
-  if settings.has_key(KEY):
-    enforce_type(settings, KEY, str)
-    import lib.log
-    lib.log.syslog = lib.log.Logger(settings[KEY])
+  if kw.has_key(KEY):
+    enforce_type(kw, KEY, str)
+    print 'config: setting syslog to %s' % kw[KEY]
+    from lib.log import Logger
+    Logger.set_syslog_name(kw[KEY])

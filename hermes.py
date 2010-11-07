@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from lib.config import configure
-configure({
-  'debug' : False,
-  'syslog' : 'hermes'
-})
+configure(
+  debug = False,
+  syslog = 'hermes'
+)
 
 from hermes.app import hermes
 

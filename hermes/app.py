@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from flask import Flask, render_template
+from flask import render_template, Flask
 from hermes.views.site import site
 from log import log
 
 hermes = Flask('hermes')
-log.add_logger('flask', hermes.logger)
+log.add_logger('app', hermes.logger)
 hermes.log = log
 
 hermes.register_module(site)
