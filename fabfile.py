@@ -7,8 +7,6 @@ import json
 
 from lib.test.name import generate_test_name
 import unittest
-from cerberus.test import CerberusTestCase
-test_sequences = [CerberusTestCase]
 
 DEPLOY_DIR = '~/manhattan'
 TEMP_DIR = '/tmp/manhattan'
@@ -51,9 +49,8 @@ def load_ssh_conf():
 load_ssh_conf()
 
 def test():
-  for sequence in test_sequences:
-    suite = unittest.TestLoader().loadTestsFromTestCase(sequence)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+  suite = unittest.TestLoader().discover('.')
+  unittest.TextTestRunner(verbosity=2).run(suite)
 
 def remote_test():
   with cd(DEPLOY_DIR):
