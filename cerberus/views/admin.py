@@ -9,7 +9,10 @@ admin_module = Module(__name__)
 
 resp = Response(log)
 
-@admin_module.route('/', methods=['GET', 'POST'])
+RESOURCE_URL = '/admin'
+METHODS = ['GET', 'POST']
+
+@admin_module.route(RESOURCE_URL, methods=METHODS)
 @resp.api_request(key_type=AdminKey)
 @resp.api_get(Admin)
 @resp.api_post(Admin)

@@ -9,7 +9,10 @@ merchant_module = Module(__name__)
 
 resp = Response(log)
 
-@merchant_module.route('/merchant', methods=['GET', 'POST'])
+RESOURCE_URL = '/merchant'
+METHODS = ['GET', 'POST']
+
+@merchant_module.route(RESOURCE_URL, methods=METHODS)
 @resp.api_request(key_type=AdminKey)
 @resp.api_get(Merchant)
 @resp.api_post(Merchant)

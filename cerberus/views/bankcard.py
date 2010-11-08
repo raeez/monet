@@ -9,11 +9,11 @@ bank_card_module = Module(__name__)
 
 resp = Response(log)
 
-@bank_card_module.route('/instrument/bank_card', methods=['GET', 'POST', 'PUT', 'DELETE'])
+RESOURCE_URL = '/instrument/bank_card'
+METHODS = ['GET', 'POST', 'PUT', 'DELETE']
+
+@bank_card_module.route(RESOURCE_URL, methods=METHODS)
 @resp.api_request()
 @resp.api_resource(BankCard)
 def bank_card():
   abort(404)
-
-def test(app, test_params):
-  pass

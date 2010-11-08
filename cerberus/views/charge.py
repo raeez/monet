@@ -2,6 +2,7 @@
 
 from flask import Module, request, abort
 from lib.api.response import out, Response
+from lib.api.error import ValidationError
 from lib.db import Charge
 from cerberus.log import log
 
@@ -9,7 +10,10 @@ charge_module = Module(__name__)
 
 resp = Response(log)
 
-@charge_module.route('/transaction/charge', methods=['GET', 'POST'])
+RESOURCE_URL = '/transaction/charge'
+METHODS = ['GET', 'POST']
+
+@charge_module.route(RESOURCE_URL, methods=METHODS)
 @resp.api_request()
 @resp.api_get(Charge)
 def charge():
@@ -23,7 +27,7 @@ def charge():
       c._validate()
 
     except Exception as e:
-      return out(e), 400
+      return out(ValidationError(e)), 400
 
     finally:
       if c._validated is True:
@@ -33,6 +37,3 @@ def charge():
         c.save() # save to db with result
     return out(c)
   abort(404)
-
-def test(app, test_params):
-  pass

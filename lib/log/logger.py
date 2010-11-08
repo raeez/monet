@@ -30,7 +30,9 @@ class Logger(dict):
   @classmethod
   def system_log(cls):
     default_name = cls.__dict__.get('syslog_name', 'default_syslog')
-    return cls.__dict__.get('syslog', Logger(default_name))
+    if 'syslog' not in cls.__dict__:
+      cls.syslog = Logger(default_name)
+    return cls.syslog
 
   @classmethod
   def set_syslog_name(cls, newname):

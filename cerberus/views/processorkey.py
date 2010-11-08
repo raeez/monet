@@ -9,11 +9,11 @@ processor_key_module = Module(__name__)
 
 resp = Response(log)
 
-@processor_key_module.route('/key/processor', methods=['GET'])
+RESOURCE_URL = '/key/processor'
+METHODS = ['GET']
+
+@processor_key_module.route(RESOURCE_URL, methods=METHODS)
 @resp.api_request()
 @resp.api_get(ProcessorKey)
 def processor_key():
   abort(404)
-
-def test(app, test_params):
-  pass

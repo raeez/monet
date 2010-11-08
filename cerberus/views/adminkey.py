@@ -9,12 +9,12 @@ admin_key_module = Module(__name__)
 
 resp = Response(log)
 
-@admin_key_module.route('/', methods=['GET', 'POST'])
+RESOURCE_URL = '/key/admin'
+METHODS = ['GET']
+
+@admin_key_module.route(RESOURCE_URL, methods=METHODS)
 @resp.api_request(key_type=AdminKey)
 @resp.api_get(AdminKey)
 @resp.api_post(AdminKey)
 def admin_key():
   abort(404)
-
-def test(app, test_params):
-  pass
