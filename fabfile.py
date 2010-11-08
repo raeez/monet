@@ -3,10 +3,12 @@
 from os.path import expanduser
 from fabric.api import env, local, run, put, cd
 from paramiko.config import SSHConfig
-import unittest
 import json
-from test import test_sequences
-from lib.test.name import *
+
+from lib.test.name import generate_test_name
+import unittest
+from cerberus.test import CerberusTestCase
+test_sequences = [CerberusTestCase]
 
 DEPLOY_DIR = '~/manhattan'
 TEMP_DIR = '/tmp/manhattan'
@@ -62,7 +64,6 @@ def pack():
   local('python setup.py sdist --formats=gztar', capture=False)
 
 def _deploy():
-  test()
 
   ARCHIVE = 'manhattan.tar.gz'
   DIST = local ('python setup.py --fullname').strip() # release name and version
@@ -95,7 +96,7 @@ def seed_db():
     run('manhattan.python scripts/seed.py')
 
 def rebase(new=False):
-  ITEMS = ['upstart', 'nginx', 'scripts', 'fcgi', 'conf', 'test.py']
+  ITEMS = ['upstart', 'nginx', 'scripts', 'fcgi', 'conf']
   ARCHIVE = 'core.tar.gz'
 
   local('tar cvzf %s %s' % (ARCHIVE, " ".join(ITEMS)))
