@@ -57,7 +57,7 @@ def test():
 
 def remote_test():
   with cd(DEPLOY_DIR):
-    run('manhattan.python test.py')
+    run('manhattan.python scripts/test.py')
 
 def pack():
   test()
@@ -90,6 +90,8 @@ def _deploy():
   with cd(DEPLOY_DIR):
     run(script('production'))
     run(script('list'))
+
+  remote_test()
 
 def seed_db():
   with cd(DEPLOY_DIR):
