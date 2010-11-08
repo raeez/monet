@@ -2,19 +2,11 @@
 
 import pymongo
 
-from lib.config import DEBUG
+import lib.config
 from lib.log import Logger
 syslog = Logger.system_log()
 from lib.db.adapter import Adapter, AdapterConnectionError
-from config import HOST, PORT, SAFE, REPLICATE_MIN
-
-if syslog is None:
-  from lib.log import Logger
-  log_name = 'db'
-  if DEBUG is False:
-    log_name += '.DEBUG'
-  syslog = Logger(log_name)
-syslog.create_logger('db')
+from lib.db.mongo.config import HOST, PORT, SAFE, REPLICATE_MIN
 
 class MongoAdapter(Adapter):
   """Abstraction and management of MongoDB instances"""

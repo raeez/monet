@@ -11,7 +11,6 @@ class BankCard(Instrument):
   
   @mandatory(str)
   def _val_number(self):
-    print repr(self.number)
     try:
       assert len(self.number) == 16
     except AssertionError:

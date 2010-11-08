@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from lib.config import configure
-configure(
-  debug = True,
-  syslog = 'cerberus'
-)
+import lib.config
+lib.config.load('conf/local.json')
+lib.config.CONF['syslog'] = 'cerberus'
 
 from cerberus.app import cerberus
 

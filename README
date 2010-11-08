@@ -75,6 +75,7 @@ cerberus/
 	[GET|POST]		/merchant			[board merchants]
 	[GET|POST]		/admin			[add new administrators]
 	[GET]			/key/processor			[merchant processor keys]
+	[GET]			/key/admin			[administrator keys]
 
 hermes/
 	hermes server - serves an admin interface to access information regarding merchants boarded and transactions processed.

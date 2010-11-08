@@ -1,14 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/manhattan.python
 # -*- coding: utf-8 -*-
 
-import os
-import sys
-
-from lib.config import configure
-configure(
-  debug = False,
-  syslog = 'hermes'
-)
+import lib.config
+lib.config.load('conf/production.json')
+lib.config.CONF['syslog'] = 'hermes'
 
 from flup.server.fcgi import WSGIServer
 from hermes.app import hermes

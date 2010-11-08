@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from lib.config import DEBUG
 from lib.log import Logger
 syslog = Logger.system_log()
 syslog.create_logger('db')

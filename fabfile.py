@@ -3,17 +3,23 @@
 from os.path import expanduser
 from fabric.api import env, local, run, put, cd
 from paramiko.config import SSHConfig
+import unittest
+import json
+from test import test_sequences
+from lib.test.name import *
 
 DEPLOY_DIR = '~/manhattan'
 TEMP_DIR = '/tmp/manhattan'
 
-def load_hosts(filename='hosts'):
-  host_list = []
-  with open(filename, 'r') as hosts:
-      for h in hosts:
-        if not h.startswith("#"):
-          host_list.append(h.rstrip())
-  return host_list
+def load_hosts(filename='conf/hosts.json'):
+  try:
+    with open(filename, 'r') as hosts:
+      data = json.loads(hosts.read())
+      if isinstance(data, list):
+        return data
+      return []
+  except:
+    return []
 
 env.hosts = load_hosts()
 
@@ -42,10 +48,22 @@ def load_ssh_conf():
 
 load_ssh_conf()
 
+def test():
+  for sequence in test_sequences:
+    suite = unittest.TestLoader().loadTestsFromTestCase(sequence)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+def remote_test():
+  with cd(DEPLOY_DIR):
+    run('manhattan.python test.py')
+
 def pack():
+  test()
   local('python setup.py sdist --formats=gztar', capture=False)
 
 def _deploy():
+  test()
+
   ARCHIVE = 'manhattan.tar.gz'
   DIST = local ('python setup.py --fullname').strip() # release name and version
 
@@ -77,7 +95,7 @@ def seed_db():
     run('manhattan.python scripts/seed.py')
 
 def rebase(new=False):
-  ITEMS = ['upstart', 'nginx', 'scripts', 'fcgi']
+  ITEMS = ['upstart', 'nginx', 'scripts', 'fcgi', 'conf', 'test.py']
   ARCHIVE = 'core.tar.gz'
 
   local('tar cvzf %s %s' % (ARCHIVE, " ".join(ITEMS)))

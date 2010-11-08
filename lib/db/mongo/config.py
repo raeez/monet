@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-HOST = "localhost"
-PORT = 27017
-SAFE = True
-REPLICATE_MIN = 1
+import lib.config
+
+HOST = lib.config.CONF['mongo']['host']
+PORT = lib.config.CONF['mongo']['port']
+SAFE = lib.config.CONF['mongo']['safe']
+REPLICATE_MIN = lib.config.CONF['mongo']['replicate_minimum']

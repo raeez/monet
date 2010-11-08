@@ -3,7 +3,7 @@ from cerberus.views.bankaccount import RESOURCE_URL
 def test(client):
   def account_stripped(account):
     assert 'aba' not in account
-    assert account['number'][:len(account)-2] == 'x' * len(account)-2
+    assert account['number'][:len(account)-2] == 'x' * (len(account)-2)
     return True
 
   data = client.get(RESOURCE_URL)

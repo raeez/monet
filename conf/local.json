@@ -1,0 +1,10 @@
+{
+	"debug": true,
+	"syslog": "conf_file",
+	"log": true,
+	"mongo": {
+		"host": "localhost",
+		"safe": true,
+		"port": 27017,
+		"replicate_minimum": 1}
+}

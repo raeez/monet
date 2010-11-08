@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from lib.config import configure
-configure(
-  debug = False,
-  syslog = 'hermes'
-)
+import lib.config
+lib.config.load('conf/local.json')
+lib.config.CONF['syslog'] = 'hermes'
 
 from hermes.app import hermes
 

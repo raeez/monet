@@ -3,11 +3,11 @@
 import logging
 import logging.handlers
 from os import mkdir
-import lib.config
 
 LOG_PREFIX = '/var/www/log/'
 
-if lib.config.DEBUG is True:
+import lib.config
+if lib.config.CONF.get('debug', True) is True:
   LOG_PREFIX = 'log/'
 
 LOG_LEVELS = { 'none' : logging.NOTSET,
@@ -29,14 +29,12 @@ class Logger(dict):
 
   @classmethod
   def system_log(cls):
-    default_name = cls.__dict__.get('syslog_name', 'default_syslog')
-    if 'syslog' not in cls.__dict__:
-      cls.syslog = Logger(default_name)
-    return cls.syslog
+    import lib.config
+    name = lib.config.CONF.get('syslog', 'sys')
 
-  @classmethod
-  def set_syslog_name(cls, newname):
-    cls.syslog_name = newname
+    if 'syslog' not in cls.__dict__:
+      cls.syslog = Logger(name)
+    return cls.syslog
 
   def __init__(self, system_name):
     super(Logger, self).__init__()
@@ -69,9 +67,13 @@ class Logger(dict):
     self.file_handler = logging.handlers.RotatingFileHandler(self.filename, maxBytes=1000000000, backupCount=5)
     self.file_handler.setLevel(logging.DEBUG)
     self.file_handler.setFormatter(self.file_formatter)
-    self.handlers.append(self.file_handler)
 
-    if lib.config.DEBUG is False:
+    import lib.config
+    if lib.config.CONF.get('log', False) is True:
+      self.handlers.append(self.file_handler)
+
+    if lib.config.CONF.get('debug', True) is False and lib.config.CONF.get('log', False) is True:
+
       self.email_handler = logging.handlers.SMTPHandler(MAIL_HOST, FROM_ADDR, MAIL_ADMINS, SUBJECT, credentials=AUTH)
       self.email_handler.setLevel(logging.ERROR)
       self.email_handler.setFormatter(self.email_formatter)
