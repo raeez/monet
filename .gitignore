@@ -3,10 +3,7 @@
 *.pyc
 *.pyo
 *.log
-dev/.Python
-dev/bin/
-dev/include/
-dev/lib/
+dev/
 Fabric.egg-info/
 manhattan.egg-info/
 build/
