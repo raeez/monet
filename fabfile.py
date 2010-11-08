@@ -5,7 +5,6 @@ from fabric.api import env, local, run, put, cd
 from paramiko.config import SSHConfig
 import json
 
-from lib.test.name import generate_test_name
 import unittest
 
 DEPLOY_DIR = '~/manhattan'
@@ -25,6 +24,9 @@ env.hosts = load_hosts()
 
 def script(script_name):
   return 'sudo sh scripts/%s' % script_name
+
+def python(script_name):
+  return 'manhattan.python scripts/%s' % script_name
 
 def load_ssh_conf():
   def hostinfo(host, config):
@@ -48,19 +50,61 @@ def load_ssh_conf():
 
 load_ssh_conf()
 
+# ---------
+# - LOCAL -
+# ---------
+
+def dev():
+  import sys
+  dev_script = {'darwin' : 'dev.osx', 'posix' : 'dev.ubuntu'}
+  local(script(dev_script[sys.platform]))
+
 def test():
   suite = unittest.TestLoader().discover('.')
   unittest.TextTestRunner(verbosity=2).run(suite)
-
-def remote_test():
-  with cd(DEPLOY_DIR):
-    run('manhattan.python scripts/test.py')
 
 def pack():
   test()
   local('python setup.py sdist --formats=gztar', capture=False)
 
-def _deploy():
+# ----------
+# - DEPLOY -
+# ----------
+
+def rebase(new=False):
+  ITEMS = ['upstart', 'nginx', 'scripts', 'fcgi', 'conf']
+  ARCHIVE = 'core.tar.gz'
+
+  local('tar cvzf %s %s' % (ARCHIVE, " ".join(ITEMS)))
+  if new:
+    try:
+      run('mkdir %s' % DEPLOY_DIR)
+    except:
+      raise Exception('Could not rebase target server - possibly')
+
+  put(ARCHIVE, DEPLOY_DIR)
+  local('rm %s' % ARCHIVE)
+
+  with cd(DEPLOY_DIR):
+    run('tar xf %s' % ARCHIVE)
+    run('rm %s' % ARCHIVE)
+
+def reconfig():
+  rebase()
+  with cd(DEPLOY_DIR):
+    run(script('production'))
+    run(script('list'))
+def bootstrap():
+  rebase(new=True)
+
+  with cd(DEPLOY_DIR):
+    run(script('bootstrap'))
+
+  deploy()
+  rseed()
+  list()
+
+def deploy():
 
   ARCHIVE = 'manhattan.tar.gz'
   DIST = local ('python setup.py --fullname').strip() # release name and version
@@ -79,7 +123,6 @@ def _deploy():
 
   with cd(TEMP_DIR):
     run('tar xzf %s/%s -C .' % (TEMP_DIR, ARCHIVE))
-
     with cd(DIST):
       run('manhattan.python setup.py install')
   run('rm -rf %s' % TEMP_DIR)
@@ -87,44 +130,28 @@ def _deploy():
   with cd(DEPLOY_DIR):
     run(script('production'))
     run(script('list'))
+  rtest()
 
-  remote_test()
+# ----------
+# - REMOTE -
+# ----------
 
-def seed_db():
-  with cd(DEPLOY_DIR):
-    run('manhattan.python scripts/seed.py')
-
-def rebase(new=False):
-  ITEMS = ['upstart', 'nginx', 'scripts', 'fcgi', 'conf']
-  ARCHIVE = 'core.tar.gz'
-
-  local('tar cvzf %s %s' % (ARCHIVE, " ".join(ITEMS)))
-  if new:
-    run('mkdir %s' % DEPLOY_DIR)
-  put(ARCHIVE, DEPLOY_DIR)
-  local('rm %s' % ARCHIVE)
-
-  with cd(DEPLOY_DIR):
-    run('tar xf %s' % ARCHIVE)
-    run('rm %s' % ARCHIVE)
-
-def reconfig():
-  rebase()
-  with cd(DEPLOY_DIR):
-    run(script('production'))
-    run(script('list'))
-
-def deploy():
-  _deploy()
-
-def bootstrap():
-  rebase(new=True)
-
-  with cd(DEPLOY_DIR):
-    run(script('bootstrap'))
-
-  _deploy()
-  seed_db()
-
+def rlist():
   with cd(DEPLOY_DIR):
     run(script('list'))
+
+def rstart():
+  with cd(DEPLOY_DIR):
+    run(script('start'))
+
+def rstop():
+  with cd(DEPLOY_DIR):
+    run(script('stop'))
+
+def rtest():
+  with cd(DEPLOY_DIR):
+    run(python('test.py'))
+
+def rseed():
+  with cd(DEPLOY_DIR):
+    run(python('seed.py'))

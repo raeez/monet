@@ -1,28 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import logging
-import logging.handlers
 from os import mkdir
 
-LOG_PREFIX = '/var/www/log/'
-
-import lib.config
-if lib.config.CONF.get('debug', True) is True:
-  LOG_PREFIX = 'log/'
-
-LOG_LEVELS = { 'none' : logging.NOTSET,
-               'debug' : logging.DEBUG,
-               'info' : logging.INFO,
-               'warning' : logging.WARNING,
-               'error' : logging.ERROR,
-               'critical' : logging.CRITICAL }
-
-MAIL_HOST = ('mail.authsmtp.com', 2525)
-FROM_ADDR = 'raeez@mit.edu'
-TO_ADDR = 'raeez@mit.edu'
-SUBJECT = 'Breakage in Manhattan!'
-MAIL_ADMINS = ['raeez@mit.edu']
-AUTH = ('ac53391', 'ezanqkp4gfzjbj')
+import lib.log.logging
+import lib.log.logging.handlers
+from lib.log.config import LOG_PREFIX, MAIL_HOST, FROM_ADDR, TO_ADDR, AUTH, SUBJECT, MAIL_ADMINS
 
 class Logger(dict):
   """docstring for Logger"""

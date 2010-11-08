@@ -1,10 +1,16 @@
 {
 	"debug": true,
-	"syslog": "conf_file",
 	"log": true,
+
+	"mail":{
+		"host": ["mail.authsmtp.com", 2525],
+		"auth": ["ac53391", "ezanqkp4gfzjbj"],
+		"address": "raeez@mit.edu"
+		},
+
 	"mongo": {
-		"host": "localhost",
+		"host": ["localhost", 27017],
 		"safe": true,
-		"port": 27017,
-		"replicate_minimum": 1}
+		"replicate_minimum": 1
+		}
 }
