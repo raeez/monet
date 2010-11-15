@@ -4,8 +4,7 @@ from os.path import expanduser
 from fabric.api import env, local, run, put, cd
 from paramiko.config import SSHConfig
 import json
-
-import unittest
+from lib.test.run import test_recursive
 
 DEPLOY_DIR = '~/manhattan'
 TEMP_DIR = '/tmp/manhattan'
@@ -60,8 +59,7 @@ def dev():
   local(script(dev_script[sys.platform]))
 
 def test():
-  suite = unittest.TestLoader().discover('.')
-  unittest.TextTestRunner(verbosity=2).run(suite)
+  test_recursive('.')
 
 def pack():
   test()

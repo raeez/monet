@@ -40,6 +40,8 @@ pip install Flask \
 				pyflakes \
 				py-bcrypt \
 
+ln -s $(pwd) dev/lib/python2.7/site-packages/manhattan
+
 git clone git://fabfile.org/fabric.git fabric
 cd fabric
 python setup.py build

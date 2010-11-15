@@ -5,7 +5,7 @@ lib.config.CONF = {
   'debug' : False,
   'syslog' : 'cerberus',
   'log' : True,
-  'mongo' : {'host' : ('localhost', 27017),
+  'mongo' : {'host' : ('localhost', 5500),
              'replicate_minimum' : 1,
              'safe' : True},
 

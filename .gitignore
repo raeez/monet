@@ -3,6 +3,7 @@
 *.pyc
 *.pyo
 *.log
+core.tar.gz
 .DS_Store
 dev/
 Fabric.egg-info/

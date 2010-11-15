@@ -49,10 +49,12 @@ chown -R ubuntu /home/ubuntu/
 cp nginx/nginx.conf /etc/nginx/nginx.conf
 rm /etc/nginx/sites-enabled/default
 rm /etc/nginx/sites-available/default
-mkdir /var/manhattan
-mkdir /var/manhattan/log
-mkdir /var/manhattan/log/nginx
+
+#deploy mongodb dir structure
 mkdir /var/www/log
+mkdir /var/www/db
+
+chown -R ubuntu /var/www
 
 echo ""
 echo "***************************"
@@ -60,7 +62,6 @@ echo "* Deploying core services *"
 echo "***************************"
 echo ""
 
-mkdir /data/db #mongodb | temp -> replace with its own deployment
 
 cp upstart/*.conf /etc/init/
 
