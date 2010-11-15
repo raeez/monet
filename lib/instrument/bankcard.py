@@ -69,15 +69,15 @@ class BankCard(Instrument):
   @valid
   def calculate_association(self):
     digits = int(self.number[:2])
-    if digits >= 40 and digits <= 49:
+    if digits in [40, 41, 42, 43, 44, 45, 46, 47, 48, 49]:
       self.association = VISA
-    elif digits >= 51 and digits <= 55:
+    elif digits in [51, 52, 53, 54, 55]:
       self.association= MASTERCARD
     elif digits in [34, 37]:
       self.association = AMEX
-    elif digits in [60, 62, 64, 65]:
+    elif digits in [38, 60, 62, 64, 65]:
       self.association = DISCOVER
-    elif digits in [35, 30]:
+    elif digits in [18, 31, 33, 35]:
       self.association = JCB
     else:
       self.association = UNKNOWN
