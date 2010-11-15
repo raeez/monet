@@ -5,7 +5,7 @@ from hermes.views.site import site
 from log import log
 
 hermes = Flask('hermes')
-log.add_logger('app', hermes.logger)
+log.add_logger('hermes_app', hermes.logger)
 hermes.log = log
 
 hermes.register_module(site)
@@ -13,7 +13,7 @@ hermes.secret_key = "\x85\\w\xf9\xb0\x9eR\xb4\xdd\xfcD\x91\xfb\x01T\xecE\x9b\xa2
 
 hermes.config.update(
   MAX_CONTENT_LENGTH = 4096,
-  LOGGER_NAME = 'app'
+  LOGGER_NAME = 'hermes_app'
 )
 
 @hermes.errorhandler(404)

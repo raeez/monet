@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from lib.db.mongo import adapter as mongo_adapter
-
 from lib.db.container import Container as Container
 
 from lib.instrument.bankcard import BankCard

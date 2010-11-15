@@ -61,6 +61,11 @@ def dev():
 def test():
   test_recursive('.')
 
+  #test them servlets
+  from servlet.c import app
+  from servlet.g import app
+  from servlet.h import app
+
 def pack():
   test()
   local('python setup.py sdist --formats=gztar', capture=False)

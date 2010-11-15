@@ -2,7 +2,6 @@
 
 from pymongo.son_manipulator import SONManipulator
 #from pymongo.bson.binary import Binary # TODO implement binary transform
-from lib.db import mongo_adapter as default_adapter
 from lib.db.model import VALIDATION_SIGNATURE, mandatory
 from time import time
 from bson import ObjectId
@@ -30,7 +29,6 @@ class ContainerTransform(SONManipulator):
           son[key] = self.transform_outgoing(value, collection)
     return son
 
-default_adapter.db.add_son_manipulator(ContainerTransform())
 
 class NoAdapterError(Exception):
   pass
@@ -54,6 +52,14 @@ def get_container_pointer(id):
 
 class Container(dict):
   """db abstraction and model wrapper for logical objects"""
+  
+  @classmethod
+  def default_adapter(cls):
+    if 'def_adapter' not in cls.__dict__:
+      from lib.db.mongo.connection import  adapter
+      adapter.db.add_son_manipulator(ContainerTransform())
+      cls.def_adapter = adapter
+    return cls.def_adapter
 
   @classmethod
   def type(cls):
@@ -71,19 +77,23 @@ class Container(dict):
 
   @classmethod
   def find(cls, params={}):
-    return default_adapter.find(cls.type(), params)
+    print 'cls.type():%s' % cls.type()
+    print 'cls.default_adapter():%s' % cls.default_adapter()
+    return cls.default_adapter().find(cls.type(), params)
 
   @classmethod
   def find_one(cls, params={}):
-    return default_adapter.find_one(cls.type(), params)
+    print 'cls.type():%s' % cls.type()
+    print 'cls.default_adapter():%s' % cls.default_adapter()
+    return cls.default_adapter().find_one(cls.type(), params)
 
   @classmethod
   def group_find(cls, params={}):
-    return default_adapter.group_find(cls.group(), params)
+    return cls.default_adapter().group_find(cls.group(), params)
 
   @classmethod
   def group_find_one(cls, params={}):
-    return default_adapter.group_find_one(cls.group(), params)
+    return cls.default_adapter().group_find_one(cls.group(), params)
 
   @classmethod
   def valid_member(cls, member, data):
@@ -166,7 +176,7 @@ class Container(dict):
     self._save()
 
   def delete(self):
-    default_adapter.delete(self["_type"], self._id)
+    self.__class__.default_adapter().delete(self["_type"], self._id)
 
   def _validate(self):
     for v in self.validators():
@@ -180,10 +190,10 @@ class Container(dict):
       self.__delitem__('_validated')
       #self.__delattr__('_validated')
       
-      if default_adapter is None:
+      if self.__class__.default_adapter() is None:
         raise NoAdapterError()
 
-      default_adapter.save(self["_type"], self)
+      self.__class__.default_adapter().save(self["_type"], self)
     except Exception as e:
       raise e
     finally:

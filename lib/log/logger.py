@@ -31,13 +31,12 @@ class Logger(dict):
     
     #formatters
     self.email_formatter = logging.Formatter('''
-              Message type:       %(levelname)s
-              Location:           %(pathname)s:%(lineno)d
+              Client:             %s:%(name)s:%(processName)s[%(process)d]:%(threadName)s[%(thread)d]
+              Severity:           %(levelname)s
+              Location:           %(pathname)s:%(lineno)d:%(funcName)s
               Module:             %(module)s
-              Function:           %(funcName)s
               Time:               %(asctime)s
 
-              Message:
 
               %(message)s
               ''')
@@ -55,6 +54,8 @@ class Logger(dict):
       self.handlers.append(self.file_handler)
 
     if lib.config.CONF.get('debug', True) is False and lib.config.CONF.get('log', False) is True:
+
+      SUBJECT = "Breakage in Manhattan::%s!" % self.system_name
 
       self.email_handler = logging.handlers.SMTPHandler(MAIL_HOST, FROM_ADDR, MAIL_ADMINS, SUBJECT, credentials=AUTH)
       self.email_handler.setLevel(logging.ERROR)

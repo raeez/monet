@@ -12,7 +12,7 @@ from cerberus.views.processorkey import processor_key_module
 from cerberus.views.refund import refund_module
 
 cerberus = Flask('cerberus')
-log.add_logger('flask', cerberus.logger)
+log.add_logger('cerberus_app', cerberus.logger)
 cerberus.log = log
 cerberus.register_module(bank_account_module)
 cerberus.register_module(bank_card_module)
@@ -23,7 +23,7 @@ cerberus.register_module(refund_module)
 
 cerberus.config.update(
   MAX_CONTENT_LENGTH = 4096,
-  LOGGER_NAME = 'app'
+  LOGGER_NAME = 'cerberus_app'
 )
 
 @cerberus.errorhandler(400)

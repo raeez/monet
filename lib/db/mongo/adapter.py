@@ -17,7 +17,7 @@ class MongoAdapter(Adapter):
     try:
       self.db = pymongo.Connection(HOST, PORT)[db_name]
     except pymongo.errors.AutoReconnect:
-      syslog['db'].critical("Could not connect to MongoDB")
+      syslog['db'].critical("Could not connect to MongoDB @ %s:%s" % (HOST, PORT))
       raise AdapterConnectionError
 
     syslog['db'].debug("Created a MongoDB connection to db:manhattan")
