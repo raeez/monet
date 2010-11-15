@@ -6,29 +6,12 @@ if [ `whoami` != root ]; then
 fi
 
 echo ""
-echo "***********************************"
-echo "* Upgrading Manhattan Environment *"
-echo "***********************************"
+echo "****************************"
+echo "* Restarting core services *"
+echo "****************************"
 echo ""
 
-chown -R ubuntu /home/ubuntu/
-
-# deploy nginx configuration
-cp nginx/nginx.conf /etc/nginx/nginx.conf
-rm /etc/nginx/sites-enabled/default
-rm /etc/nginx/sites-available/default
-chown -R ubuntu /var/www
-
-echo ""
-echo "**************************"
-echo "* Updating core services *"
-echo "**************************"
-echo ""
-
-
-cp upstart/*.conf /etc/init/
-
-sh scripts/restart
+sh scripts/reload
 
 echo ""
 echo "********************"

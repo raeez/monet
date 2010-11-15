@@ -131,6 +131,7 @@ def deploy():
   run('rm -rf %s' % TEMP_DIR)
 
   with cd(DEPLOY_DIR):
+    run(script('production'))
     run(script('list'))
   rtest()
 
@@ -149,6 +150,10 @@ def start():
 def restart():
   with cd(DEPLOY_DIR):
     run(script('restart'))
+
+def reload():
+  with cd(DEPLOY_DIR):
+    run(script('reload'))
 
 def rtest():
   with cd(DEPLOY_DIR):

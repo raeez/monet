@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ `whoami` != root ]; then
+	echo Please run this script as root, or using sudo
+	exit
+fi
+
+echo "*** manhattan *** reloading cerberus..."
+kill -HUP /tmp/cerberus.gunicorn.pid
+echo "*** manhattan *** reloading hermes..."
+kill -HUP /tmp/hermes.gunicorn.pid
+echo "*** manhattan *** reloading gaia..."
+kill -HUP /tmp/gaia.gunicorn.pid
