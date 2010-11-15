@@ -4,7 +4,7 @@ import random
 from lib.db.container import Container, register_container
 from lib.db.model import mandatory
 
-CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_*(),'
+CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_'
 KEY_SIZE = 50
 
 class Key(Container):

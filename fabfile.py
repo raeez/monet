@@ -95,7 +95,7 @@ def rebase(new=False):
 def reconfig():
   rebase()
   with cd(DEPLOY_DIR):
-    run(script('production'))
+    run(script('reconfig'))
     run(script('list'))
 def bootstrap():
   rebase(new=True)
@@ -139,17 +139,17 @@ def deploy():
 # - REMOTE -
 # ----------
 
-def rlist():
+def list():
   with cd(DEPLOY_DIR):
     run(script('list'))
 
-def rstart():
+def start():
   with cd(DEPLOY_DIR):
     run(script('start'))
 
-def rstop():
+def restart():
   with cd(DEPLOY_DIR):
-    run(script('stop'))
+    run(script('restart'))
 
 def rtest():
   with cd(DEPLOY_DIR):

@@ -25,10 +25,11 @@ echo "* Updating core services *"
 echo "**************************"
 echo ""
 
+sh scripts/stop
 
 cp upstart/*.conf /etc/init/
 
-sh scripts/restart
+sh scripts/start
 
 echo ""
 echo "********************"
