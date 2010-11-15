@@ -31,7 +31,7 @@ class Logger(dict):
     
     #formatters
     self.email_formatter = logging.Formatter('''
-              Client:             %s:%(name)s:%(processName)s[%(process)d]:%(threadName)s[%(thread)d]
+              Client:             %(name)s:%(processName)s[%(process)d]:%(threadName)s[%(thread)d]
               Severity:           %(levelname)s
               Location:           %(pathname)s:%(lineno)d:%(funcName)s
               Module:             %(module)s
