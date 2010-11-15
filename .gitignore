@@ -3,6 +3,7 @@
 *.pyc
 *.pyo
 *.log
+.DS_Store
 dev/
 Fabric.egg-info/
 manhattan.egg-info/
