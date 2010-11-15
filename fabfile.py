@@ -131,7 +131,6 @@ def deploy():
   run('rm -rf %s' % TEMP_DIR)
 
   with cd(DEPLOY_DIR):
-    run(script('production'))
     run(script('list'))
   rtest()
 

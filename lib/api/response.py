@@ -88,7 +88,8 @@ class Response:
           self.log['request'].debug(error.log())
           return out(error), 400
 
-        request.processor_key = key_type.find_one({"key" : request._items.get(PROCESSOR_KEY)})
+        request.processor_key = key_type.find_one({"key" : request._items[PROCESSOR_KEY]})
+        request._items["key_type"] = key_type.__name__
 
         if request.processor_key is None:
           error = InvalidKeyError()
@@ -107,6 +108,7 @@ class Response:
           request.query['_merchant'] = request.user._id
 
         del request._items['_key']
+        del request._items['key_type']
 
         return function(*args, **kw)
       return __api_request

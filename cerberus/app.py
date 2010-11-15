@@ -9,6 +9,7 @@ from cerberus.views.bankcard import bank_card_module
 from cerberus.views.charge import charge_module
 from cerberus.views.merchant import merchant_module
 from cerberus.views.processorkey import processor_key_module
+from cerberus.views.adminkey import admin_key_module
 from cerberus.views.refund import refund_module
 
 cerberus = Flask('cerberus')
@@ -19,6 +20,7 @@ cerberus.register_module(bank_card_module)
 cerberus.register_module(charge_module)
 cerberus.register_module(merchant_module)
 cerberus.register_module(processor_key_module)
+cerberus.register_module(admin_key_module)
 cerberus.register_module(refund_module)
 
 cerberus.config.update(

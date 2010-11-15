@@ -10,7 +10,7 @@ admin_key_module = Module(__name__)
 resp = Response(log)
 
 RESOURCE_URL = '/key/admin'
-METHODS = ['GET']
+METHODS = ['GET', 'POST']
 
 @admin_key_module.route(RESOURCE_URL, methods=METHODS)
 @resp.api_request(key_type=AdminKey)

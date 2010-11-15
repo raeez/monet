@@ -29,7 +29,7 @@ class MissingKeyError(RequestError):
 class InvalidKeyError(RequestError):
   def __init__(self):
     super(InvalidKeyError, self).__init__()
-    self['message'] = "%s: supplied key: ('%s' : %s)" % (self.__class__.__name__, PROCESSOR_KEY, request._items.get(PROCESSOR_KEY))
+    self['message'] = "%s: supplied key: ('%s' : '%s')" % (self.__class__.__name__, request._items.get('key_type'), request._items.get(PROCESSOR_KEY) )
 
 class DanglingKeyError(RequestError):
   def __init__(self):
