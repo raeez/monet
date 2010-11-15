@@ -3,8 +3,7 @@
 	"syslog": "test",
 	"log": true,
 	"mongo": {
-		"host": "localhost",
+		"host": ["localhost", 27017],
 		"safe": true,
-		"port": 27017,
 		"replicate_minimum": 1}
 }

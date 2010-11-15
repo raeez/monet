@@ -77,14 +77,10 @@ class Container(dict):
 
   @classmethod
   def find(cls, params={}):
-    print 'cls.type():%s' % cls.type()
-    print 'cls.default_adapter():%s' % cls.default_adapter()
     return cls.default_adapter().find(cls.type(), params)
 
   @classmethod
   def find_one(cls, params={}):
-    print 'cls.type():%s' % cls.type()
-    print 'cls.default_adapter():%s' % cls.default_adapter()
     return cls.default_adapter().find_one(cls.type(), params)
 
   @classmethod
