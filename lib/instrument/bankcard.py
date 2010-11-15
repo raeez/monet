@@ -7,7 +7,7 @@ from lib.db.container import register_container
 from lib.associations import VISA, MASTERCARD, AMEX, JCB, DISCOVER, UNKNOWN
 
 def checksum(number):
-  from itertools import ifilter, islice
+  from itertools import islice
 
   def dbl(x):
     x = str(int(x)*2)
@@ -20,9 +20,9 @@ def checksum(number):
       return int(x)
 
   # reverse sequence, drop first digit, select even items, dbl, cast to int
-  double = [dbl(x[1]) for x in ifilter(lambda x: x[0] % 2 == 0, enumerate(islice(number[::-1], 1, None)))]
+  double = [dbl(x) for i,x in enumerate(islice(reversed(number), 1, None)) if i % 2 == 0]
   # select even items, cast to int
-  single = [int(x[1]) for x in ifilter(lambda x: x[0] % 2 == 0, enumerate(number))]
+  single = [int(x) for i,x in enumerate(reversed(number)) if i % 2 == 0]
 
   return sum(single) + sum(double)
 
@@ -64,7 +64,7 @@ class BankCard(Instrument):
   @optional(str)
   def _val_association(self):
     valid_bankcard_types = [VISA, MASTERCARD, AMEX, JCB, DISCOVER, UNKNOWN]
-    assert self.association in valid_bankcard_types, "'association' provided is invalid"
+    assert self.association in valid_bankcard_types, "'association' is invalid"
 
   @valid
   def calculate_association(self):
@@ -77,7 +77,7 @@ class BankCard(Instrument):
       self.association = AMEX
     elif digits in [60, 62, 64, 65]:
       self.association = DISCOVER
-    elif digits == 35:
+    elif digits in [35, 30]:
       self.association = JCB
     else:
       self.association = UNKNOWN

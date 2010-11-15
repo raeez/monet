@@ -6,12 +6,12 @@ if [ `whoami` != root ]; then
 fi
 
 echo "*** manhattan *** starting cerberus..."
-start cerberus.manhattan
+restart cerberus.manhattan
 echo "*** manhattan *** starting hermes..."
-start hermes.manhattan
+restart hermes.manhattan
 echo "*** manhattan *** starting gaia..."
-start gaia.manhattan
+restart gaia.manhattan
 echo "*** manhattan *** starting nginx..."
-start nginx.manhattan
+restart nginx.manhattan
 echo "*** manhattan *** starting mongodb..."
-start mongodb.manhattan
+restart mongodb.manhattan

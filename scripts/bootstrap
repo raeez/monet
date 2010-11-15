@@ -34,11 +34,14 @@ virtualenv -p python2.7 --no-site-packages --distribute --clear dev
 
 # python dependencies
 pip install Flask \
-				flup \
-				pymongo \
-				py-bcrypt \
+			pymongo \
+			greenlet \
+			eventlet \
+			gunicorn \
+			py-bcrypt \
 
 ln -s $(pwd)/dev/bin/python /usr/bin/manhattan.python
+ln -s $(pwd)/dev/bin/gunicorn /usr/bin/manhattan.gunicorn
 
 chown -R ubuntu /home/ubuntu/
 
@@ -63,8 +66,6 @@ cp upstart/*.conf /etc/init/
 
 cp nginx/cert.crt /var/www/
 cp nginx/cert.key /var/www/
-
-cp fcgi/*.fcgi /var/www/
 
 chown -R ubuntu /var/www
 

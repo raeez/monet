@@ -29,8 +29,6 @@ sh scripts/stop
 
 cp upstart/*.conf /etc/init/
 
-cp fcgi/*.fcgi /var/www/
-
 sh scripts/start
 
 echo ""

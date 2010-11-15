@@ -6,7 +6,6 @@ def test(client):
     assert 'exp_month' not in card
     assert 'exp_year' not in card
     assert 'association' in card
-    assert card['number'][:12] == 'x' * 12
     return True
 
   data = client.get(RESOURCE_URL)
@@ -22,20 +21,20 @@ def test(client):
   assert 'exp_month' in mal_month['message']
 
   data_a = client.post(RESOURCE_URL,
-                       {'number' : '4573837291827283',
+                       {'number' : '4111111111111111',
                         'cvc' : 838,
                         "exp_month" : 10,
-                        "exp_year" : 2011}) #visa
-  assert data_a['number'] == 'xxxxxxxxxxxx7283'
+                        "exp_year" : 2011})
+  assert data_a['number'] == 'xxxxxxxxxxxx1111'
   assert data_a['association'] == 'visa'
   assert card_stripped(data_a)
 
   data_b = client.post(RESOURCE_URL,
-                       {'number' : '5543927348329192',
+                       {'number' : '5500000000000004',
                         'cvc' : 3243,
                         'exp_month' : 12,
                         'exp_year' : 2015})
-  assert data_b['number'] == 'xxxxxxxxxxxx9192'
+  assert data_b['number'] == 'xxxxxxxxxxxx0004'
   assert data_b['association'] == 'mastercard'
   assert card_stripped(data_b)
 
@@ -49,29 +48,29 @@ def test(client):
   assert 'number' in mal_number['message']
 
   data_c = client.post(RESOURCE_URL,
-                       {'number' : '6283837483740192',
+                       {'number' : '6011000000000004',
                         'cvc' : 293,
                         'exp_month' : 03,
                         'exp_year' : 2014})
-  assert data_c['number'] == 'xxxxxxxxxxxx0192'
+  assert data_c['number'] == 'xxxxxxxxxxxx0004'
   assert data_c['association'] == 'discover'
   assert card_stripped(data_c)
 
   data_d = client.post(RESOURCE_URL,
-                       {'number' : '5134734792738347',
+                       {'number' : '5500000000000004',
                         'cvc' : 324,
                         'exp_month' : 8,
                         'exp_year' : 2012})
-  assert data_d['number'] == 'xxxxxxxxxxxx8347'
+  assert data_d['number'] == 'xxxxxxxxxxxx0004'
   assert data_d['association'] == 'mastercard'
   assert card_stripped(data_d)
 
   data_e = client.post(RESOURCE_URL,
-                       {'number' : '3592827392737372',
+                       {'number' : '3088000000000009',
                         'cvc' : 2922,
                         'exp_month' : 2,
                         'exp_year' : 2015})
-  assert data_e['number'] == 'xxxxxxxxxxxx7372'
+  assert data_e['number'] == 'xxxxxxxxxxxx0009'
   assert data_e['association'] == 'jcb'
   assert card_stripped(data_e)
 
@@ -85,21 +84,21 @@ def test(client):
   assert 'exp_year' in mal_year['message']
 
   data_f = client.post(RESOURCE_URL,
-                       {'number' : '3433938483710293',
+                       {'number' : '3400000000000000',
                         'cvc' : 2043,
                         'exp_month' : 8,
                         'exp_year' : 2012})
-  assert data_f['number'] == 'xxxxxxxxxxxx0293'
+  assert data_f['number'] == 'xxxxxxxxxxxx0000'
   assert data_f['association'] == 'amex'
   assert card_stripped(data_f)
 
 
   data_g = client.post(RESOURCE_URL,
-                       {'number' : '9374726392739283',
+                       {'number' : '201400000000009',
                         'cvc' : 3499,
                         'exp_month' : 4,
                         'exp_year' : 2013})
-  assert data_g['number'] == 'xxxxxxxxxxxx9283'
+  assert data_g['number'] == 'xxxxxxxxxxx0009'
   assert data_g['association'] == 'unknown'
   assert card_stripped(data_g)
   
@@ -113,11 +112,11 @@ def test(client):
   assert 'exp_year' in mal_year['message']
 
   data_h = client.post(RESOURCE_URL,
-                       {'number' : '9978837483749182',
+                       {'number' : '14000000000004',
                         'cvc' : 123,
                         'exp_month' : 5,
                         'exp_year' : 2020})
-  assert data_h['number'] == 'xxxxxxxxxxxx9182'
+  assert data_h['number'] == 'xxxxxxxxxx0004'
   assert data_h['association'] == 'unknown'
   assert card_stripped(data_h)
 
@@ -129,7 +128,6 @@ def test(client):
   assert 'error' in mal_cvc
   assert mal_cvc['error'] == 'ValidationError'
   assert 'cvc' in mal_cvc['message']
-
 
   # ensure that we only stored the valid ones
   valid = [data_a, data_b, data_c, data_d, data_e, data_f, data_g]
@@ -164,15 +162,15 @@ def test(client):
   assert update_a == data_a
   assert card_stripped(update_a)
 
-  update_d = client.put(RESOURCE_URL, {'_id' : data_d['_id'], 'number' : '4384637483746273'})
-  assert update_d['number'] == 'xxxxxxxxxxxx6273'
+  update_d = client.put(RESOURCE_URL, {'_id' : data_d['_id'], 'number' : '4111111111111111'})
+  assert update_d['number'] == 'xxxxxxxxxxxx1111'
   assert update_d['association'] == 'visa'
   assert update_d['_id'] == data_d['_id']
   assert card_stripped(update_d)
 
-  update_e = client.put(RESOURCE_URL, {'_id' : data_e['_id'], 'number' : 8273637463727283})
-  assert update_e['number'] == 'xxxxxxxxxxxx7283'
-  assert update_e['association'] == 'unknown'
+  update_e = client.put(RESOURCE_URL, {'_id' : data_e['_id'], 'number' : 30000000000004})
+  assert update_e['number'] == 'xxxxxxxxxx0004'
+  assert update_e['association'] == 'jcb'
   assert update_e['_id'] == data_e['_id']
   assert card_stripped(update_e)
 

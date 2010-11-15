@@ -5,9 +5,6 @@ if [ `whoami` == root ]; then
 	exit
 fi
 
-# clean current env, if any
-rm -rf dev
-
 echo ""
 echo "****************************************"
 echo "* Setting up Manhattan-dev environment *"
@@ -30,17 +27,19 @@ apt-get -y install git \
 					build-essential \
 					python2.7-setuptools \
 
-# manhattan env
+# dev env
 pip install virtualenv
 virtualenv -p python2.7 --no-site-packages --distribute --clear dev
 . manhattan/bin/activate
 
 # python dependencies
 pip install Flask \
-				flup \
 				sphinx \
-				pymongo \
 				ipython \
+				pymongo \
+				greenlet \
+				eventlet \
+				gunicorn \
 				pyflakes \
 				py-bcrypt \
 

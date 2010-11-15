@@ -9,7 +9,7 @@ bank_account_module = Module(__name__)
 
 resp = Response(log)
 
-RESOURCE_URL = '/instrument/bank_account'
+RESOURCE_URL = '/instrument/bankaccount'
 METHODS = ['GET', 'POST', 'PUT', 'DELETE']
 
 @bank_account_module.route(RESOURCE_URL, methods=METHODS)

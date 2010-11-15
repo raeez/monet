@@ -1,10 +1,9 @@
-#!/usr/bin/manhattan.python
 # -*- coding: utf-8 -*-
 
 import lib.config
-lib.conf.CONF = {
+lib.config.CONF = {
   'debug' : False,
-  'syslog' : 'hermes',
+  'syslog' : 'cerberus',
   'log' : True,
   'mongo' : {'host' : ('localhost', 27017),
              'replicate_minimum' : 1,
@@ -15,7 +14,4 @@ lib.conf.CONF = {
             'auth' : ('ac53391', 'ezanqkp4gfzjbj')}
 }
 
-from flup.server.fcgi import WSGIServer
-from hermes.app import hermes
-
-WSGIServer(hermes, bindAddress='/tmp/hermes-fcgi.sock').run()
+from cerberus.app import cerberus as app

@@ -1,8 +1,7 @@
-#!/usr/bin/manhattan.python
 # -*- coding: utf-8 -*-
 
 import lib.config
-lib.conf.CONF = {
+lib.config.CONF = {
   'debug' : False,
   'syslog' : 'gaia',
   'log' : True,
@@ -15,7 +14,4 @@ lib.conf.CONF = {
             'auth' : ('ac53391', 'ezanqkp4gfzjbj')}
 }
 
-from flup.server.fcgi import WSGIServer
-from gaia.app import gaia
-
-WSGIServer(gaia, bindAddress='/tmp/gaia-fcgi.sock').run()
+from gaia.app import gaia as app

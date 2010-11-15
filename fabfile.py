@@ -72,7 +72,7 @@ def pack():
 # ----------
 
 def rebase(new=False):
-  ITEMS = ['upstart', 'nginx', 'scripts', 'fcgi', 'conf']
+  ITEMS = ['upstart', 'nginx', 'scripts',  'conf']
   ARCHIVE = 'core.tar.gz'
 
   local('tar cvzf %s %s' % (ARCHIVE, " ".join(ITEMS)))
@@ -80,7 +80,7 @@ def rebase(new=False):
     try:
       run('mkdir %s' % DEPLOY_DIR)
     except:
-      raise Exception('Could not rebase target server - possibly')
+      raise Exception('Could not rebase target server')
 
   put(ARCHIVE, DEPLOY_DIR)
   local('rm %s' % ARCHIVE)

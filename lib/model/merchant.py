@@ -10,7 +10,6 @@ class Merchant(Container):
   def _defaults(self):
     self.parent = 'ROOT_MERCHANT'
     self.invites = 0
-    self.legal = 0
     self.keys = []
     self.settings = {}
 
@@ -37,10 +36,6 @@ class Merchant(Container):
   @pointer('Merchant')
   def _val_parent(self):
     pass
-
-  @mandatory(int)
-  def _val_legal(self):
-    assert self.legal >= 0
 
   @mandatory(list)
   def _val_keys(self):

@@ -26,15 +26,17 @@ sudo port install vim +python27 \
 
 # dev env
 pip install virtualenv
-virtualenv --no-site-packages --distribute --clear dev
+virtualenv -p python2.7 --no-site-packages --distribute --clear dev
 . dev/bin/activate
 
 # python dependencies
 pip install Flask \
-				flup \
 				sphinx \
 				ipython \
 				pymongo \
+				greenlet \
+				eventlet \
+				gunicorn \
 				pyflakes \
 				py-bcrypt \
 

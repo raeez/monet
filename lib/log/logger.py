@@ -2,8 +2,8 @@
 
 from os import mkdir
 
-import lib.log.logging
-import lib.log.logging.handlers
+import logging
+import logging.handlers
 from lib.log.config import LOG_PREFIX, MAIL_HOST, FROM_ADDR, TO_ADDR, AUTH, SUBJECT, MAIL_ADMINS
 
 class Logger(dict):
