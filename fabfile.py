@@ -22,10 +22,10 @@ def load_hosts(filename='conf/hosts.json'):
 env.hosts = load_hosts()
 
 def script(script_name):
-  return 'sudo sh scripts/%s' % script_name
+  return 'sudo sh script/%s' % script_name
 
 def python(script_name):
-  return 'manhattan.python scripts/%s' % script_name
+  return 'manhattan.python script/%s' % script_name
 
 def load_ssh_conf():
   def hostinfo(host, config):
@@ -75,7 +75,7 @@ def pack():
 # ----------
 
 def rebase(new=False):
-  ITEMS = ['upstart', 'nginx', 'scripts',  'conf']
+  ITEMS = ['upstart', 'nginx', 'script',  'conf']
   ARCHIVE = 'core.tar.gz'
 
   local('tar cvzf %s %s' % (ARCHIVE, " ".join(ITEMS)))
