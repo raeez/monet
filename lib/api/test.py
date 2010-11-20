@@ -24,7 +24,7 @@ class TestClient(object):
   def __init__(self, app, test_log, test_params):
 
     self.client = app.test_client()
-    self.processor_key = test_params['processor_key']
+    self.processor_key = test_params['merchant_key']
     self.admin_key = test_params['admin_key']
     self.log = test_log
 
@@ -62,7 +62,6 @@ class TestClient(object):
     self.log.debug("[PUT]\t'%s' --> [%s]\n\t\t%s " % (resource, resp, resp.data))
     print("[PUT]\t'%s' --> [%s]\n\t\t%s " % (resource, resp, resp.data))
     return data
-
 
   def delete(self, resource, d={}, a='merchant'):
     key = self.processor_key

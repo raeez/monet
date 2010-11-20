@@ -3,8 +3,6 @@
 from functools import wraps
 from bson.objectid import ObjectId
 
-VALIDATION_SIGNATURE = "_val_"
-
 def is_container(container, type):
   # TODO implement
   return True
@@ -18,24 +16,27 @@ def enforce_member_type(self, member_name, t):
     try:
       cast = t(member)
       self.__setattr__(member_name, cast)
-    except ValueError:
-      raise TypeError("member: " + member_name + " must be of type " + str(t))
     except TypeError:
-      raise TypeError("member: " + member_name + " must be of type " + str(t))
+      raise TypeError("member '%r' must be of type '%r'" % (member_name, t))
+    except ValueError:
+      raise TypeError("member '%r' must be of type '%r'" % (member_name, t))
   return
 
 def enforce_member_length(self, member_name, t):
-  if t == str:
-    try:
-      assert len(self.__getattribute__(member_name)) < 255
-    except AssertionError:
-      raise AssertionError("member '" + member_name + "' must be less than 255 characters in length'")
+  if isinstance(t, basestring):
+    assert len(self.__getattribute__(member_name)) < 255, "member '%r' must be less than 255 characters in length'" % member_name
 
-def optional(t=str):
+def optional(t=str, **var):
   def _optional(function):
-    def __optional(*args, **kw):
-      member_name = function.func_name[len(VALIDATION_SIGNATURE):]
-      self = args[0]
+    def __optional__(self):
+      assert len(var) >= 1, "@optional:%r directive missing variable names" % function.__name__
+      member_name, member_value = var.items()[0]
+
+      if member_value is not None and member_name not in dir(self):
+        self.__setattr__(member_name, member_value)
+       
+      if member_name not in self.__class__.__validators__:
+        self.__dict__['__mapped_validators__'][member_name] = function.func_name
 
       if member_name not in dir(self):
         return
@@ -43,34 +44,43 @@ def optional(t=str):
       enforce_member_type(self, member_name, t)
       enforce_member_length(self, member_name, t)
       
-      return function(*args, **kw)
-    return __optional
+      return function(self)
+    return __optional__
   return _optional
 
-def mandatory(t=str):
+def mandatory(t=str, **var):
   def _mandatory(function):
-    def __mandatory(*args, **kw):
-      member_name = function.func_name[len(VALIDATION_SIGNATURE):]
-      self = args[0]
+    def __mandatory__(self):
+      assert len(var) >= 1, "@mandatory:%r directive missing variable names" % function.__name__
+      member_name, member_value = var.items()[0]
+
+      if member_value is not None and member_name not in dir(self):
+        self.__setattr__(member_name, member_value)
+
+      if member_name not in self.__class__.__validators__:
+        self.__dict__['__mapped_validators__'][member_name] = function.func_name
 
       if member_name not in dir(self):
-        raise TypeError("missing member: " + member_name + " of type " + str(t))
-
+        raise AttributeError("missing member '%r' of type '%r'" % (member_name, t))
+      
       enforce_member_type(self, member_name, t)
       enforce_member_length(self, member_name, t)
 
-      return function(*args, **kw)
-    return __mandatory
+      return function(self)
+    return __mandatory__
   return _mandatory
 
-def pointer(t):
+def pointer(t, **var):
   def _pointer(function):
-    def __pointer(*args, **kw):
-      member_name = function.func_name[len(VALIDATION_SIGNATURE):]
-      self = args[0]
+    def __pointer__(self):
+      assert len(var) >= 1, "@pointer:%r directive missing variable names" % function.__name__
+      member_name, member_value = var.items()[0]
+
+      if member_name not in self.__class__.__validators__:
+        self.__dict__['__mapped_validators__'][member_name] = function.func_name
 
       if member_name not in dir(self):
-        raise TypeError("missing member: " + member_name + " of type " + str(t))
+        raise AttributeError("missing member '%r' of type '%r'" % (member_name, t))
 
       try:
         assert isinstance(self.__getattribute__(member_name), ObjectId)
@@ -78,10 +88,9 @@ def pointer(t):
       except AssertionError:
         raise TypeError("member: " + member_name + " must be a pointer to type " + str(t))
       
-      return function(*args, **kw)
-    return __pointer
+      return function(self)
+    return __pointer__
   return _pointer
-
 
 def valid(function):
   @wraps(function)

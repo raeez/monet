@@ -1,34 +1,25 @@
 # -*- coding: utf-8 -*-
 
-from lib.db.container import Container, register_container
+from lib.db.container import Container
 from lib.db.model import mandatory, is_container
 
 class Admin(Container):
   """Admin logical entity"""
 
-  def _defaults(self):
-    self.legal = 0
-    self.keys = []
+  @mandatory(str, email=None)
+  def val_email(self):
+    assert "@" in self.email, "'email' must be a valid email address"
+    assert "." in self.email, "'email' must be a valid email address"
 
-  @mandatory(unicode)
-  def _val_email(self):
-    try:
-      assert "@" in self.email
-      assert "." in self.email
-    except AssertionError:
-      raise AssertionError('member email must be a valid email address')
-
-  @mandatory(unicode)
-  def _val_password(self):
+  @mandatory(str, password=None)
+  def val_password(self):
     pass
 
-  @mandatory(unicode)
-  def _val_name(self):
-    assert len(self.name) < 255
+  @mandatory(str, name=None)
+  def val_name(self):
+    assert len(self.name) < 255, "'name' is too long; must be less than 255 characters"
 
-  @mandatory(list)
-  def _val_keys(self):
-    for key in self.keys:
+  @mandatory(list, key_list=[])
+  def val_keys(self):
+    for key in self.key_list:
       assert is_container('AdminKey', key)
-
-register_container(Admin)

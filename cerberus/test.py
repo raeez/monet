@@ -24,13 +24,10 @@ class CerberusTestCase(unittest.TestCase):
 
     lib.db.mongo_adapter = MongoAdapter(self.test_name)
     self.auth_objects = seed_test_db()
-    self.processor_key = self.auth_objects['processor_key'].key
+    self.merchant_key = self.auth_objects['merchant_key'].key
     self.admin_key = self.auth_objects['admin_key'].key
 
-    self.client = TestClient(self.app, self.test_log, {'processor_key' : self.processor_key, 'admin_key' : self.admin_key})
-
-  def test_illegal_access(self):
-    pass
+    self.client = TestClient(self.app, self.test_log, {'merchant_key' : self.merchant_key, 'admin_key' : self.admin_key})
 
   def test_bank_account(self):
     from cerberus.tests.bankaccount import test

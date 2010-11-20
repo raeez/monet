@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from lib.db import Admin, AdminKey, Merchant, ProcessorKey
+from lib.db import Admin, AdminKey, Merchant, MerchantKey
 from bson.objectid import ObjectId
 import bcrypt
 
@@ -12,12 +12,12 @@ def seed_test_db():
   m.password = bcrypt.hashpw('a123', bcrypt.gensalt(10))
   m.save()
 
-  pk = ProcessorKey()
-  pk._merchant = m._id
-  pk.processor = 'fdc'
-  pk.save()
-
-  m.keys.append(pk._id)
+  mk = MerchantKey()
+  mk._merchant = m._id
+  mk.processor = 'fdc'
+  mk.save()
+  
+  m.key_list.append(mk._id)
   m.save()
 
   a = Admin()
@@ -30,7 +30,7 @@ def seed_test_db():
   ak._admin = a._id
   ak.save()
 
-  a.keys.append(ak._id)
+  a.key_list.append(ak._id)
   a.save()
   
-  return {"merchant" : m, "admin" : a, "processor_key" : pk, "admin_key" : ak}
+  return {"merchant" : m, "admin" : a, "merchant_key" : mk, "admin_key" : ak}

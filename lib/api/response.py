@@ -3,8 +3,9 @@
 from flask import request
 from functools import wraps
 import json
-from lib.db.container import ResponseEncoder, get_container_pointer
-from lib.db import Admin, Merchant, BankCard, BankAccount, ProcessorKey, AdminKey
+from lib.db.container import ResponseEncoder
+from lib.db.transform import get_container_pointer
+from lib.db import Admin, Merchant, BankCard, BankAccount, MerchantKey, AdminKey
 
 from lib.api.keys import PROCESSOR_KEY, OBJECT_ID
 from lib.api.error import RequestError, MissingKeyError, InvalidKeyError, DanglingKeyError, RequiredArgumentError, ForbiddenArgumentError, InvalidArgumentError, ValidationError, InternalError
@@ -59,13 +60,13 @@ class Response:
   def __init__(self, log):
     self.log = log
 
-  def api_request(self, key_type=ProcessorKey):
+  def api_request(self, key_type=MerchantKey):
     def _api_request(function):
       @wraps(function)
       def __api_request(*args, **kw):
 
         try:
-          assert key_type in [AdminKey, ProcessorKey]
+          assert key_type in [AdminKey, MerchantKey]
         except:
           error = InternalError("Supplied key type %s not a valid key for an api_request" % key_type.__name__)
           self.log['request'].critical(error.log())
@@ -141,15 +142,15 @@ class Response:
             if key != PROCESSOR_KEY and key != OBJECT_ID and t.safe_member(key):
               data = request._items[key]
 
-              r = t.valid_member(key, data)
-              if r is not None:
-                if r.valid is False:
-                  error = ValidationError(TypeError(r.args))
+              v, d, e, a = t.validate_member(key, data)
+              if v is not None:
+                if v is False:
+                  error = ValidationError(TypeError(a))
                   self.log['request'].debug(error.log())
                   errors.append(error)
                   continue
                 else:
-                  data = r.data
+                  data = d
               request.query[key] = data
 
           if len(errors) > 0:

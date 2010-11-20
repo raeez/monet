@@ -1,34 +1,24 @@
 # -*- coding: utf-8 -*-
 
-from lib.db.container import Container, register_container
 from lib.db.model import mandatory, pointer, valid
-from lib.db import  ProcessorKey
+from lib.model.merchantobject import MerchantObject
 from lib.currencies import CURRENCIES
 
-class Transaction(Container):
+class Transaction(MerchantObject):
   """Transaction Logical Object"""
 
-  def _internal(self):
-    return super(Transaction, self)._internal().append(['_merchant'])
-
-  @mandatory(int)
-  def _val_amount(self):
+  @mandatory(int, amount=0)
+  def val_amount(self):
     assert self.amount > 0
 
-  @mandatory(str)
-  def _val_currency(self):
+  @mandatory(str, currency='usd')
+  def val_currency(self):
     assert self.currency.upper() in CURRENCIES
 
-  @pointer(ProcessorKey)
-  def _val_processer_key(self):
-    pass
-
-  @pointer('Merchant')
-  def _val_merchant(self):
+  @pointer('MerchantKey', key=None)
+  def val_key(self):
     pass
 
   @valid
   def process(self): #auth, settle etc.
     pass
-
-register_container(Transaction)

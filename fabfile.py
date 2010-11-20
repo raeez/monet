@@ -66,6 +66,21 @@ def test():
   from servlet.g import app
   from servlet.h import app
 
+def seed():
+  from lib.test import seed_test_db
+  obj = seed_test_db()
+
+  print 'Admin: %s' % repr(obj['admin'])
+  print 'Merchant: %s' % repr(obj['merchant'])
+  print
+  print
+  print 'AdminKey: %s' % repr(obj['admin_key'])
+  print 'MerchantKey: %s' % repr(obj['merchant_key'])
+  print
+  print
+  print 'admin_key: %s' % repr(obj['admin_key'].key)
+  print 'merchant_key: %s' % repr(obj['merchant_key'].key)
+
 def pack():
   test()
   local('python setup.py sdist --formats=gztar', capture=False)

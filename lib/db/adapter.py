@@ -4,6 +4,9 @@ from lib.log import Logger
 syslog = Logger.system_log()
 syslog.create_logger('db')
 
+class NoAdapterError(Exception):
+  pass
+
 class Adapter(object):
   """Abstraction over a database connection"""
   def __init__(self):

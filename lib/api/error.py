@@ -12,6 +12,11 @@ class RequestError(dict):
     self['method'] = request.method
     self['error'] = "%s" % self.__class__.__name__
     self['message'] = "%s: %s" % (self.__class__.__name__, msg)
+    
+    import lib.config
+    if lib.config.CONF['debug']:
+      import traceback
+      self['traceback'] = traceback.format_exc()
 
   def log(self):
     if request.user:

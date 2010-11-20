@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from lib.db.container import Container
-from lib.db.model import pointer
+from lib.model.merchantobject import MerchantObject
 
-class Instrument(Container):
-  """Payment Instrument logical object"""
-  @pointer('Merchant')
-  def _val__merchant(self):
-    pass
+class Instrument(MerchantObject):
+  pass

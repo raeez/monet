@@ -22,8 +22,8 @@ print 'Merchant: %s' % repr(obj['merchant'])
 print
 print
 print 'AdminKey: %s' % repr(obj['admin_key'])
-print 'ProcessorKey: %s' % repr(obj['processor_key'])
+print 'MerchantKey: %s' % repr(obj['merchant_key'])
 print
 print
 print 'admin_key: %s' % repr(obj['admin_key'].key)
-print 'processor_key: %s' % repr(obj['processor_key'].key)
+print 'merchant_key: %s' % repr(obj['merchant_key'].key)

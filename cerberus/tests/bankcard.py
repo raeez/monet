@@ -12,7 +12,7 @@ def test(client):
   assert data == []
 
   mal_month = client.post(RESOURCE_URL,
-                      {'number' : '3948729372830192',
+                      {'number' : '3948729372830193',
                        'cvc' : 3499,
                        'exp_month' : 2013,
                        'exp_year' : 2013})
@@ -75,7 +75,7 @@ def test(client):
   assert card_stripped(data_e)
 
   mal_year = client.post(RESOURCE_URL,
-                      {'number' : '3948729372830192',
+                      {'number' : '3158485439220903',
                        'cvc' : 3499,
                        'exp_month' : 4,
                        'exp_year' : 'aa92'})
@@ -103,7 +103,7 @@ def test(client):
   assert card_stripped(data_g)
   
   mal_year = client.post(RESOURCE_URL,
-                      {'number' : '3948729372830192',
+                      {'number' : '201489083725814',
                        'cvc' : 3499,
                        'exp_month' : 4,
                        'exp_year' : 'aa92'})
@@ -121,7 +121,7 @@ def test(client):
   assert card_stripped(data_h)
 
   mal_cvc = client.post(RESOURCE_URL,
-                      {'number' : '3948729372830192',
+                      {'number' : '14000000000004',
                        'cvc' : '3499a',
                        'exp_month' : 4,
                        'exp_year' : '2013'})
@@ -174,7 +174,7 @@ def test(client):
   assert update_e['_id'] == data_e['_id']
   assert card_stripped(update_e)
 
-  update_f = client.put(RESOURCE_URL, {'_id' : data_f['_id'], 'number' : 8273637463727283, 'exp_month' : 2019})
+  update_f = client.put(RESOURCE_URL, {'_id' : data_f['_id'], 'number' : 3337121527840468, 'exp_month' : 2019})
   assert 'error' in update_f
   assert update_f['error'] == 'ValidationError'
   assert 'exp_month' in update_f['message']

@@ -1,171 +1,194 @@
 # -*- coding: utf-8 -*-
 
-from pymongo.son_manipulator import SONManipulator
-#from pymongo.bson.binary import Binary # TODO implement binary transform
-from lib.db.model import VALIDATION_SIGNATURE, mandatory
+from lib.db.adapter import NoAdapterError
+from lib.db.model import mandatory
+from lib.db.transform import ContainerTransform, ResponseEncoder, registered_containers
 from time import time
-from bson import ObjectId
 import json
-
-class ResponseEncoder(json.JSONEncoder):
-  """docstring for ObjectIDEncoder"""
-  def default(self, obj):
-    if isinstance(obj, ObjectId):
-      return str(obj)
-    return json.JSONEncoder.default(self, obj)
-
-class ContainerTransform(SONManipulator):
-  """SON Transform for containers"""
-
-  def transform_outgoing(self, son, collection):
-    if "_type" in son and son["_type"] in Container._types:
-      return Container._types[son["_type"]](son)
-
-    for (key, value) in son.items():
-      if isinstance(value, dict):
-        if "_type" in value and value["_type"] in Container._types:
-          son[key] = Container._types[value["_type"]](value)
-        else:
-          son[key] = self.transform_outgoing(value, collection)
-    return son
-
-
-class NoAdapterError(Exception):
-  pass
 
 class InvalidContainer(Exception):
   pass
 
-def get_container_pointer(id):
-  # TODO actually implement, potentially as a SON Transform
+class MetaContainer(type):
 
-  if isinstance(id, ObjectId):
-    return id
+  def __new__(mcl, classname, bases, class_dict):
 
-  assert isinstance(id, unicode)
-  id = str(id)
-  try:
-    obj = ObjectId(id)
-  except Exception:
-    return None
-  return obj
+    def __init__(self, d={}):
+      super(Container, self).__init__()
+     
+      #run all validators once to set defaults
+      self.__dict__['__mapped_validators__'] = {}
+      for v in self.__class__.__validators__:
+        try:
+          self.__class__.__validators__[v](self)
+        except:
+          continue
 
-class Container(dict):
-  """db abstraction and model wrapper for logical objects"""
-  
-  @classmethod
-  def default_adapter(cls):
-    if 'def_adapter' not in cls.__dict__:
-      from lib.db.mongo.connection import  adapter
-      adapter.db.add_son_manipulator(ContainerTransform())
-      cls.def_adapter = adapter
-    return cls.def_adapter
+      mapping = {}
+      for member, func_name in self.__mapped_validators__.items():
+        mapping[member] = self.__class__.__validators__[func_name]
+      self.__class__.__mapped_validators__ = mapping
 
-  @classmethod
-  def type(cls):
-    return str(cls.__module__)
+      self.__dict__['_validated'] = False # __dict__ to avoid hidden properties showing up in the container
 
-  @classmethod
-  def group(cls):
-    items = cls.type().split('.')
+      self._type = self.__module__
+      self._created = int(time())
+
+      for key in d:
+        self[key] = d[key]
+
+    def __setitem__(self, key, value):
+      super(Container, self).__setitem__(key, value)
+      super(Container, self).__setattr__(key, value)
+
+    def __delitem__(self, key):
+      super(Container, self).__delitem__(key)
+      super(Container, self).__delattr__(key)
+
+    def __setattr__(self, key, value):
+      super(Container, self).__setattr__(key, value)
+      super(Container, self).__setitem__(key, value)
+
+    def __delattr__(self, key):
+      super(Container, self).__delattr__(key)
+      super(Container, self).__delitem__(key)
+
+    __module__ = class_dict['__module__']
+    items = __module__.split('.')
     items.pop() # get rid of current module
     items.reverse()
     _name = items.pop() #get first element
     for i in items:
       _name += '.' + items.pop()
-    return str(_name)
+
+    __group__ = str(_name)
+    __type__ = __module__
+    __inter__ = set(['_validated', '_type', '_created', '_merchant'])
+    __validators__ = {}
+    __defaults__ = {}
+
+    validator_signatures = ['function __mandatory', 'function __optional', 'function __pointer']
+
+    def fetch_model(d):
+      _val = {}
+      for n in d:
+        f = d[n]
+        if 'func_name' in dir(f):
+          for v in validator_signatures:
+            if v in str(f.__repr__()):
+              _val[n] = f
+              continue
+      return _val
+
+    for b in bases:
+      if b.__module__.startswith('lib.'):
+        v = fetch_model(b.__dict__)
+        for k in v:
+          __validators__[k] = v[k]
+
+    v = fetch_model(class_dict)
+    for k in v:
+      __validators__[k] = v[k]
+
+    new_dict = {'__init__' : __init__,
+
+                '__setitem__' : __setitem__,
+                '__delitem__' : __delitem__,
+                '__setattr__' : __setattr__,
+                '__delattr__' : __delattr__,
+
+                '__group__' : __group__,
+                '__inter__' : __inter__,
+                '__validators__' : __validators__,
+                '__defaults__' : __defaults__,
+                '__type__' : __type__,
+
+                '_encoder' : ResponseEncoder,
+               }
+
+    # inherit the rest of the behaviour
+    for k in class_dict:
+      new_dict[k] = class_dict[k]
+
+    t = super(MetaContainer, mcl).__new__(mcl, classname, bases, new_dict)
+    registered_containers[t.__module__] = t
+
+    return t
+
+class Container(dict):
+  __metaclass__ = MetaContainer
+
+  def __repr__(self):
+    return self.to_json(show_internal=True)
+
+  @classmethod
+  def default_adapter(cls):
+    if 'def_adapter' not in cls.__dict__:
+      from lib.db.mongo.connection import adapter
+      adapter.db.add_son_manipulator(ContainerTransform())
+      cls.def_adapter = adapter
+    return cls.def_adapter
 
   @classmethod
   def find(cls, params={}):
-    return cls.default_adapter().find(cls.type(), params)
+    return cls.default_adapter().find(cls.__type__, params)
 
   @classmethod
   def find_one(cls, params={}):
-    return cls.default_adapter().find_one(cls.type(), params)
+    return cls.default_adapter().find_one(cls.__type__, params)
 
   @classmethod
   def group_find(cls, params={}):
-    return cls.default_adapter().group_find(cls.group(), params)
+    return cls.default_adapter().group_find(cls.__group__, params)
 
   @classmethod
   def group_find_one(cls, params={}):
-    return cls.default_adapter().group_find_one(cls.group(), params)
+    return cls.default_adapter().group_find_one(cls.__group__, params)
 
   @classmethod
-  def valid_member(cls, member, data):
-    class ValidatorResponse(object):
-      pass
+  def validate_member(cls, member, data):
+  
+    #TODO reimplement sane
 
-    validator = VALIDATION_SIGNATURE+member
+    validator = cls.__mapped_validators__.get(member, None)
     temp = cls()
 
-    r = ValidatorResponse()
-    r.validator = validator
+    if validator is None:
+      raise AttributeError("%r has no validator for member '%r'\n we checked: %r" % (cls, member, cls.__mapped_validators__))
 
-    if validator in dir(temp):
-      try:
-        temp[member] = data
-        temp.__getattribute__(validator)()
-        r.valid = True
-        r.data = temp[member]
-        r.errors = []
-        r.args = ()
-        return r
-      except Exception as e:
-        r.valid = False
-        r.data = temp[member]
-        r.errors = [x for x in e.args]
-        r.args = e.args
-        return r
+    try:
+      temp[member] = data
+      validator(temp)
+      valid = True
+      data = temp[member]
+      errors = []
+      args = ()
+      return valid, data, errors, args
 
-    return None #not a member!
+    except Exception as e:
+      valid = False
+      data = temp[member]
+      errors = [x for x in e.args]
+      args = e.args
+      return valid, data, errors, args
 
-  @classmethod
-  def __internal(cls):
-    return ['_validated', '_type', '_created', '_merchant']
+    return None, None, None, None #not a member!
 
   @classmethod
   def safe_member(cls, member):
-    return member not in cls.__internal()
+    return member not in cls.__inter__
 
-  def __init__(self, d={}):
-    super(Container, self).__init__()
+  def _save(self):
+    try:
+      self.enforce_validated()
+      
+      if self.__class__.default_adapter() is None:
+        raise NoAdapterError()
 
-    self.__setitem__("_type", self.__class__.type())
-    self._validated = False
-    self._created = int(time())
+      self.__class__.default_adapter().save(self["_type"], self)
 
-    if '_defaults' in dir(self):
-      self._defaults()
-
-    for key in d:
-      self[key] = d[key]
-
-  def __setitem__(self, key, value):
-    if self.has_key(key) is False:
-      super(Container, self).__setitem__(key, value)
-      self.__setattr__(key, value)
-
-    elif self.has_key(key) and self[key] != value:
-      super(Container, self).__setitem__(key, value)
-      self.__setattr__(key, value)
-
-  def __setattr__(self, key, value):
-    super(Container, self).__setattr__(key, value)
-    self.__setitem__(key, value)
-
-  def __delitem__(self, key): # TODO fix del attr, only del if has attr
-    if self.has_key(key):
-      super(Container, self).__delitem__(key)
-      self.__delattr__(key)
-
-  def __delattr__(self, key):
-    if key in dir(self):
-      super(Container, self).__delattr__(key)
-    self.__delitem__(key)
-
-  def validators(self):
-    return [attr for attr in dir(self) if attr.startswith(VALIDATION_SIGNATURE)]
+    finally:
+      self.__dict__['_validated'] = False
 
   def save(self):
     self._validate()
@@ -175,52 +198,34 @@ class Container(dict):
     self.__class__.default_adapter().delete(self["_type"], self._id)
 
   def _validate(self):
-    for v in self.validators():
-      self.__getattribute__(v)()
+    for v in self.__validators__:
+      self.__validators__[v](self)
     self._validated = True
 
-  def _save(self):
-    try:
-      self.enforce_validated()
-
-      self.__delitem__('_validated')
-      #self.__delattr__('_validated')
-      
-      if self.__class__.default_adapter() is None:
-        raise NoAdapterError()
-
-      self.__class__.default_adapter().save(self["_type"], self)
-    except Exception as e:
-      raise e
-    finally:
-      self._validated = False
-
   def enforce_validated(self):
-    if self._validated is False:
+    if self.__dict__['_validated'] is False:
       raise InvalidContainer()
 
-  def to_dict(self):
-    js = {}
-    internal = self._internal()
+  def to_dict(self, show_internal=False):
+    d = {}
     for k in self:
-      if k not in internal:
-        js[k] = self[k]
-    return js
+      if k not in self.__inter__:
+        d[k] = self[k]
+      elif show_internal:
+        d[k] = self[k]
+    return d
 
-  def to_json(self):
-    return json.dumps(self.to_dict(), cls = ResponseEncoder, sort_keys=True, indent=2)
+  def to_json(self, show_internal=False):
+    return json.dumps(self.to_dict(show_internal),
+                      cls = self.__class__._encoder,
+                      sort_keys=True,
+                      indent=2)
 
-  def _internal(self):
-    return self.__class__.__internal()
+  @mandatory(int, _created=0)
+  def val__created(self):
+    assert self._created > 0
+    assert self._created < time()
 
-  @mandatory
-  def _val__created(self):
-    assert self.created > 0
-    assert self.created < time()
-
-def register_container(t):
-  assert isinstance(t, type)
-  if '_types' not in dir(Container):
-    Container._types = {}
-  Container._types[t.__module__] = t
-register_container(Container)
+  @mandatory(str, _type=None)
+  def val__type(self):
+    assert self._type == self.__module__
