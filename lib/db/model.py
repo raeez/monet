@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from functools import wraps
-from bson.objectid import ObjectId
+from lib.db.objectid import ObjectId
 
 def is_container(container, type):
   # TODO implement

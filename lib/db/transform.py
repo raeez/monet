@@ -2,7 +2,7 @@
 
 from pymongo.son_manipulator import SONManipulator
 import json
-from bson import ObjectId
+from lib.db.objectid import ObjectId
 
 registered_containers = {}
 
