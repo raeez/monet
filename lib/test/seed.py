@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from lib.db import Admin, AdminKey, Merchant, MerchantKey
-from bson.objectid import ObjectId
+from lib.db import Admin, AdminKey, Merchant, MerchantKey, ObjectId
 import bcrypt
 
 def seed_test_db():
