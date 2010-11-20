@@ -67,8 +67,8 @@ class MetaContainer(type):
     __validators__ = {}
     __defaults__ = {}
 
-    validator_signatures = ['function __mandatory', 'function __optional', 'function __pointer']
-
+    validator_signatures = ['__mandatory', '__optional', '__pointer']
+    
     def fetch_model(d):
       _val = {}
       for n in d:
@@ -81,10 +81,9 @@ class MetaContainer(type):
       return _val
 
     for b in bases:
-      if b.__module__.startswith('lib.'):
-        v = fetch_model(b.__dict__)
-        for k in v:
-          __validators__[k] = v[k]
+      if 'builtin' not in b.__module__:
+        for k in b.__validators__:
+          __validators__[k] = b.__validators__[k]
 
     v = fetch_model(class_dict)
     for k in v:
@@ -222,10 +221,10 @@ class Container(dict):
                       indent=2)
 
   @mandatory(int, _created=0)
-  def val__created(self):
+  def val_created(self):
     assert self._created > 0
     assert self._created < time()
 
   @mandatory(str, _type=None)
-  def val__type(self):
+  def val_type(self):
     assert self._type == self.__module__
