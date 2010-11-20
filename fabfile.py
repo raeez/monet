@@ -90,17 +90,20 @@ def seed():
     c.key = obj['merchant_key']._id
     c.amount = int((random.random() % 10000) * 10000) + 1
     c._instrument = ObjectId()
+    c._merchant = obj['merchant']._id
     c.save()
 
     r = Refund()
     r.key = obj['merchant_key']._id
     r.amount = int((random.random() % 10000) * 10000) + 1
     r._instrument = ObjectId()
+    r._merchant = obj['merchant']._id
     r.save()
 
     ba = BankAccount()
     ba.number = "29345729304729134792347"
     ba.aba = "29342937492013749201"
+    ba._merchant = obj['merchant']._id
     ba.save()
 
     bc = BankCard()
@@ -108,6 +111,7 @@ def seed():
     bc.exp_year = 2010+int((random.random() % 20) * 20)
     bc.exp_month = int((random.random() % 12) * 12) + 1
     bc.number = 3158485439220903
+    bc._merchant = obj['merchant']._id
     bc.save()
 
   print "done"
@@ -151,7 +155,7 @@ def bootstrap():
 
   deploy()
   start()
-  rseed()
+  reseed()
   list()
 
 def deploy():
@@ -180,7 +184,7 @@ def deploy():
   with cd(DEPLOY_DIR):
     run(script('production'))
     run(script('list'))
-  rtest()
+  retest()
 
 # ----------
 # - REMOTE -
@@ -202,10 +206,10 @@ def reload():
   with cd(DEPLOY_DIR):
     run(script('reload'))
 
-def rtest():
+def retest():
   with cd(DEPLOY_DIR):
     run(python('test.py'))
 
-def rseed():
+def reseed():
   with cd(DEPLOY_DIR):
     run(python('seed.py'))
