@@ -1,17 +1,35 @@
+# osx
 .DS_Store
-*.pyc
-*.pyo
-*.swp
-*.swo
-*.log
-core.tar.gz
-env
-env*
+
+# python
+*.py[co]
+
+# packages
 dist
 sdist
 build
+eggs
+parts
+bin
+develop-eggs
+.installed.cfg
 *.egg
 *.egg-info
 Fabric.egg-info
 manhattan.egg-info
+
+# installer logs
+pip-log.txt
+
+# vi
+*.sw[po]
+
+# application
+*.log
+core.tar.gz
+
+# virtualenv
+env
+
+# external packages
 fabric
