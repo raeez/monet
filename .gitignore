@@ -1,5 +1,8 @@
 # osx
 .DS_Store
+Icon?
+.Spotlight-V100
+.Trashes
 
 # python
 *.py[co]
@@ -22,7 +25,8 @@ manhattan.egg-info
 pip-log.txt
 
 # vi
-*.sw[po]
+*.sw[a-z]
+*.un~
 
 # application
 *.log
