@@ -29,8 +29,8 @@ apt-get -y install git \
 
 # virtual env
 pip install virtualenv
-virtualenv -p python2.7 --no-site-packages --distribute --clear dev
-. dev/bin/activate
+virtualenv -p python2.7 --no-site-packages --distribute --clear env
+. env/bin/activate
 
 # python dependencies
 pip install Flask \
@@ -40,8 +40,8 @@ pip install Flask \
 			gunicorn \
 			py-bcrypt \
 
-ln -s $(pwd)/dev/bin/python /usr/bin/manhattan.python
-ln -s $(pwd)/dev/bin/gunicorn /usr/bin/manhattan.gunicorn
+ln -s $(pwd)/env/bin/python /usr/bin/manhattan.python
+ln -s $(pwd)/env/bin/gunicorn /usr/bin/manhattan.gunicorn
 
 chown -R ubuntu /home/ubuntu/
 

@@ -29,8 +29,8 @@ apt-get -y install git \
 
 # dev env
 pip install virtualenv
-virtualenv -p python2.7 --no-site-packages --distribute --clear dev
-. manhattan/bin/activate
+virtualenv -p python2.7 --no-site-packages --distribute --clear env
+. env/bin/activate
 
 # python dependencies
 pip install Flask \
@@ -43,7 +43,7 @@ pip install Flask \
 				pyflakes \
 				py-bcrypt \
 
-ln -s $(pwd) dev/lib/python2.7/site-packages/manhattan
+ln -s $(pwd) env/lib/python2.7/site-packages/manhattan
 
 
 git clone git://fabfile.org/fabric.git fabric
