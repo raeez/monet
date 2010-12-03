@@ -1,0 +1,54 @@
+#!/bin/bash
+
+if [ `whoami` == root ]; then
+	echo Please DONT run this script as root, or using sudo
+	exit
+fi
+
+echo ""
+echo "****************************************"
+echo "* Setting up Manhattan-dev environment *"
+echo "****************************************"
+echo ""
+
+# system and python dependencies
+sudo port install python27 \
+			 python_select \
+
+# ensure python27 is the active python
+sudo python_select python27
+
+sudo port install git-core +svn \
+			 mongodb +python27 \
+
+sudo port install vim +python27 \
+			 MacVim +python27 \
+
+# dev env
+pip install virtualenv
+virtualenv -p python2.7 --no-site-packages --distribute --clear env
+. env/bin/activate
+
+# python dependencies
+pip install Flask \
+				sphinx \
+				ipython \
+				pymongo \
+				greenlet \
+				eventlet \
+				gunicorn \
+				pyflakes \
+				py-bcrypt \
+
+ln -s $(pwd) env/lib/python2.7/site-packages/manhattan
+
+git clone git://fabfile.org/fabric.git fabric
+cd fabric
+python setup.py build
+python setup.py install
+
+echo ""
+echo "************************"
+echo "* Manhattan-dev::Done! *"
+echo "************************"
+echo ""

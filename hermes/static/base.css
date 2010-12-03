@@ -1,0 +1,5 @@
+body {font-family: "Helvetica"; font-size: 14px;}
+
+/* forms */
+label {float: left; text-align: right; width: 100px; padding-right: 5px; display: block;}
+#footer {margin: 100px 0 0 0; color: #777;}

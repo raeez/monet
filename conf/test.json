@@ -1,0 +1,9 @@
+{
+	"debug": true,
+	"syslog": "test",
+	"log": true,
+	"mongo": {
+		"host": ["localhost", 27017],
+		"safe": true,
+		"replicate_minimum": 1}
+}

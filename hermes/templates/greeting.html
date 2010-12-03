@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block title %}Greetings!{% endblock %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+  <h1>Greetings!</h1>
+  You are logged in as {{session['email']}}! Log out <a href="{{ url_for('logout') }}">here.</a>
+{% endblock %}

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ `whoami` != root ]; then
+	echo Please run this script as root, or using sudo
+	exit
+fi
+
+echo "*** manhattan *** starting cerberus..."
+start cerberus.manhattan
+echo "*** manhattan *** starting hermes..."
+start hermes.manhattan
+echo "*** manhattan *** starting gaia..."
+start gaia.manhattan
+echo "*** manhattan *** starting nginx..."
+start nginx.manhattan
+echo "*** manhattan *** starting mongodb..."
+start mongodb.manhattan

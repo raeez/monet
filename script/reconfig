@@ -1,0 +1,38 @@
+#!/bin/bash
+
+if [ `whoami` != root ]; then
+	echo Please run this script as root, or using sudo
+	exit
+fi
+
+echo ""
+echo "***********************************"
+echo "* Upgrading Manhattan Environment *"
+echo "***********************************"
+echo ""
+
+chown -R ubuntu /home/ubuntu/
+
+# deploy nginx configuration
+cp nginx/nginx.conf /etc/nginx/nginx.conf
+rm /etc/nginx/sites-enabled/default
+rm /etc/nginx/sites-available/default
+chown -R ubuntu /var/www
+
+echo ""
+echo "**************************"
+echo "* Updating core services *"
+echo "**************************"
+echo ""
+
+sh scripts/stop
+
+cp upstart/*.conf /etc/init/
+
+sh scripts/start
+
+echo ""
+echo "********************"
+echo "* Manhattan::Done! *"
+echo "********************"
+echo ""

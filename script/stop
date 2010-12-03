@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ `whoami` != root ]; then
+	echo Please run this script as root, or using sudo
+	exit
+fi
+
+stop nginx.manhattan
+stop hermes.manhattan
+stop gaia.manhattan
+stop cerberus.manhattan

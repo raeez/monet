@@ -1,0 +1,58 @@
+#!/bin/bash
+
+if [ `whoami` == root ]; then
+	echo Please DONT run this script as root, or using sudo
+	exit
+fi
+
+echo ""
+echo "****************************************"
+echo "* Setting up Manhattan-dev environment *"
+echo "****************************************"
+echo ""
+
+#mongodb snapshot sources
+apt-add-repository 'deb http://downloads.mongodb.org/distros/ubuntu 10.10 10gen'
+apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
+apt-get -y update
+apt-get -y upgrade
+
+# system and python dependencies
+apt-get -y install git \
+					nginx \
+					mongodb \
+					python2.7 \
+					python-pip \
+					python2.7-dev \
+					build-essential \
+					python2.7-setuptools \
+
+# dev env
+pip install virtualenv
+virtualenv -p python2.7 --no-site-packages --distribute --clear env
+. env/bin/activate
+
+# python dependencies
+pip install Flask \
+				sphinx \
+				ipython \
+				pymongo \
+				greenlet \
+				eventlet \
+				gunicorn \
+				pyflakes \
+				py-bcrypt \
+
+ln -s $(pwd) env/lib/python2.7/site-packages/manhattan
+
+
+git clone git://fabfile.org/fabric.git fabric
+cd fabric
+python setup.py build
+python setup.py install
+
+echo ""
+echo "***********************"
+echo "* Manhattan-dev::Done! *"
+echo "***********************"
+echo ""

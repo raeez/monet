@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ `whoami` != root ]; then
+	echo Please run this script as root, or using sudo
+	exit
+fi
+
+echo ""
+echo "****************************"
+echo "* Restarting core services *"
+echo "****************************"
+echo ""
+
+sh scripts/reload
+
+echo ""
+echo "********************"
+echo "* Manhattan::Done! *"
+echo "********************"
+echo ""

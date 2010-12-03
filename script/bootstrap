@@ -1,0 +1,77 @@
+#!/bin/bash
+
+if [ `whoami` != root ]; then
+	echo Please run this script as root, or using sudo
+	exit
+fi
+
+echo ""
+echo "***************************************"
+echo "* Bootstrapping Manhattan Environment *"
+echo "***************************************"
+echo ""
+
+#mongodb snapshot sources
+apt-add-repository 'deb http://downloads.mongodb.org/distros/ubuntu 10.10 10gen'
+apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
+apt-get -y update
+apt-get -y upgrade
+
+# system and python dependencies
+apt-get -y install git \
+					nginx \
+					mongodb \
+					python2.7 \
+					python-pip \
+					python2.7-dev \
+					build-essential \
+					python-setuptools \
+
+# virtual env
+pip install virtualenv
+virtualenv -p python2.7 --no-site-packages --distribute --clear env
+. env/bin/activate
+
+# python dependencies
+pip install Flask \
+			pymongo \
+			greenlet \
+			eventlet \
+			gunicorn \
+			py-bcrypt \
+
+ln -s $(pwd)/env/bin/python /usr/bin/manhattan.python
+ln -s $(pwd)/env/bin/gunicorn /usr/bin/manhattan.gunicorn
+
+chown -R ubuntu /home/ubuntu/
+
+# deploy nginx configuration
+cp nginx/nginx.conf /etc/nginx/nginx.conf
+rm /etc/nginx/sites-enabled/default
+rm /etc/nginx/sites-available/default
+
+#deploy mongodb dir structure
+mkdir /var/www/log
+mkdir /var/www/db
+
+chown -R ubuntu /var/www
+
+echo ""
+echo "***************************"
+echo "* Deploying core services *"
+echo "***************************"
+echo ""
+
+
+cp upstart/*.conf /etc/init/
+
+cp nginx/cert.crt /var/www/
+cp nginx/cert.key /var/www/
+
+chown -R ubuntu /var/www
+
+echo ""
+echo "********************"
+echo "* Manhattan::Done! *"
+echo "********************"
+echo ""
