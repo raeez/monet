@@ -3,15 +3,15 @@
 from setuptools import setup, find_packages
 
 setup(
-  name = 'manhattan',
-  version = '0.16',
+  name = 'stream',
+  version = '0.17',
   packages = find_packages(),
   include_package_data = True,
   zip_safe = False,
 
   author = 'Raeez Lorgat',
   author_email = 'raeez@mit.edu',
-  description = 'Manhattan payment processing gateway',
+  description = 'Stream mail client',
 
   install_requires=['Flask>=0.6', 'pymongo', 'py-bcrypt', 'gunicorn', 'eventlet', 'greenlet']
 )

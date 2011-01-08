@@ -3,7 +3,7 @@
 import lib.config
 lib.config.CONF = {
   'debug' : False,
-  'syslog' : 'cerberus',
+  'syslog' : 'client',
   'log' : True,
   'mongo' : {'host' : ('localhost', 5500),
              'replicate_minimum' : 1,
@@ -14,4 +14,4 @@ lib.config.CONF = {
             'auth' : ('ac53391', 'ezanqkp4gfzjbj')}
 }
 
-from cerberus.app import cerberus as app
+from client.app import client as app

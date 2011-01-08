@@ -7,7 +7,7 @@ fi
 
 echo ""
 echo "****************************************"
-echo "* Setting up Manhattan-dev environment *"
+echo "* Setting up stream-dev environment *"
 echo "****************************************"
 echo ""
 
@@ -43,7 +43,7 @@ pip install Flask \
 				pyflakes \
 				py-bcrypt \
 
-ln -s $(pwd) env/lib/python2.7/site-packages/manhattan
+ln -s $(pwd) env/lib/python2.7/site-packages/stream
 
 
 git clone git://fabfile.org/fabric.git fabric
@@ -53,6 +53,6 @@ python setup.py install
 
 echo ""
 echo "***********************"
-echo "* Manhattan-dev::Done! *"
+echo "* stream-dev::Done! *"
 echo "***********************"
 echo ""

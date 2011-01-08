@@ -6,9 +6,9 @@ if [ `whoami` != root ]; then
 fi
 
 echo ""
-echo "***************************************"
-echo "* Bootstrapping Manhattan Environment *"
-echo "***************************************"
+echo "************************************"
+echo "* Bootstrapping Stream Environment *"
+echo "************************************"
 echo ""
 
 #mongodb snapshot sources
@@ -40,8 +40,8 @@ pip install Flask \
 			gunicorn \
 			py-bcrypt \
 
-ln -s $(pwd)/env/bin/python /usr/bin/manhattan.python
-ln -s $(pwd)/env/bin/gunicorn /usr/bin/manhattan.gunicorn
+ln -s $(pwd)/env/bin/python /usr/bin/stream.python
+ln -s $(pwd)/env/bin/gunicorn /usr/bin/stream.gunicorn
 
 chown -R ubuntu /home/ubuntu/
 
@@ -71,7 +71,7 @@ cp nginx/cert.key /var/www/
 chown -R ubuntu /var/www
 
 echo ""
-echo "********************"
-echo "* Manhattan::Done! *"
-echo "********************"
+echo "*****************"
+echo "* Stream::Done! *"
+echo "*****************"
 echo ""

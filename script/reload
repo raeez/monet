@@ -5,9 +5,5 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-echo "*** manhattan *** reloading cerberus..."
-kill -HUP /tmp/cerberus.gunicorn.pid
-echo "*** manhattan *** reloading hermes..."
-kill -HUP /tmp/hermes.gunicorn.pid
-echo "*** manhattan *** reloading gaia..."
-kill -HUP /tmp/gaia.gunicorn.pid
+echo "*** stream *** reloading client..."
+kill -HUP /tmp/client.gunicorn.pid

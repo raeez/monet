@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from flask import Module, session, redirect, url_for, request, render_template
-from lib.db import Admin
+from stream.model import User
 import bcrypt
-from hermes.log import log
+from client.log import log
 
 site = Module(__name__)
 
@@ -22,8 +22,10 @@ def login():
   elif request.method == 'POST':
     log['login'].debug("request %s" % repr(request.form))
     #auth
-    admin = Admin.find_one({'email' : request.form['email']})
-    if admin is None:
+    user = User.find_one({'email' : request.form['email']})
+    user.login()
+
+    if user is None:
       return redirect(url_for('login'))
 
     if bcrypt.hashpw(request.form['password'], admin.password) == admin.password:
@@ -38,6 +40,3 @@ def logout():
   log['logout'].debug(session['email'])
   session.pop('email', None)
   return redirect(url_for('index'))
-
-def test(app, test_params):
-  pass

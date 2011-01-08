@@ -5,7 +5,5 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-stop nginx.manhattan
-stop hermes.manhattan
-stop gaia.manhattan
-stop cerberus.manhattan
+stop nginx.stream
+stop client.stream

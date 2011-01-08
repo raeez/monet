@@ -7,13 +7,14 @@ fi
 
 echo ""
 echo "****************************************"
-echo "* Setting up Manhattan-dev environment *"
+echo "* Setting up stream-dev environment *"
 echo "****************************************"
 echo ""
 
 # system and python dependencies
 sudo port install python27 \
 			 python_select \
+			 py27-setuptools \
 
 # ensure python27 is the active python
 sudo python_select python27
@@ -25,6 +26,7 @@ sudo port install vim +python27 \
 			 MacVim +python27 \
 
 # dev env
+easy_install pip # TODO ensure that this utilises the python27 version of easy_install installed above 'py27-setuptools'
 pip install virtualenv
 virtualenv -p python2.7 --no-site-packages --distribute --clear env
 . env/bin/activate
@@ -40,7 +42,7 @@ pip install Flask \
 				pyflakes \
 				py-bcrypt \
 
-ln -s $(pwd) env/lib/python2.7/site-packages/manhattan
+ln -s $(pwd) env/lib/python2.7/site-packages/stream
 
 git clone git://fabfile.org/fabric.git fabric
 cd fabric
@@ -49,6 +51,6 @@ python setup.py install
 
 echo ""
 echo "************************"
-echo "* Manhattan-dev::Done! *"
+echo "* stream-dev::Done! *"
 echo "************************"
 echo ""

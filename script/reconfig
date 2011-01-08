@@ -6,9 +6,9 @@ if [ `whoami` != root ]; then
 fi
 
 echo ""
-echo "***********************************"
-echo "* Upgrading Manhattan Environment *"
-echo "***********************************"
+echo "********************************"
+echo "* Upgrading stream Environment *"
+echo "********************************"
 echo ""
 
 chown -R ubuntu /home/ubuntu/
@@ -32,7 +32,7 @@ cp upstart/*.conf /etc/init/
 sh scripts/start
 
 echo ""
-echo "********************"
-echo "* Manhattan::Done! *"
-echo "********************"
+echo "*****************"
+echo "* stream::Done! *"
+echo "*****************"
 echo ""

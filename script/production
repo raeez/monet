@@ -11,7 +11,7 @@ echo "* Restarting core services *"
 echo "****************************"
 echo ""
 
-sh scripts/reload
+sh script/reload
 
 echo ""
 echo "********************"

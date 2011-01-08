@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from lib.db.container import Container
-from lib.db.model import mandatory, optional, pointer, is_container
+from lib.db.model import mandatory, optional
 from time import time
 
-class Merchant(Container):
+class User(Container):
 
   @mandatory(str, email=None)
   def val_email(self):
@@ -25,15 +25,6 @@ class Merchant(Container):
   @mandatory(int, invites=0)
   def val_invites(self):
     assert self.invites >= 0
-
-  @pointer('Merchant', parent=None)
-  def val_parent(self):
-    pass
-
-  @mandatory(list, key_list=[])
-  def val_keys(self):
-    for key in self.key_list:
-      assert is_container('MerchantKey', key)
 
   @mandatory(dict, settings={})
   def val_settings(self):

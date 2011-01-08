@@ -11,7 +11,7 @@ from lib.db.mongo.config import HOST, SAFE, REPLICATE_MIN
 class MongoAdapter(Adapter):
   """Abstraction and management of MongoDB instances"""
 
-  def __init__(self, db_name='manhattan'):
+  def __init__(self, db_name='stream'):
     super(MongoAdapter, self).__init__()
 
     try:
@@ -20,7 +20,7 @@ class MongoAdapter(Adapter):
       syslog['db'].critical("Could not connect to MongoDB @ %s:%s" % (HOST[0], HOST[1]))
       raise AdapterConnectionError
 
-    syslog['db'].debug("Created a MongoDB connection to db:manhattan")
+    syslog['db'].debug("Created a MongoDB connection to db:stream")
 
   def save(self, collection, document):
     super(MongoAdapter, self).insert(collection, document)

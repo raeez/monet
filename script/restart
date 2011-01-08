@@ -5,13 +5,9 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-echo "*** manhattan *** starting cerberus..."
-restart cerberus.manhattan
-echo "*** manhattan *** starting hermes..."
-restart hermes.manhattan
-echo "*** manhattan *** starting gaia..."
-restart gaia.manhattan
-echo "*** manhattan *** starting nginx..."
-restart nginx.manhattan
-echo "*** manhattan *** starting mongodb..."
-restart mongodb.manhattan
+echo "*** stream *** starting client..."
+restart client.stream
+echo "*** stream *** starting nginx..."
+restart nginx.stream
+echo "*** stream *** starting mongodb..."
+restart mongodb.stream
