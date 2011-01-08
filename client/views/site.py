@@ -23,7 +23,6 @@ def login():
     log['login'].debug("request %s" % repr(request.form))
     #auth
     user = User.find_one({'email' : request.form['email']})
-    user.login()
 
     if user is None:
       return redirect(url_for('login'))
