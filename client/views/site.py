@@ -19,6 +19,7 @@ def index():
 @site.route('/login', methods=['GET', 'POST'])
 def login():
   log['request'].debug("request %s" % repr(request.path))
+
   if 'email' in session:
     return redirect(url_for('index'))
   elif request.method == 'POST':
@@ -27,6 +28,7 @@ def login():
     user = User.find_one({'email' : request.form['email']})
 
     if user is None:
+      log['login'].debug('user %s attempted to log in, but could not find corresponding User object' % request.form['email'])
       return redirect(url_for('login'))
 
     if bcrypt.hashpw(request.form['password'], user.password) == user.password:
