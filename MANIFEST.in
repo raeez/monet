@@ -1,2 +1,2 @@
-recursive-include hermes/templates *
-recursive-include hermes/static *
+recursive-include client/templates *
+recursive-include client/static *

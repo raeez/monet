@@ -10,8 +10,10 @@ site = Module(__name__)
 @site.route('/')
 def index():
   log['request'].debug("request %s" % repr(request.path))
+
   if 'email' in session:
     return render_template('greeting.html')
+  
   return render_template('index.html')
 
 @site.route('/login', methods=['GET', 'POST'])
@@ -27,7 +29,7 @@ def login():
     if user is None:
       return redirect(url_for('login'))
 
-    if bcrypt.hashpw(request.form['password'], admin.password) == admin.password:
+    if bcrypt.hashpw(request.form['password'], user.password) == user.password:
       session['email'] = request.form['email']
       log['login'].debug(session['email'])
       return redirect(url_for('index'))
