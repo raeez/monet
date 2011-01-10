@@ -32,8 +32,7 @@ def login():
       import stream.gmail.api #only support gmail for now # TODO catch exceptions here
       auth_tuple = (request.form['email'], request.form['password'])
       if stream.gmail.api.valid_gmail_account(auth_tuple):
-        stream.gmail.api.link_gmail_account(auth_tuple)
-        user = User.find_one({'email' : request.form['email']})
+        user = stream.gmail.api.link_gmail_account(auth_tuple)
       else:
         return redirect(url_for('login'))
 
