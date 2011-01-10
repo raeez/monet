@@ -2,17 +2,13 @@
 
 from lib.db.container import Container
 from lib.db.model import mandatory, optional
-from time import time
 
 class User(Container):
 
   @mandatory(str, email=None)
   def val_email(self):
-    try:
-      assert "@" in self.email
-      assert "." in self.email
-    except AssertionError:
-      raise AssertionError('member email must be a valid email address')
+    assert "@" in self.email, 'member email must be a valid email address'
+    assert "." in self.email, 'member email must be a valid email address'
 
   @mandatory(str, password=None)
   def val_password(self):
@@ -32,8 +28,4 @@ class User(Container):
 
   @optional(int, last_login=None)
   def val_last_login(self):
-    try:
-      assert self.last_login > 1286688330
-      assert self.last_login < time()
-    except AssertionError:
-      raise AssertionError("Ivalid time-stamp for member 'time'")
+    assert self.last_login > 1286688330, "Ivalid time-stamp for member 'time'"
