@@ -3,8 +3,11 @@
 from lib.db.adapter import NoAdapterError
 from lib.db.model import mandatory
 from lib.db.transform import ContainerTransform, ResponseEncoder, registered_containers
-from time import time
+import time
 import json
+
+def timestamp():
+  return int(time.time())
 
 class InvalidContainer(Exception):
   pass
@@ -32,7 +35,6 @@ class MetaContainer(type):
       self.__dict__['_validated'] = False # __dict__ to avoid hidden properties showing up in the container
 
       self._type = self.__module__
-      self._created = int(time())
 
       for key in d:
         self[key] = d[key]
@@ -220,10 +222,9 @@ class Container(dict):
                       sort_keys=True,
                       indent=2)
 
-  @mandatory(int, _created=0)
+  @mandatory(int, _created=timestamp)
   def val_created(self):
     assert self._created > 0
-    assert self._created < time()
 
   @mandatory(str, _type=None)
   def val_type(self):

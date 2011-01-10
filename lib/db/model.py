@@ -33,7 +33,11 @@ def optional(t=str, **var):
       member_name, member_value = var.items()[0]
 
       if member_value is not None and member_name not in dir(self):
-        self.__setattr__(member_name, member_value)
+        # TODO fix this to be the 'proper' way to test if the obj is a function
+        if hasattr(member_value, '__call__'):
+          self.__setattr__(member_name, member_value.__call__())
+        else:
+          self.__setattr__(member_name, member_value)
        
       if member_name not in self.__class__.__validators__:
         self.__dict__['__mapped_validators__'][member_name] = function.func_name
@@ -55,7 +59,11 @@ def mandatory(t=str, **var):
       member_name, member_value = var.items()[0]
 
       if member_value is not None and member_name not in dir(self):
-        self.__setattr__(member_name, member_value)
+        # TODO fix this to be the 'proper' way to test if the obj is a function
+        if hasattr(member_value, '__call__'):
+          self.__setattr__(member_name, member_value.__call__())
+        else:
+          self.__setattr__(member_name, member_value)
 
       if member_name not in self.__class__.__validators__:
         self.__dict__['__mapped_validators__'][member_name] = function.func_name
