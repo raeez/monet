@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Stream{% endblock %}
 
 {% block head %}
   {{ super() }}
 {% endblock %}
 
 {% block content %}
-  <h1>Home</h1>
-    You are not logged in! Do so <a href="{{ url_for('login') }}">here.</a>
+  <h1>Stream</h1>
+    Log in <a href="{{ url_for('login') }}">here.</a>
 {% endblock %}
