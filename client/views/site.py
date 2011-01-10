@@ -27,9 +27,15 @@ def login():
     #auth
     user = User.find_one({'email' : request.form['email']})
 
+    #if this user has not logged in before
     if user is None:
-      log['login'].debug('user %s attempted to log in, but could not find corresponding User object' % request.form['email'])
-      return redirect(url_for('login'))
+      import stream.gmail.api #only support gmail for now # TODO catch exceptions here
+      auth_tuple = (request.form['email'], request.form['password'])
+      if stream.gmail.api.valid_gmail_account(auth_tuple):
+        stream.gmail.api.link_gmail_account(auth_tuple)
+        user = User.find_one({'email' : request.form['email']})
+      else:
+        return redirect(url_for('login'))
 
     if bcrypt.hashpw(request.form['password'], user.password) == user.password:
       session['email'] = request.form['email']
