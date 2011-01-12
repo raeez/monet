@@ -3,7 +3,7 @@
 from lib.db.container import Container
 from lib.db.model import mandatory, pointer
 
-from stream.model.user import User
+from alpha.model.user import User
 
 class MailBox(Container):
 

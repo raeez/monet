@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import Module, session, redirect, url_for, request, render_template
-from stream.model import User
+from alpha.model import User
 import bcrypt
 from client.log import log
 

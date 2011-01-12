@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import render_template, Flask
-from client.views.login import login_module
+from server.views.login import login_module
 from log import log
 
 client = Flask('client')

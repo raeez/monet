@@ -14,7 +14,7 @@ echo ""
 #mongodb snapshot sources
 sudo apt-add-repository 'deb http://downloads.mongodb.org/distros/ubuntu 10.10 10gen'
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
-sudo apt-get -y update
+#sudo apt-get -y update
 sudo apt-get -y upgrade
 
 # system and python dependencies
@@ -28,14 +28,14 @@ sudo apt-get -y install git \
 					python2.7-setuptools \
 
 # dev env
-pip install virtualenv
-virtualenv -p python2.7 --no-site-packages --distribute --clear env
+sudo pip install virtualenv
+virtualenv --no-site-packages --distribute --clear env
 . env/bin/activate
 
 # python dependencies
 pip install Flask \
 				sphinx \
-				ipython \
+#				ipython \
 				pymongo \
 				greenlet \
 				eventlet \
