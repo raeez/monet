@@ -3,7 +3,7 @@
 from flask import Module, session, redirect, url_for, request, render_template
 from alpha.model import User
 import bcrypt
-from client.log import log
+from server.log import log
 
 login_module = Module(__name__)
 
