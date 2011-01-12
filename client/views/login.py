@@ -5,18 +5,18 @@ from stream.model import User
 import bcrypt
 from client.log import log
 
-site = Module(__name__)
+login_module = Module(__name__)
 
-@site.route('/')
+@login_module.route('/')
 def index():
   log['request'].debug("request %s" % repr(request.path))
 
   if 'email' in session:
-    return render_template('greeting.html')
+    return redirect(url_for('summary'))
   
   return render_template('index.html')
 
-@site.route('/login', methods=['GET', 'POST'])
+@login_module.route('/login', methods=['GET', 'POST'])
 def login():
   log['request'].debug("request %s" % repr(request.path))
 
@@ -38,13 +38,34 @@ def login():
 
     if bcrypt.hashpw(request.form['password'], user.password) == user.password:
       session['email'] = request.form['email']
+      session['password'] = request.form['password']
       log['login'].debug(session['email'])
       return redirect(url_for('index'))
   return render_template('login.html')
 
-@site.route('/logout')
+@login_module.route('/logout')
 def logout():
   log['request'].debug("request %s" % repr(request.path))
   log['logout'].debug(session['email'])
   session.pop('email', None)
   return redirect(url_for('index'))
+
+
+@login_module.route('/summary')
+def summary():
+  log['request'].debug("request %s" % repr(request.path))
+
+  if 'email' not in session:
+    return redirect(url_for('login'))
+
+  import stream.imap.client
+  iclient = stream.imap.client.IMAPClient((session['email'], session['password']))
+  data = []
+  for m in iclient.mailbox_list():
+    mailbox = {}
+    mailbox['name'] = m[2]
+    mailbox['messages'] = iclient.messages(mailbox['name'])
+    data.append(mailbox)
+
+  
+  return render_template('summary.html', mboxes=data)
