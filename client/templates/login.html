@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 
-{% block title %}Collate Login{% endblock %}
+{% block title %}Memoize Login{% endblock %}
 
 {% block head %}
   {{ super() }}
 {% endblock %}
 
 {% block content %}
-  <h1>Collate Login</h1>
+  <h1>Memoize Login</h1>
   {% with messages = get_flashed_messages() %}
     {% if messages %}
     {% for message in messages %} 

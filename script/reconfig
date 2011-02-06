@@ -7,7 +7,7 @@ fi
 
 echo ""
 echo "********************************"
-echo "* Upgrading collate Environment *"
+echo "* Upgrading memoize Environment *"
 echo "********************************"
 echo ""
 
@@ -33,6 +33,6 @@ sh scripts/start
 
 echo ""
 echo "*****************"
-echo "* collate::Done! *"
+echo "* memoize::Done! *"
 echo "*****************"
 echo ""

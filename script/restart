@@ -5,9 +5,9 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-echo "*** collate *** starting client..."
-restart client.collate
-echo "*** collate *** starting nginx..."
-restart nginx.collate
-echo "*** collate *** starting mongodb..."
-restart mongodb.collate
+echo "*** memoize *** starting client..."
+restart client.memoize
+echo "*** memoize *** starting nginx..."
+restart nginx.memoize
+echo "*** memoize *** starting mongodb..."
+restart mongodb.memoize

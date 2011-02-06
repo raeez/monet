@@ -5,11 +5,11 @@ from fabric.api import env, local, run, put, cd
 from paramiko.config import SSHConfig
 import json
 
-import collate.test.run
+import memoize.test.run
 
-DEPLOY_DIR = '~/collate'
-PYTHON = 'collate.python'
-TEMP_DIR = '/tmp/collate'
+DEPLOY_DIR = '~/memoize'
+PYTHON = 'memoize.python'
+TEMP_DIR = '/tmp/memoize'
 
 def load_hosts(filename='conf/hosts.json'):
   try:
@@ -61,7 +61,7 @@ def dev():
   local(script(dev_script[sys.platform]))
 
 def test():
-  collate.test.run.test_recursive('.')
+  memoize.test.run.test_recursive('.')
 
   # test them servlets
   from servlet.c import app
@@ -110,7 +110,7 @@ def bootstrap():
 
 def deploy():
 
-  ARCHIVE = 'collate.tar.gz'
+  ARCHIVE = 'memoize.tar.gz'
   DIST = local ('python setup.py --fullname').strip() # release name and version
 
   header = "Deploying %s" % DIST

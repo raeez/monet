@@ -7,7 +7,7 @@ fi
 
 echo ""
 echo "************************************"
-echo "* Bootstrapping collate Environment *"
+echo "* Bootstrapping memoize Environment *"
 echo "************************************"
 echo ""
 
@@ -42,8 +42,8 @@ pip install Flask \
 			py-bcrypt \
 			flask-uploads \
 
-ln -s $(pwd)/env/bin/python /usr/bin/collate.python
-ln -s $(pwd)/env/bin/gunicorn /usr/bin/collate.gunicorn
+ln -s $(pwd)/env/bin/python /usr/bin/memoize.python
+ln -s $(pwd)/env/bin/gunicorn /usr/bin/memoize.gunicorn
 
 chown -R ubuntu /home/ubuntu/
 
@@ -74,6 +74,6 @@ chown -R ubuntu /var/www
 
 echo ""
 echo "*****************"
-echo "* collate::Done! *"
+echo "* memoize::Done! *"
 echo "*****************"
 echo ""

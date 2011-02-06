@@ -2,13 +2,13 @@
 
 from flask import Module, session, redirect, url_for, request, render_template, flash
 from flaskext.uploads import UploadNotAllowed
-from collate.model import User, Photo, Collation
+from memoize.model import User, Photo, Collation
 import bcrypt
 from client.log import log
 
-login_module = Module(__name__)
+main_module = Module(__name__)
 
-@login_module.route('/')
+@main_module.route('/')
 def index():
   log['request'].debug("request %s" % repr(request.path))
 
@@ -17,7 +17,7 @@ def index():
   
   return render_template('index.html')
 
-@login_module.route('/login', methods=['GET', 'POST'])
+@main_module.route('/login', methods=['GET', 'POST'])
 def login():
   log['request'].debug("request %s" % repr(request.path))
 
@@ -40,7 +40,7 @@ def login():
       return redirect(url_for('index'))
   return render_template('login.html')
 
-@login_module.route('/logout')
+@main_module.route('/logout')
 def logout():
   log['request'].debug("request %s" % repr(request.path))
   log['logout'].debug(session['email'])
@@ -48,7 +48,7 @@ def logout():
   return redirect(url_for('index'))
 
 
-@login_module.route('/stream')
+@main_module.route('/stream')
 def stream():
     log['request'].debug("request %s" % repr(request.path))
     p = Photo.find({'email' : session['email']})
@@ -59,7 +59,7 @@ def stream():
     return render_template('stream.html', photos=ps)
 
 #
-@login_module.route('/new', methods=['GET', 'POST'])
+@main_module.route('/new', methods=['GET', 'POST'])
 def new():
   if request.method == 'POST':
     photo = request.files.get('photo')

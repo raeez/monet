@@ -1,12 +1,44 @@
 {% extends "layout.html" %}
 
-{% block title %}Collate{% endblock %}
+{% block title %}Memoize{% endblock %}
 
 {% block head %}
   {{ super() }}
 {% endblock %}
 
 {% block content %}
-  <h1>Collate</h1>
-    Log in <a href="{{ url_for('login') }}">here</a>.
+  <h1>Welcome to Memoize.</h1>
+  <h3><a href="{{ url_for('login') }}">Sign in</a> to access your memories.</h3>
+
+  <h3> Build a new Memory!</h3>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %} 
+        <ul class="flashes">
+          {% if message == "missing" %}
+            <li>You must fill in all the fields!</li>
+          {% endif %}
+          {% if message == "fail" %}
+            <li>We don't support that file; sorry!</li>
+          {% endif %}
+          {% if message == "success" %}
+            <li>Upload Success! Try another.</li>
+          {% endif %}
+        </ul>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  In order to create a new memory, you must upload some photographs:
+
+    <form method=POST enctype=multipart/form-data action="{{url_for('new')}}">
+        <input type=file name=photo>
+        <input type=text name=title>
+        <input type=text name=caption>
+        <input type="submit" name="submit" value="Send my Photo!" />
+    </form>
+
+
+
 {% endblock %}

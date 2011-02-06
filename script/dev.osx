@@ -7,7 +7,7 @@ fi
 
 echo ""
 echo "****************************************"
-echo "* Setting up collate-dev environment *"
+echo "* Setting up memoize-dev environment *"
 echo "****************************************"
 echo ""
 
@@ -43,7 +43,7 @@ pip install Flask \
 				py-bcrypt \
                 flask-uploads \
 
-ln -s $(pwd) env/lib/python2.7/site-packages/collate
+ln -s $(pwd) env/lib/python2.7/site-packages/memoize
 
 git clone git://fabfile.org/fabric.git fabric
 cd fabric
@@ -52,6 +52,6 @@ python setup.py install
 
 echo ""
 echo "************************"
-echo "* collate-dev::Done! *"
+echo "* memoize-dev::Done! *"
 echo "************************"
 echo ""

@@ -3,14 +3,14 @@
 from flask import render_template, Flask
 from flaskext.uploads import (UploadSet, configure_uploads, IMAGES,
                               UploadNotAllowed, patch_request_class)
-from client.views.login import login_module
+from client.views.main import main_module
 from log import log
 
 client = Flask('client')
 log.add_logger('client_app', client.logger)
 client.log = log
 
-client.register_module(login_module)
+client.register_module(main_module)
 client.secret_key = "\x85\\w\xf9\xb0\x9eR\xb4\xdd\xfcD\x91\xfb\x01T\xecE\x9b\xa2-b\x87J/\xf5\xbb\x06\xdd\x96\xe6\xa7\x86x\xd5\x8f"
 
 client.config.update(
