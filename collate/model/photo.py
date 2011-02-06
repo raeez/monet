@@ -10,6 +10,6 @@ class Photo(Container):
     assert "@" in self.email, 'member email must be a valid email address'
     assert "." in self.email, 'member email must be a valid email address'
 
-  @mandatory(str, email=None)
+  @mandatory(str, filename=None)
   def val_user(self):
     assert len(self.filename) < 255, "username must be less than 255 characters long"
