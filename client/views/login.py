@@ -54,4 +54,4 @@ def summary():
   if 'email' not in session:
     return redirect(url_for('login'))
   
-  return render_template('summary.html', mboxes=data)
+  return render_template('summary.html')

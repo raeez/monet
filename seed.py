@@ -2,10 +2,10 @@
 
 import lib.config
 lib.config.CONF = {
-  'debug' : False,
+  'debug' : True,
   'syslog' : 'client.bootstrap.seed',
   'log' : True,
-  'mongo' : {'host' : ('localhost', 5500),
+  'mongo' : {'host' : ('localhost', 27017),
              'replicate_minimum' : 1,
              'safe' : True},
 

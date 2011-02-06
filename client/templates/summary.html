@@ -1,28 +1,13 @@
 {% extends "layout.html" %}
 
-{% block title %}Stream Summary{% endblock %}
+{% block title %}Collate Summary{% endblock %}
 
 {% block head %}
   {{ super() }}
 {% endblock %}
 
 {% block content %}
-  <h1>Stream Summary</h1>
+  <h1>Collate Summary</h1>
   You are logged in as {{session['email']}}! Log out <a href="{{ url_for('logout') }}">here</a>.
-
-  <h1>Mailboxes</h1>
-  <ol>
-    {% for mailbox in mboxes %}
-    <li>{{mailbox['name']}}</li>
-      <h1>Messages</h1>
-      <ol>
-        {% for message in mailbox['messages'] %}
-        <li>{{message}}</li>
-        {% endfor %}
-      </ol>
-    {% endfor %}
-  </ol>
-
-
 
 {% endblock %}
