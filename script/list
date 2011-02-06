@@ -5,4 +5,4 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-initctl list | grep stream
+initctl list | grep collate
