@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}New Collation{% endblock %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+  <h1>New Collation</h1>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %} 
+        <ul class="flashes">
+          {% if message == "missing" %}
+            <li>You must fill in all the fields!</li>
+          {% endif %}
+          {% if message == "fail" %}
+            <li>Unable to upload the file: sorry ;-(</li>
+          {% endif %}
+          {% if message == "success" %}
+            <li>Upload Success! Try another.</li>
+          {% endif %}
+        </ul>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  In order to create a new collation, you must upload some photographs:
+
+    <form method=POST enctype=multipart/form-data action="{{url_for('new')}}">
+        <input type=file name=photo>
+        <input type=text name=title>
+        <input type=text name=caption>
+        <input type="submit" name="submit" value="Send my Photo!" />
+    </form>
+
+  Alternatively, use the collate mobile app.
+{% endblock %}

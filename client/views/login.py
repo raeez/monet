@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from flask import Module, session, redirect, url_for, request, render_template, flash
-from collate.model import User
+from flaskext.uploads import UploadNotAllowed
+from collate.model import User, Photo, Collation
 import bcrypt
 from client.log import log
 
@@ -55,3 +56,37 @@ def summary():
     return redirect(url_for('login'))
   
   return render_template('summary.html')
+
+@login_module.route('/photos')
+def show():
+    p = Photo.find({'email' : session['email']})
+    ps = []
+    for i in p:
+      from client.app import client as app
+      ps.append(app.photos.url(i.filename))
+    return render_template('show.html', photos=ps)
+
+#
+@login_module.route('/new', methods=['GET', 'POST'])
+def new():
+  if request.method == 'POST':
+    photo = request.files.get('photo')
+    title = request.form.get('title')
+    caption = request.form.get('caption')
+
+    if not (photo and title and caption):
+      flash("missing")
+    else:
+      try:
+        from client.app import client as app
+        filename = app.photos.save(request.files['photo'])
+      except UploadNotAllowed:
+        flash("fail")
+      else:
+        p = Photo()
+        p.filename = filename
+        p.email = session['email']
+        p.save()
+        flash('success')
+        return redirect(url_for('show'))
+  return render_template('new.html')

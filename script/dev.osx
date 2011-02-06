@@ -41,6 +41,7 @@ pip install Flask \
 				gunicorn \
 				pyflakes \
 				py-bcrypt \
+                flask-uploads \
 
 ln -s $(pwd) env/lib/python2.7/site-packages/collate
 
