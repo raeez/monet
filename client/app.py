@@ -2,7 +2,7 @@
 
 from flask import render_template, Flask
 from flaskext.uploads import (UploadSet, configure_uploads, IMAGES,
-                              UploadNotAllowed)
+                              UploadNotAllowed, patch_request_class)
 from client.views.login import login_module
 from log import log
 
@@ -14,13 +14,15 @@ client.register_module(login_module)
 client.secret_key = "\x85\\w\xf9\xb0\x9eR\xb4\xdd\xfcD\x91\xfb\x01T\xecE\x9b\xa2-b\x87J/\xf5\xbb\x06\xdd\x96\xe6\xa7\x86x\xd5\x8f"
 
 client.config.update(
-  MAX_CONTENT_LENGTH = 40960000000000000000000000000000000,
   LOGGER_NAME = 'client_app',
-  UPLOADS_DEFAULT_DEST = "/lib/az"
+  UPLOADED_PHOTOS_DEST = '/tmp'
 )
+
+UPLOADED_PHOTOS_DEST = '/tmp'
 
 client.photos = UploadSet('photos', IMAGES)
 configure_uploads(client, client.photos)
+patch_request_class(client, 32 * 1024 * 1024) #32 MB
 
 
 @client.errorhandler(404)

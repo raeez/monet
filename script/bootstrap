@@ -27,6 +27,7 @@ apt-get -y install git \
 					build-essential \
 					python-setuptools \
 
+
 # virtual env
 pip install virtualenv
 virtualenv -p python2.7 --no-site-packages --distribute --clear env
@@ -39,6 +40,7 @@ pip install Flask \
 			eventlet \
 			gunicorn \
 			py-bcrypt \
+			flask-uploads \
 
 ln -s $(pwd)/env/bin/python /usr/bin/collate.python
 ln -s $(pwd)/env/bin/gunicorn /usr/bin/collate.gunicorn

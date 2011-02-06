@@ -13,7 +13,7 @@ def index():
   log['request'].debug("request %s" % repr(request.path))
 
   if 'email' in session:
-    return redirect(url_for('summary'))
+    return redirect(url_for('stream'))
   
   return render_template('index.html')
 
@@ -48,23 +48,15 @@ def logout():
   return redirect(url_for('index'))
 
 
-@login_module.route('/summary')
-def summary():
-  log['request'].debug("request %s" % repr(request.path))
-
-  if 'email' not in session:
-    return redirect(url_for('login'))
-  
-  return render_template('summary.html')
-
-@login_module.route('/photos')
-def show():
+@login_module.route('/stream')
+def stream():
+    log['request'].debug("request %s" % repr(request.path))
     p = Photo.find({'email' : session['email']})
     ps = []
     for i in p:
       from client.app import client as app
       ps.append(app.photos.url(i.filename))
-    return render_template('show.html', photos=ps)
+    return render_template('stream.html', photos=ps)
 
 #
 @login_module.route('/new', methods=['GET', 'POST'])
@@ -88,5 +80,5 @@ def new():
         p.email = session['email']
         p.save()
         flash('success')
-        return redirect(url_for('show'))
+        return redirect(url_for('stream'))
   return render_template('new.html')
