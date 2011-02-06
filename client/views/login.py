@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import Module, session, redirect, url_for, request, render_template
-from stream.model import User
+from collate.model import User
 import bcrypt
 from client.log import log
 
@@ -29,10 +29,10 @@ def login():
 
     #if this user has not logged in before
     if user is None:
-      import stream.gmail.api #only support gmail for now # TODO catch exceptions here
+      import collate.gmail.api #only support gmail for now # TODO catch exceptions here
       auth_tuple = (request.form['email'], request.form['password'])
-      if stream.gmail.api.valid_gmail_account(auth_tuple):
-        user = stream.gmail.api.link_gmail_account(auth_tuple)
+      if collate.gmail.api.valid_gmail_account(auth_tuple):
+        user = collate.gmail.api.link_gmail_account(auth_tuple)
       else:
         return redirect(url_for('login'))
 
@@ -58,8 +58,8 @@ def summary():
   if 'email' not in session:
     return redirect(url_for('login'))
 
-  import stream.imap.client
-  iclient = stream.imap.client.IMAPClient((session['email'], session['password']))
+  import collate.imap.client
+  iclient = collate.imap.client.IMAPClient((session['email'], session['password']))
   data = []
   for m in iclient.mailbox_list():
     mailbox = {}
