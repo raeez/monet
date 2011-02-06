@@ -1,13 +1,25 @@
 {% extends "layout.html" %}
 
-{% block title %}Stream Login{% endblock %}
+{% block title %}Collate Login{% endblock %}
 
 {% block head %}
   {{ super() }}
 {% endblock %}
 
 {% block content %}
-  <h1>Stream Login</h1>
+  <h1>Collate Login</h1>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %} 
+        <ul class="flashes">
+          {% if message == 'null' %}
+            <li>Could not find a user with that username/password, please try again!</li>
+          {% endif %}
+        </ul>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
   <form action="" method="post">
       <p><label>email:</label><input type=text name=email></p>
       <p><label>password:</label><input type=password name=password></p>

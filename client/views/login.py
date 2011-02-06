@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import Module, session, redirect, url_for, request, render_template
+from flask import Module, session, redirect, url_for, request, render_template, flash
 from collate.model import User
 import bcrypt
 from client.log import log
@@ -29,12 +29,8 @@ def login():
 
     #if this user has not logged in before
     if user is None:
-      import collate.gmail.api #only support gmail for now # TODO catch exceptions here
-      auth_tuple = (request.form['email'], request.form['password'])
-      if collate.gmail.api.valid_gmail_account(auth_tuple):
-        user = collate.gmail.api.link_gmail_account(auth_tuple)
-      else:
-        return redirect(url_for('login'))
+      flash('null')
+      return redirect(url_for('login'))
 
     if bcrypt.hashpw(request.form['password'], user.password) == user.password:
       session['email'] = request.form['email']
@@ -57,15 +53,5 @@ def summary():
 
   if 'email' not in session:
     return redirect(url_for('login'))
-
-  import collate.imap.client
-  iclient = collate.imap.client.IMAPClient((session['email'], session['password']))
-  data = []
-  for m in iclient.mailbox_list():
-    mailbox = {}
-    mailbox['name'] = m[2]
-    mailbox['messages'] = iclient.messages(mailbox['name'])
-    data.append(mailbox)
-
   
   return render_template('summary.html', mboxes=data)
