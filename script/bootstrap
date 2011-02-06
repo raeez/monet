@@ -7,7 +7,7 @@ fi
 
 echo ""
 echo "************************************"
-echo "* Bootstrapping Stream Environment *"
+echo "* Bootstrapping collate Environment *"
 echo "************************************"
 echo ""
 
@@ -40,8 +40,8 @@ pip install Flask \
 			gunicorn \
 			py-bcrypt \
 
-ln -s $(pwd)/env/bin/python /usr/bin/stream.python
-ln -s $(pwd)/env/bin/gunicorn /usr/bin/stream.gunicorn
+ln -s $(pwd)/env/bin/python /usr/bin/collate.python
+ln -s $(pwd)/env/bin/gunicorn /usr/bin/collate.gunicorn
 
 chown -R ubuntu /home/ubuntu/
 
@@ -72,6 +72,6 @@ chown -R ubuntu /var/www
 
 echo ""
 echo "*****************"
-echo "* Stream::Done! *"
+echo "* collate::Done! *"
 echo "*****************"
 echo ""

@@ -5,5 +5,5 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-echo "*** stream *** reloading client..."
+echo "*** collate *** reloading client..."
 kill -HUP $(cat /tmp/client.gunicorn.pid)

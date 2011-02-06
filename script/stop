@@ -5,5 +5,5 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-stop nginx.stream
-stop client.stream
+stop nginx.collate
+stop client.collate

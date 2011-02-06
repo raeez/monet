@@ -5,11 +5,11 @@ from fabric.api import env, local, run, put, cd
 from paramiko.config import SSHConfig
 import json
 
-import stream.test.run
+import collate.test.run
 
-DEPLOY_DIR = '~/stream'
-PYTHON = 'stream.python'
-TEMP_DIR = '/tmp/stream'
+DEPLOY_DIR = '~/collate'
+PYTHON = 'collate.python'
+TEMP_DIR = '/tmp/collate'
 
 def load_hosts(filename='conf/hosts.json'):
   try:
@@ -61,7 +61,7 @@ def dev():
   local(script(dev_script[sys.platform]))
 
 def test():
-  stream.test.run.test_recursive('.')
+  collate.test.run.test_recursive('.')
 
   # test them servlets
   from servlet.c import app
@@ -110,7 +110,7 @@ def bootstrap():
 
 def deploy():
 
-  ARCHIVE = 'stream.tar.gz'
+  ARCHIVE = 'collate.tar.gz'
   DIST = local ('python setup.py --fullname').strip() # release name and version
 
   header = "Deploying %s" % DIST

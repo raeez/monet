@@ -7,7 +7,7 @@ fi
 
 echo ""
 echo "********************************"
-echo "* Upgrading stream Environment *"
+echo "* Upgrading collate Environment *"
 echo "********************************"
 echo ""
 
@@ -33,6 +33,6 @@ sh scripts/start
 
 echo ""
 echo "*****************"
-echo "* stream::Done! *"
+echo "* collate::Done! *"
 echo "*****************"
 echo ""

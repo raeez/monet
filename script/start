@@ -5,9 +5,9 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-echo "*** stream *** starting client..."
-start client.stream
-echo "*** stream *** starting nginx..."
-start nginx.stream
-echo "*** stream *** starting mongodb..."
-start mongodb.stream
+echo "*** collate *** starting client..."
+start client.collate
+echo "*** collate *** starting nginx..."
+start nginx.collate
+echo "*** collate *** starting mongodb..."
+start mongodb.collate

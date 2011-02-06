@@ -14,7 +14,7 @@ lib.config.CONF = {
             'auth' : ('ac53391', 'ezanqkp4gfzjbj')}
 }
 
-from stream.model import User
+from collate.model import User
 import bcrypt
 
 u = User()

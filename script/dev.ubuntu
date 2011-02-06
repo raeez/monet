@@ -7,7 +7,7 @@ fi
 
 echo ""
 echo "****************************************"
-echo "* Setting up stream-dev environment *"
+echo "* Setting up collate-dev environment *"
 echo "****************************************"
 echo ""
 
@@ -43,7 +43,7 @@ pip install Flask \
 				pyflakes \
 				py-bcrypt \
 
-ln -s $(pwd) env/lib/python2.7/site-packages/stream
+ln -s $(pwd) env/lib/python2.7/site-packages/collate
 
 
 git clone git://fabfile.org/fabric.git fabric
@@ -53,6 +53,6 @@ python setup.py install
 
 echo ""
 echo "***********************"
-echo "* stream-dev::Done! *"
+echo "* collate-dev::Done! *"
 echo "***********************"
 echo ""
