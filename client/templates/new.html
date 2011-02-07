@@ -9,18 +9,22 @@
 {% block content %}
   <h1>New Memory</h1>
 
+  {% if 'email' in session %}
+    <h3> You are logged in as {{session['email']}}</h3>
+  {% endif %}
+
   {% with messages = get_flashed_messages() %}
     {% if messages %}
     {% for message in messages %} 
         <ul class="flashes">
           {% if message == "missing" %}
             <li>You must fill in all the fields!</li>
-          {% endif %}
-          {% if message == "fail" %}
+          {% elif message == "fail" %}
             <li>We don't support that file; sorry!</li>
-          {% endif %}
-          {% if message == "success" %}
+          {% elif message == "success" %}
             <li>Upload Success! Try another.</li>
+          {% else %}
+            <li>{{message}}</li>
           {% endif %}
         </ul>
       {% endfor %}
@@ -30,10 +34,11 @@
   In order to create a new memory, you must upload some photographs:
 
     <form method=POST enctype=multipart/form-data action="{{url_for('new')}}">
-        <input type=file name=photo>
-        <input type=text name=title>
-        <input type=text name=caption>
-        <input type="submit" name="submit" value="Send my Photo!" />
+        <p><label>Photo:</label><input type=file name=photo></p>
+        <p><label>Title:</label><input type=text name=title></p>
+        <p><label>Caption:</label><input type=text name=caption></p>
+        <p><label>Memory Name:</label><input type=text name=mem_name></p>
+        <p><input type="submit" name="submit" value="Send my Photo!" /></p>
     </form>
 
   Alternatively, use the memoize mobile app.

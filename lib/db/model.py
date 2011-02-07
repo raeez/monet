@@ -91,7 +91,6 @@ def pointer(t, **var):
         raise AttributeError("missing member '%r' of type '%r'" % (member_name, t))
 
       try:
-        assert isinstance(self.__getattribute__(member_name), ObjectId)
         assert is_container(self.__getattribute__(member_name), t)
       except AssertionError:
         raise TypeError("member: " + member_name + " must be a pointer to type " + str(t))

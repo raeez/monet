@@ -7,6 +7,6 @@ import memoize.model.admin
 
 class AdminKey(Key):
   
-  @pointer(memoize.model.admin.Admin)
+  @pointer(memoize.model.admin.Admin, admin=None)
   def val_admin(self):
     pass

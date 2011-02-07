@@ -7,13 +7,17 @@
 {% endblock %}
 
 {% block content %}
-  <h1>Viewing photos from {{session['email']}} </h1>
+  <h1>Viewing memories from {{session['email']}} </h1>
   <p>Log out <a href="{{ url_for('logout') }}">here</a>.</p>
 
-  {% for photo_url in photos %}
-    <p class="image"><img src="{{photo_url}}"></img></p>
+  {% if stream %}
+  <ul>
+  {% for memory in stream %}
+    <li>{{memory.name}}&#151;some-url-here</li>
   {% endfor %}
+  </ul>
+  {% endif %}
 
-  <p>Or, upload some photos <a href="{{url_for('new')}}">here</a>.</p>
+  <p>Or, create a new memory <a href="{{url_for('new')}}">here</a>.</p>
 
 {% endblock %}
