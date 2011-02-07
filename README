@@ -25,7 +25,7 @@ can be called. Bootstrap then installs required service configuration files, as 
 
 nginx/ -> /etc/nginx/
 upstart/ -> /etc/init/
-* -> /home/ubuntu/collate
+* -> /home/ubuntu/memoize
 
 Service and application logs can be found in /var/www/log, logmails will be sent on ERROR and CRITICAL exceptions.
 
@@ -43,7 +43,7 @@ fab reconfig
 	reinstall all configuration files in target production environment, halt and restart core services
 
 fab rebase
-  replace all base configuration files in ~/collate
+  replace all base configuration files in ~/memoize
 
 fab bootstrap
 	install production environment onto a clean ubuntu instance; deploy current python egg and start core services
@@ -66,8 +66,8 @@ servlets/
 lib/
 	the manhattan library: implements web framework functionality.
 
-collate/
-  the collate library: implements collate client routines.
+memoize/
+  the memoize library: implements memoize client routines.
 
 nginx/
 	nginx configuration scripts, temporary certs etc.
@@ -100,4 +100,4 @@ script/
     production installation and deployment specifications.
 
 client.py
-  development helper script to launch a local collate server.
+  development helper script to launch a local memoize server.
