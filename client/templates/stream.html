@@ -10,13 +10,11 @@
   <h1>Viewing memories from {{session['email']}} </h1>
   <p>Log out <a href="{{ url_for('logout') }}">here</a>.</p>
 
-  {% if stream %}
   <ul>
   {% for memory in stream %}
-    <li>{{memory.name}}&#151;some-url-here</li>
+    <li>{{memory[0]}}&#151;<a href="{{url_for('memory', id=memory[1])}}">open</a></li>
   {% endfor %}
   </ul>
-  {% endif %}
 
   <p>Or, create a new memory <a href="{{url_for('new')}}">here</a>.</p>
 

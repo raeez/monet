@@ -39,6 +39,7 @@ def login():
 
     if bcrypt.hashpw(request.form['password'], user.password) == user.password:
       session['email'] = request.form['email']
+      session['_id'] = user._id
       session['password'] = request.form['password']
       log['login'].debug(session['email'])
       return redirect(url_for('index'))
@@ -74,7 +75,7 @@ def new():
         m = Memory()
         m.user = None
         if 'email' in session:
-          m.user = User.find({'email' : session['email']})
+          m.user = session['_id']
         m.name = mem_name
         m.items = []
         m.save()
@@ -145,5 +146,10 @@ def stream():
   if 'email' not in session:
     return redirect(url_for('login'))
 
-  s = Memory.find({'email' : session['email']})
+  stream = Memory.find({'user' : session['_id']})
+  s = []
+  for memory in stream:
+    pair = (memory.name, memory._id)
+    s.append(pair)
+  print 'stream: ',s
   return render_template('stream.html', stream=s)
