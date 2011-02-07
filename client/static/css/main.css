@@ -1,0 +1,180 @@
+@charset "utf-8";
+/* CSS Document */
+
+/*
+ * Collate CSS Style Sheet
+ */
+ 
+/*****************************************
+ * Color Scheme
+ *****************************************/
+
+/* White */
+.collate_white {
+	color: #ebebeb;
+}
+
+/* Grey */
+.collate_grey {
+	color: #333333;
+}
+
+/* Teal */
+.collate_teal {
+	color: #1e5957;
+}
+
+/*****************************************
+ * Reset Browser Defaults
+ *****************************************/
+ 
+ html, body, div, span, object, iframe,  h1, h2, h3, h4, h5, h6, p, blockquote, pre,  a, abbr, acronym, address, code,  del, dfn, em, img, q, dl, dt, dd, ol, ul, li,  fieldset, form, label, legend,  table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	vertical-align: baseline;
+}
+body {
+	line-height: 1.2;
+}
+/* Tables still need 'cellspacing="0"' in the markup. */
+
+table {
+	border-collapse: separate;
+	border-spacing: 0;
+}
+caption, th, td {
+	text-align: left;
+	font-weight: normal;
+}
+table, td, th {
+	vertical-align: middle;
+}
+/* Remove possible quote marks (") from <q>, <blockquote>. */
+
+blockquote:before, blockquote:after, q:before, q:after {
+	content: "";
+}
+blockquote, q {
+	quotes: "" "";
+}
+/* Remove annoying border on linked images. */
+
+a img {
+	border: none;
+}
+
+/*****************************************
+ * Primary Node Overrides
+ *****************************************/
+ 
+body {
+	background: #ebebeb;
+	font-family: "Trebuchet MS", "Trebuchet", "Myriad Web", "Myriad", Geneva, Lucida Sans, Lucida Grande, Lucida Sans Unicode, Verdana, sans-serif;
+}
+
+h1 {
+	font-size:3em;
+	font-weight:normal;
+	color: #1e5957;
+}
+
+a {
+	color:#1e5957;
+	text-decoration:none;
+}
+
+p {
+	color:#333333;
+}
+
+/*****************************************
+ * General Classes
+ *****************************************/
+.wrapper {
+	width:960px;
+	margin:0 auto;
+	position:relative;
+}
+.visible {
+	display:inherit;
+}
+.invisible {
+	display:none;
+}
+ 
+/*****************************************
+ * Header
+ *****************************************/
+
+#header {
+	padding:20px 0px 10px 0px;
+}
+
+#header .click input {
+	font-size:1em;
+	font-weight:normal;
+	color: #1e5957;
+	background:transparent;
+	border:0;
+	margin:0;
+	padding:0;
+	font-family:inherit;
+}
+
+#header .click {
+	margin:0;
+	padding:0px 5px;
+}
+
+#header .click:hover {
+	border:2px #ccc dashed;
+	cursor:text;
+	padding:0px 3px;
+}
+
+/*****************************************
+ * Canvas
+ *****************************************/
+
+#canvas {
+}
+
+/*****************************************
+ * Photo
+ *****************************************/
+
+.photo {
+	-moz-box-shadow: 2px 2px 7px #333;
+	-webkit-box-shadow: 2px 2px 7px #333;
+	box-shadow: 2px 2px 7px #333;
+	margin:3px;
+}
+
+.photo:hover {
+	cursor:pointer;
+	-moz-box-shadow: 2px 2px 7px #1e5957;
+	-webkit-box-shadow: 2px 2px 7px #1e5957;
+	box-shadow: 2px 2px 7px #1e5957;
+	border:2px solid #1e5957;
+	margin:1px;
+}
+
+/*****************************************
+ * Footer
+ *****************************************/
+ 
+/*****************************************
+ * Miscellaneous
+ *****************************************/
+.clear {
+	clear:both;
+	content: "\0020";
+	display: block;
+	height: 0;
+	visibility: hidden;
+	overflow:hidden;
+}
