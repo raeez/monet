@@ -1,180 +1,362 @@
-@charset "utf-8";
-/* CSS Document */
-
-/*
- * Collate CSS Style Sheet
- */
- 
-/*****************************************
- * Color Scheme
- *****************************************/
-
-/* White */
-.collate_white {
-	color: #ebebeb;
-}
-
-/* Grey */
-.collate_grey {
-	color: #333333;
-}
-
-/* Teal */
-.collate_teal {
-	color: #1e5957;
-}
-
-/*****************************************
- * Reset Browser Defaults
- *****************************************/
- 
- html, body, div, span, object, iframe,  h1, h2, h3, h4, h5, h6, p, blockquote, pre,  a, abbr, acronym, address, code,  del, dfn, em, img, q, dl, dt, dd, ol, ul, li,  fieldset, form, label, legend,  table, caption, tbody, tfoot, thead, tr, th, td {
-	margin: 0;
-	padding: 0;
-	border: 0;
-	font-weight: inherit;
-	font-style: inherit;
-	font-size: 100%;
-	vertical-align: baseline;
-}
-body {
-	line-height: 1.2;
-}
-/* Tables still need 'cellspacing="0"' in the markup. */
-
-table {
-	border-collapse: separate;
-	border-spacing: 0;
-}
-caption, th, td {
-	text-align: left;
-	font-weight: normal;
-}
-table, td, th {
-	vertical-align: middle;
-}
-/* Remove possible quote marks (") from <q>, <blockquote>. */
-
-blockquote:before, blockquote:after, q:before, q:after {
-	content: "";
-}
-blockquote, q {
-	quotes: "" "";
-}
-/* Remove annoying border on linked images. */
-
-a img {
-	border: none;
-}
-
-/*****************************************
- * Primary Node Overrides
- *****************************************/
- 
-body {
-	background: #ebebeb;
-	font-family: "Trebuchet MS", "Trebuchet", "Myriad Web", "Myriad", Geneva, Lucida Sans, Lucida Grande, Lucida Sans Unicode, Verdana, sans-serif;
-}
-
-h1 {
-	font-size:3em;
-	font-weight:normal;
-	color: #1e5957;
-}
-
-a {
-	color:#1e5957;
-	text-decoration:none;
-}
-
-p {
-	color:#333333;
-}
-
-/*****************************************
- * General Classes
- *****************************************/
-.wrapper {
-	width:960px;
-	margin:0 auto;
-	position:relative;
-}
-.visible {
-	display:inherit;
-}
-.invisible {
-	display:none;
-}
- 
-/*****************************************
- * Header
- *****************************************/
-
-#header {
-	padding:20px 0px 10px 0px;
-}
-
-#header .click input {
-	font-size:1em;
-	font-weight:normal;
-	color: #1e5957;
-	background:transparent;
-	border:0;
-	margin:0;
-	padding:0;
-	font-family:inherit;
-}
-
-#header .click {
-	margin:0;
-	padding:0px 5px;
-}
-
-#header .click:hover {
-	border:2px #ccc dashed;
-	cursor:text;
-	padding:0px 3px;
-}
-
-/*****************************************
- * Canvas
- *****************************************/
-
-#canvas {
-}
-
-/*****************************************
- * Photo
- *****************************************/
-
-.photo {
-	-moz-box-shadow: 2px 2px 7px #333;
-	-webkit-box-shadow: 2px 2px 7px #333;
-	box-shadow: 2px 2px 7px #333;
-	margin:3px;
-}
-
-.photo:hover {
-	cursor:pointer;
-	-moz-box-shadow: 2px 2px 7px #1e5957;
-	-webkit-box-shadow: 2px 2px 7px #1e5957;
-	box-shadow: 2px 2px 7px #1e5957;
-	border:2px solid #1e5957;
-	margin:1px;
-}
-
-/*****************************************
- * Footer
- *****************************************/
- 
-/*****************************************
- * Miscellaneous
- *****************************************/
-.clear {
-	clear:both;
-	content: "\0020";
-	display: block;
-	height: 0;
-	visibility: hidden;
-	overflow:hidden;
-}
+@charset "utf-8";
+/* CSS Document */
+
+/*
+ * Memoize CSS Style Sheet
+ */
+ 
+/*****************************************
+ * Color Scheme
+ *****************************************/
+
+/* White */
+.memoize_white {
+	color: #ebebeb;
+}
+
+/* Grey */
+.memoize_grey_dark {
+	color: #222222;
+}
+.memoize_grey_medium {
+	color: #333333;
+}
+.memoize_grey_light {
+	color: #aaaaaa;
+}
+
+/* Teal */
+.memoize_teal {
+	color: #11b0aa;
+}
+
+.memoize_red {
+    color: #C72625
+}
+/*****************************************
+ * Reset Browser Defaults
+ *****************************************/
+ 
+ html, body, div, span, object, iframe,  h1, h2, h3, h4, h5, h6, p, blockquote, pre,  a, abbr, acronym, address, code,  del, dfn, em, img, q, dl, dt, dd, ol, ul, li,  fieldset, form, label, legend,  table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	vertical-align: baseline;
+}
+body {
+	line-height: 1.2;
+}
+/* Tables still need 'cellspacing="0"' in the markup. */
+
+table {
+	border-collapse: separate;
+	border-spacing: 0;
+}
+caption, th, td {
+	text-align: left;
+	font-weight: normal;
+}
+table, td, th {
+	vertical-align: middle;
+}
+/* Remove possible quote marks (") from <q>, <blockquote>. */
+
+blockquote:before, blockquote:after, q:before, q:after {
+	content: "";
+}
+blockquote, q {
+	quotes: "" "";
+}
+/* Remove annoying border on linked images. */
+
+a img {
+	border: none;
+}
+
+/*****************************************
+ * Primary Node Overrides
+ *****************************************/
+ 
+@font-face {
+    font-family: "Trebuchet MS";
+    src: url("TREBUC.TTF");
+    src: local("Trebuchet MS"), url("TREBUC.TTF") format("truetype");
+}
+
+
+body {
+	background: #222222;
+	font-family: "Trebuchet", "Trebuchet MS", Trebuchet MS, sans-serif; 
+	letter-spacing:.07em;
+	line-height:1.6em;
+	color:#ebebeb;
+}
+
+h1 {
+	font-size:3em;
+	font-weight:normal;
+	color: #11b0aa;
+}
+
+a {
+	color:#11b0aa;
+	text-decoration:none;
+}
+
+p {
+}
+
+label {
+	color:#aaaaaa;
+	font-size:.7em;
+	letter-spacing:.04em;
+	padding:0;
+	margin:10;
+}
+input {
+	border:1px solid #333333;
+	background:#222222;
+	color:#aaaaaa;
+	padding:.2em .2em .2em .4em;
+	font-size:.7em;
+	letter-spacing:.04em;
+	font-family: "Trebuchet", "Trebuchet MS", Trebuchet MS, sans-serif; 
+}
+input:hover {
+	border:1px solid #aaaaaa;
+	background:#222222;
+}
+.input_hover {
+	border:1px solid #aaaaaa;
+	background:#222222;
+}
+input:focus {
+	border:1px solid #aaaaaa;
+	background:#333333;
+}
+.input_button {
+	padding:.2em;
+}
+.input_button:hover {
+	cursor:pointer;
+}
+.input_button:active {
+	background:#444444;
+}
+.field100 {
+	width:100%;
+}
+
+/*****************************************
+ * General Classes
+ *****************************************/
+.wrapper {
+	width:960px;
+	margin:0 auto;
+	position:relative;
+}
+.error {
+    line-height:1.2em;
+    font-size:.7em;
+    color:#C72625;
+    margin:5px 0px;
+}
+.visible {
+	display:inherit;
+}
+.invisible {
+	display:none;
+}
+ 
+/*****************************************
+ * Landing Page
+ *****************************************/
+#landing_wrapper {
+	position:relative;
+	width:639px;
+	margin-left:auto;
+	margin-right:auto;
+	top:43px;
+}
+
+#landing_drag_area_top {
+	width:639px; /* 639 + 144 = 783 */
+	height:65px;
+	padding:0px 72px;
+	background:transparent url(../images/Landing_DragAreaBG_top.png) no-repeat top left;
+}
+
+#landing_drag_area_middle {
+	width:639px; /* 639 + 144 = 783 */
+	min-height:145px;
+	padding:0px 72px;
+	/*height:277px;  277 + 72 + 65 = 412 */
+	background:transparent url(../images/Landing_DragAreaBG_middle.png) repeat-y top left;
+}
+
+#landing_drag_area_bottom {
+	width:639px; /* 639 + 144 = 783 */
+    height:65px;
+	padding:0px 72px;
+	background:transparent url(../images/Landing_DragAreaBG_bottom.png) no-repeat top left;
+}
+
+#titlebar {
+	position:relative;
+	bottom:-45px;
+	padding-left:52px;
+}
+
+.title {
+	color:#11b0aa;
+	font-size:50px;
+}
+
+.subtitle {
+	color:#11b0aa;
+	font-size:22px;
+}
+
+#drag_example_graphic{
+	position:absolute;
+	left:-140px;
+	top:30px;
+}
+
+#landing_drag_area_content{
+	width:495px;
+}
+
+#helper_text {
+	font-size:18px;
+}
+
+#upload_area {
+	margin-top:20px;
+}
+
+#landing_login{
+	position:relative;
+	top:-25px;
+	left:52px;
+	float:left;
+	width:218px;
+	z-index:10;
+}
+
+#landing_login_email {
+	width:210px;
+}
+#landing_login_pass {
+	width:160px;
+	float:left;
+	margin-top:5px;
+}
+#landing_login_submit {
+	width:45px;
+	float:right;
+	margin-top:5px;
+}
+
+
+#mobile_app_graphic{
+	position:relative;
+	top:-145px;
+	left:100px;
+	text-align:right;
+	z-index:5;
+}
+#mobile_app_text {
+	font-size:18px;
+	text-align:left;
+	width:283px;
+	position:absolute;
+	top:120px;
+	left:230px;
+}
+
+/*****************************************
+ * Header
+ *****************************************/
+
+#header {
+	padding:20px 0px 10px 0px;
+}
+
+#header #title {
+	float:left;
+	width:700px;
+}
+
+#header #login {
+	float:right;
+	width:220px;
+}
+
+#header .click input {
+	font-size:1em;
+	font-weight:normal;
+	color: #1e5957;
+	background:transparent;
+	border:0;
+	margin:0;
+	padding:0;
+	font-family:inherit;
+}
+
+#header .click {
+	margin:0;
+	padding:0px 5px;
+}
+
+#header .click:hover {
+	border:2px #ccc dashed;
+	cursor:text;
+	padding:0px 3px;
+}
+
+/*****************************************
+ * Canvas
+ *****************************************/
+
+#canvas {
+}
+
+/*****************************************
+ * Photo
+ *****************************************/
+
+.photo {
+	-moz-box-shadow: 2px 2px 7px #333;
+	-webkit-box-shadow: 2px 2px 7px #333;
+	box-shadow: 2px 2px 7px #333;
+	margin:3px;
+}
+
+.photo:hover {
+	cursor:pointer;
+	-moz-box-shadow: 2px 2px 7px #1e5957;
+	-webkit-box-shadow: 2px 2px 7px #1e5957;
+	box-shadow: 2px 2px 7px #1e5957;
+	border:2px solid #1e5957;
+	margin:1px;
+}
+
+/*****************************************
+ * Footer
+ *****************************************/
+ 
+/*****************************************
+ * Miscellaneous
+ *****************************************/
+.clear {
+	clear:both;
+	content: "\0020";
+	display: block;
+	height: 0;
+	visibility: hidden;
+	overflow:hidden;
+}

@@ -1,24 +1,37 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="description" content="login">
-  <meta name="author" content="Raeez">
 
-  <link rel="stylesheet" href="{{url_for('static', filename='base.css')}}">
 
-  <title>{% block title %}{% endblock %} - Memoize</title>
-  {% block head %}{% endblock %}
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+	<title>Memoize: A Home for Shared Memories</title>
+    
+    <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/base/jquery-ui.css" id="theme">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/jquery.fileupload-ui.css')}}">
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
+    <script src="{{url_for('static', filename='js/jquery.fileupload.js')}}"></script>
+    <script src="{{url_for('static', filename='js/jquery.fileupload-ui.js')}}"></script>
+    <script src="{{url_for('static', filename='js/jquery.ui.progressbar.js')}}"></script>
+    <script src="{{url_for('static', filename='js/jquery.ui.core.js')}}"></script>
+    <script src="{{url_for('static', filename='js/jquery.ui.widget.js')}}"></script>
+    <script src="{{url_for('static', filename='js/memoize.js')}}"></script>
+    {% block head %}{% endblock %}
+
 </head>
 
 <body>
-  <div id="content">{% block content %}{% endblock %}</div>
-  <div id="footer">
-    {% block footer %}
-    &copy; Copyright 2011 by <a href="http://memoize.raeez.com/">Memoize</a>.
-    {% endblock %}
-  </div>
+    {% block content %}{% endblock %}
+
+    <div id="footer">
+        {% block footer %}
+        <!-- &copy; Copyright 2011 by <a href="http://memoize.raeez.com/">Memoize</a>. -->
+        {% endblock %}
+    </div>
+
 </body>
 </html>
