@@ -29,10 +29,10 @@
 .memoize_teal {
 	color: #11b0aa;
 }
-
-.memoize_red {
-    color: #C72625
+.memoize_darker_teal {
+	color:#189792;
 }
+
 /*****************************************
  * Reset Browser Defaults
  *****************************************/
@@ -80,30 +80,26 @@ a img {
  * Primary Node Overrides
  *****************************************/
  
-@font-face {
-    font-family: "Trebuchet MS";
-    src: url("TREBUC.TTF");
-    src: local("Trebuchet MS"), url("TREBUC.TTF") format("truetype");
-}
-
-
 body {
 	background: #222222;
-	font-family: "Trebuchet", "Trebuchet MS", Trebuchet MS, sans-serif; 
+	font-family: "Trebuchet MS", "Trebuchet", "Myriad Web", "Myriad", Geneva, Lucida Sans, Lucida Grande, Lucida Sans Unicode, Verdana, sans-serif;
 	letter-spacing:.07em;
 	line-height:1.6em;
 	color:#ebebeb;
 }
 
 h1 {
-	font-size:3em;
+	font-size:2em;
 	font-weight:normal;
-	color: #11b0aa;
+	color: #ebebeb;
 }
 
 a {
-	color:#11b0aa;
+	color:#189792;
 	text-decoration:none;
+}
+a:hover {
+	color:#11b0aa;
 }
 
 p {
@@ -123,7 +119,7 @@ input {
 	padding:.2em .2em .2em .4em;
 	font-size:.7em;
 	letter-spacing:.04em;
-	font-family: "Trebuchet", "Trebuchet MS", Trebuchet MS, sans-serif; 
+	font-family: "Trebuchet MS", "Trebuchet", "Myriad Web", "Myriad", Geneva, Lucida Sans, Lucida Grande, Lucida Sans Unicode, Verdana, sans-serif;
 }
 input:hover {
 	border:1px solid #aaaaaa;
@@ -157,12 +153,6 @@ input:focus {
 	width:960px;
 	margin:0 auto;
 	position:relative;
-}
-.error {
-    line-height:1.2em;
-    font-size:.7em;
-    color:#C72625;
-    margin:5px 0px;
 }
 .visible {
 	display:inherit;
@@ -199,7 +189,7 @@ input:focus {
 
 #landing_drag_area_bottom {
 	width:639px; /* 639 + 144 = 783 */
-    height:65px;
+	height:65px;
 	padding:0px 72px;
 	background:transparent url(../images/Landing_DragAreaBG_bottom.png) no-repeat top left;
 }
@@ -279,24 +269,53 @@ input:focus {
 }
 
 /*****************************************
- * Header
+ * Canvas Header
  *****************************************/
 
-#header {
-	padding:20px 0px 10px 0px;
+#canvas_header {
+	background:#222222 url(../images/dark_glow_top.png) repeat-x bottom left;
 }
 
-#header #title {
+#header_accent_bar {
+	background:#189792 url(../images/teal_accent_top.jpg) no-repeat bottom left;
+	width:38px;
+	min-height:57px;
+	margin-left:1px;
+}
+
+#canvas_header #title {
 	float:left;
 	width:700px;
+	padding-top:5px;
 }
 
-#header #login {
+#canvas_header #login {
 	float:right;
-	width:220px;
+	width:250px;
+	font-size:.8em;
+	color:#aaaaaa;
+	line-height:1.4em;
+}
+#canvas_login_div {
+	width:218px;
+	display:none;
+}
+#canvas_login_email {
+	width:210px;
+}
+#canvas_login_pass {
+	width:160px;
+	float:left;
+	margin-top:5px;
+}
+#canvas_login_submit {
+	width:45px;
+	float:right;
+	margin-top:5px;
 }
 
-#header .click input {
+
+#canvas_header .click input {
 	font-size:1em;
 	font-weight:normal;
 	color: #1e5957;
@@ -307,22 +326,88 @@ input:focus {
 	font-family:inherit;
 }
 
-#header .click {
+#canvas_header .click {
 	margin:0;
 	padding:0px 5px;
 }
 
-#header .click:hover {
+#canvas_header .click:hover {
 	border:2px #ccc dashed;
 	cursor:text;
 	padding:0px 3px;
 }
 
 /*****************************************
- * Canvas
+ * Canvas Page
  *****************************************/
 
 #canvas {
+	background:#333333;
+}
+
+.canvas_outer_wrapper {
+	width:1060px;
+	margin:0 auto;
+	position:relative;
+}
+.canvas_left_of_wrapper {
+	width:50px;
+	float:left;
+	height:100%;
+}
+.canvas_center {
+	position:relative;
+	width:955px;
+	float:left;
+	padding-top:10px;
+	z-index:5;
+}
+.canvas_right_of_wrapper {
+	width:50px;
+	position:absolute;
+	bottom:0;
+	right:0;
+}
+
+#share_bar {
+	background:#189792 url(../images/share_default.jpg) no-repeat top left;
+	width:38px;
+	height:33px;
+}
+#share_bar:hover {
+	background:#11b0aa url(../images/share_hover.jpg) no-repeat top left;
+	cursor:pointer;
+}
+
+#share_link_area {
+	position:absolute;
+	width:410px;
+	height:33px;
+	background:#11b0aa url(../images/share_link_area.jpg) no-repeat top left;
+	display:none;
+	z-index:10;
+	top:0;
+	left:39px;
+	padding:1px 5px 0px 5px;
+}
+
+#share_link_prompt {
+	color:#333333;
+	font-size:0.5em;
+	line-height:1em;
+	letter-spacing:0em;
+}
+#share_link_value {
+	width:400px;
+	padding:0px;
+	margin-top:2px;
+	font-size:0.6em;
+}
+
+#bottom_accent_bar {
+	background:#189792 url(../images/teal_accent_bottom_inner.jpg) no-repeat bottom left;
+	width:20px;
+	min-height:17px;
 }
 
 /*****************************************
@@ -348,6 +433,33 @@ input:focus {
 /*****************************************
  * Footer
  *****************************************/
+ 
+ #canvas_footer {
+	 background:#222222 url(../images/dark_glow_bottom.png) repeat-x top left;
+ }
+ 
+ #canvas_footer .canvas_center {
+	 padding:0;
+ }
+ 
+ #footer_accent_bar {
+	background:#189792 url(../images/teal_accent_bottom.jpg) no-repeat bottom left;
+	width:20px;
+	min-height:55px;
+	margin-left:1px;
+ }
+ 
+ #company_info {
+	line-height:1.2em;
+	margin-top:18px;
+	height:37px;
+	float:right;
+	width:270px;
+	text-align:right;
+ }
+ #company_info_descriptor {
+	 font-size:0.7em;
+ }
  
 /*****************************************
  * Miscellaneous
