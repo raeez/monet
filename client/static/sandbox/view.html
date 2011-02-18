@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+	<title>Memoize: A Home for Shared Memories</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/base/jquery-ui.css" id="theme">
+	<link rel="stylesheet" href="../css/jquery.fileupload-ui.css">
+    <link rel="stylesheet" href="../css/zoomooz.css" type="text/css" />
+    
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
+	<script src="../js/jquery.fileupload.js"></script>
+	<script src="../js/jquery.fileupload-ui.js"></script>
+	<script src="../js/jquery.ui.progressbar.js"></script>
+	<script src="../js/jquery.ui.core.js"></script>
+	<script src="../js/jquery.ui.widget.js"></script>
+    <script src="../js/memoize.js"></script>
+
+	<script type="text/javascript" src="../js/sylvester.js"></script>
+	<script type="text/javascript" src="../js/purecssmatrix.js"></script>
+	<script type="text/javascript" src="../js/jquery.zoomooz.js"></script>
+
+	<script src="../js/jquery.jeditable.mini.js"></script>
+
+<script type="text/javascript">
+
+$(document).ready(function()
+{
+	$(".click").editable("http://www.appelsiini.net/projects/jeditable/php/echo.php", { 
+		indicator : "<img src='../images/indicator.gif'>",
+		tooltip   : "Click to edit...",
+		style  : "inherit"
+	});
+	
+	$(".photo").toggle(function(evt) {
+		console.log("clicked");
+		settings = {
+			// zoomed size relative to screen
+			// 0.0-1.0
+			targetsize: 0.9,
+			// scale content to screen based on their size
+			// "width"|"height"|"both"
+			scalemode: "both",
+			// animation duration
+			duration: 500,
+			// easing of animation, similar to css transition params
+			// "linear"|"ease"|"ease-in"|"ease-out"|
+			// "ease-in-out"|[p1,p2,p3,p4]
+			// [p1, p2, p3, p4] refer to cubic-bezier curve params
+			easing: "ease",
+			// use browser native animation in webkit
+			// true|false
+			nativeanimation: true
+		}
+      $(this).zoomTo(settings);
+      evt.stopPropagation();
+    },
+	function(evt) {
+		$("body").zoomTo({targetsize:1.0});
+		evt.stopPropagation();
+	});
+	
+	$("body").click(function(evt) {
+		$(this).zoomTo({targetsize:1.0});
+		evt.stopPropagation();
+    });
+
+
+});
+</script>
+
+</head>
+
+<body>
+
+	<div id="canvas_header">
+    	<div class="canvas_outer_wrapper">
+            <div class="canvas_left_of_wrapper">
+            	<div id="header_accent_bar"></div>
+            </div>
+            <div class="canvas_center">
+                <div id="title">
+                    <h1 class="click" style="display: inline">Concert at the garden</h1>
+                </div>
+                <div id="login">
+                	<div id="canvas_login_prompt">
+                        Login <a id="canvas_login_text" href="#">here</a> to claim this memory<br />
+                        or <a href="">connect</a> with Facebook
+                    </div>
+                    
+                    <div id="canvas_login_div">
+                        <form id="canvas_login_form" action="" method="post">
+                            <div id="canvas_login_email"><input type="text" name="email" title="Login with new or existing email" class="field100" /></div>
+                            <div id="canvas_login_pass"><input type="password" name="password" title="New or existing pass" class="field100" /></div>
+                            <input id="canvas_login_submit" type="submit" class="input_button" name="submit" value="Login" />
+                        </form>
+                    </div>
+                    
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div class="canvas_right_of_wrapper">
+			</div>
+			<div class="clear"></div>
+         </div>
+    </div>
+    
+    <div id="canvas">
+    	<div class="canvas_outer_wrapper">
+            <div class="canvas_left_of_wrapper">
+            	<div id="share_area">
+                    <div id="share_bar"></div>
+                    <div id="share_link_area">
+                    	<p id="share_link_prompt">Click to copy to clipboard then paste in email or IM to let friends add memories</p>
+                        <script> document.write("<input id=\"share_link_value\" type=\"text\" value=\"" + window.location + "\"/>"); </script>
+                    </div>
+                </div>
+            </div>
+            <div class="canvas_center" id="photo_canvas_center">
+            	<div id="photo_wrapper">
+                    <div id="photo_div_1" class="photo_div"><img class="photo" src="images/1.jpg" width="117" height="175" /></div>
+                    <div id="photo_div_2" class="photo_div"><img class="photo" src="images/2.jpg" width="263" height="175" /></div>
+                    <div id="photo_div_3" class="photo_div"><img class="photo" src="images/3.jpg" width="263" height="175" /></div>
+                    <div id="photo_div_4" class="photo_div"><img class="photo" src="images/4.jpg" width="117" height="175" /></div>
+                    <div id="photo_div_5" class="photo_div"><img class="photo" src="images/5.jpg" width="263" height="175" /></div>
+                    <div id="photo_div_6" class="photo_div"><img class="photo" src="images/6.jpg" width="117" height="175" /></div>
+                    <div id="photo_div_7" class="photo_div"><img class="photo" src="images/7.jpg" width="117" height="175" /></div>
+                    <div id="photo_div_8" class="photo_div"><img class="photo" src="images/8.jpg" width="263" height="175" /></div>
+                    <div id="photo_div_9" class="photo_div"><img class="photo" src="images/9.jpg" width="263" height="175" /></div>
+                    <div id="photo_div_10" class="photo_div"><img class="photo" src="images/10.jpg" width="117" height="175" /></div>
+                </div>
+            </div>
+            <div class="canvas_right_of_wrapper">
+            	<div id="bottom_accent_bar"></div>
+            </div>
+            <div class="clear"></div>
+        </div>
+    </div>
+    
+    <div id="canvas_footer">
+    	<div class="canvas_outer_wrapper">
+            <div class="canvas_left_of_wrapper">&nbsp;</div>
+            <div class="canvas_center">
+            	<div id="company_info">
+                Collected through <a href="">Memoize</a><br/>
+                <span id="company_info_descriptor"><a href="">About</a> | <a href="">Team</a> | <a href="">Contact</a></span>       
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div class="canvas_right_of_wrapper">
+            	<div id="footer_accent_bar"></div>
+            </div>
+            <div class="clear"></div>
+        </div>
+    </div>
+    
+</body>
+</html>

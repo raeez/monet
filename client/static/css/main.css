@@ -360,6 +360,7 @@ input:focus {
 	width:955px;
 	float:left;
 	padding-top:10px;
+	padding-bottom:10px;
 	z-index:5;
 }
 .canvas_right_of_wrapper {
@@ -415,19 +416,31 @@ input:focus {
  *****************************************/
 
 .photo {
-	-moz-box-shadow: 2px 2px 7px #333;
-	-webkit-box-shadow: 2px 2px 7px #333;
-	box-shadow: 2px 2px 7px #333;
-	margin:3px;
+	
 }
 
 .photo:hover {
+}
+
+#photo_wrapper {
+}
+
+.photo_div{
+	display:block;
+	float:left;
+	-moz-box-shadow: 2px 2px 7px #111;
+	-webkit-box-shadow: 2px 2px 7px #111;
+	box-shadow: 2px 2px 7px #111;
+	margin:5px;
+	overflow:hidden;
+}
+.photo_div:hover {
 	cursor:pointer;
 	-moz-box-shadow: 2px 2px 7px #1e5957;
 	-webkit-box-shadow: 2px 2px 7px #1e5957;
 	box-shadow: 2px 2px 7px #1e5957;
-	border:2px solid #1e5957;
-	margin:1px;
+	border:1px solid #1e5957;
+	margin:4px;
 }
 
 /*****************************************

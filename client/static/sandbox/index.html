@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+
+<head>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+	<title>Memoize: A Home for Shared Memories</title>
+    
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/base/jquery-ui.css" id="theme">
+	<link rel="stylesheet" href="../css/jquery.fileupload-ui.css">
+    
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
+	<script src="../js/jquery.fileupload.js"></script>
+	<script src="../js/jquery.fileupload-ui.js"></script>
+	<script src="../js/jquery.ui.progressbar.js"></script>
+	<script src="../js/jquery.ui.core.js"></script>
+	<script src="../js/jquery.ui.widget.js"></script>
+    <script src="../js/memoize.js"></script>
+
+</head>
+
+<body>
+    <div id="landing_wrapper">
+    	<div id="titlebar">
+            <span class="title">Memoize</span><span class="subtitle">&nbsp;&nbsp;&nbsp;A home for shared memories</span>
+        </div>
+
+		<div id="landing_drag_area_top"></div>
+    	<div id="landing_drag_area_middle">
+            <div id="drag_example_graphic"><img src="../images/photo_drag.png" alt="Simply drag any number of photos onto Memoize to start them uploading to your own canvas" />
+        	</div>
+        
+        <div id="landing_drag_area_content">
+        	<div id="helper_text">Simply drag or <a href="#">upload photos</a> here. Share the link of your new canvas and let friends add their memories
+            </div>
+            
+            <div id="upload_area">
+            <form id="formUpload" class="upload" action="dummy_return.json" method="POST" enctype="multipart/form-data">
+                <input type="file" name="file" multiple>
+            </form>
+            </div>
+        </div>
+        </div>
+        <div id="landing_drag_area_bottom"></div>
+        
+        <div id="landing_login">
+        	<form id="landing_login_form" action="" method="post">
+            	<div id="landing_login_email"><input type="text" name="email" title="Login with new or existing email" class="field100" /></div>
+                <div id="landing_login_pass"><input type="password" name="password" title="New or existing pass" class="field100" /></div>
+                <input id="landing_login_submit" type="submit" class="input_button" name="submit" value="Login" />
+            </form>
+        </div>
+        
+        <div id="mobile_app_graphic">
+        	<div id="mobile_app_text">Better yet, <a href="#">get our app</a> and start snapping away together</div>
+        	<img src="../images/mobile_app.png" alt="Get our mobile app and upload from your phone with friends to the same canvas!" />
+        </div>
+    
+    </div>
+
+
+	<script>
+        /*global $ */
+        $(function () {
+            $('.upload').fileUploadUI({
+                    uploadTable: $('.upload_files'),
+                    downloadTable: $('.download_files'),
+                    buildUploadRow: function (files, index) {
+                    var file = files[index];
+                },
+                
+                buildDownloadRow: function (file) {
+                    return $('<tr><td>' + file.name + '<\/td><\/tr>');
+                }
+            });
+        });
+    </script>
+
+</body></html>
