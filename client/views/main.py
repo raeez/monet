@@ -2,8 +2,8 @@
 
 from flask import Module, session, redirect, url_for, request, render_template, flash, abort
 from flaskext.uploads import UploadNotAllowed
-from memoize.model import User, Photo, Quote, Memory
-from memoize.upload.helpers import get_memory, create_memory, upload_photo
+from memoize.model import User
+from memoize.upload.helpers import get_memory, get_photo, create_memory, upload_photo, build_memory_stream, claimed
 from lib.db.objectid import ObjectId
 import bcrypt
 
@@ -45,7 +45,7 @@ def login():
 
     if bcrypt.hashpw(request.form['password'], user.password) == user.password:
       session['email'] = request.form['email']
-      session['_id'] = user._id
+      session['_id'] = str(user._id)
       session['password'] = request.form['password']
       log['login'].debug(session['email'])
       return redirect(url_for('index'))
@@ -77,14 +77,37 @@ def memory(id):
 
   if not m:
     abort(404)
+
   else:
     from client.app import client as app
     items = []
     for i in m.items:
-      p = Photo.find_one({"_id" : ObjectId(i)})
+      p = get_photo(i)
       triple = (p._id, p.title, app.photos.url(p.filename))
       items.append(triple)
-    return render_template('memory.html', memory=(m.name, m._id, items))
+    return render_template('memory.html', memory={'id' : m._id, 'name' : m.name, 'items' : items})
+
+@main_module.route('/rename_memory', methods=['POST'])
+def rename():
+  if not request.form['new_name'] or not request.form['id']:
+    abort(400)
+
+  m = get_memory(request.form['id'])
+  if claimed(m):
+    if ('email' in session) and (m.user == session['_id']):
+      m.name = request.form['new_name']
+      m.save()
+      return
+  else:
+    m.name = request.form['new_name']
+    return
+
+  abort(403)
+
+def new():
+  if request.method == 'POST':
+    return upload_photo()
+  return render_template('new.html')
 
 ###############
 ## LOGGED IN ##
@@ -94,13 +117,7 @@ def memory(id):
 def stream():
   log['request'].debug("request %s" % repr(request.path))
 
-  if 'email' not in session:
+  if 'email' not in session and '_id' not in session:
     return redirect(url_for('login'))
 
-  stream = Memory.find({'user' : session['_id']})
-  s = []
-  for memory in stream:
-    pair = (memory.name, memory._id)
-    s.append(pair)
-
-  return render_template('stream.html', stream=s)
+  return render_template('stream.html', stream=build_memory_stream())

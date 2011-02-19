@@ -12,7 +12,7 @@
 
   <ul>
   {% for memory in stream %}
-    <li>{{memory[0]}}&#151;<a href="{{url_for('memory', id=memory[1])}}">open</a></li>
+    <li>{{memory['name']}}&#151;<a href="{{url_for('memory', id=memory['id'])}}">open</a></li>
   {% endfor %}
   </ul>
 

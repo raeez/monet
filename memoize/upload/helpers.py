@@ -5,11 +5,7 @@ from memoize.model import User, Photo, Quote, Memory
 from lib.db.objectid import ObjectId
 
 def create_memory():
-  print "creating a memory"
-
   mem_name = request.form.get('mem_name',None)
-
-  print "it\'s name is %s" % mem_name
 
   if not mem_name:
     flash("missing")
@@ -18,6 +14,8 @@ def create_memory():
     m.user = None
     if 'email' in session:
       m.user = session['_id']
+    else:
+      m.user = None
     m.name = mem_name
     m.items = []
     m.save()
@@ -25,10 +23,10 @@ def create_memory():
   return None
 
 def get_memory(_id):
-  print "Getting memory %s" % _id
-  m = Memory.find_one({'_id' : ObjectId(_id)})
-  print "It's name is %s" % m.name
-  return m
+  return Memory.find_one({'_id' : ObjectId(_id)})
+
+def get_photo(_id):
+  return Photo.find_one({"_id" : ObjectId(_id)})
 
 def upload_photo(mem_id=None):
   photo = request.files.get('photo', None)
@@ -60,4 +58,13 @@ def upload_photo(mem_id=None):
       m.save()
       return redirect(url_for('memory', id=m._id))
 
+def build_memory_stream():
+  m = Memory.find({'user' : session['_id']})
+  s = []
+  for memory in m:
+    pair = {'id' : memory._id, 'name' : memory.name}
+    s.append(pair)
+  return s
 
+def claimed(m):
+  return not (not m.user)
