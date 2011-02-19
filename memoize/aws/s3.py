@@ -1,5 +1,5 @@
 IMAGE_BUCKET = 'memoize-images'
-SETTINGS_JSON = 'aws.json'
+SETTINGS_JSON = 'conf/aws.json'
 
 def load_settings():
   if globals().get('settings', None) is None:
