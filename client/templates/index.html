@@ -43,7 +43,7 @@
                 {% endif %}
             {% endwith %}
 
-        	<form id="landing_login_form" action="" method="post">
+        	<form id="landing_login_form" action="/login" method="post">
             	<div id="landing_login_email"><input type="text" name="email" title="Login with new or existing email" class="field100" /></div>
                 <div id="landing_login_pass"><input type="password" name="password" title="New or existing pass" class="field100" /></div>
                 <input id="landing_login_submit" type="submit" class="input_button" name="submit" value="Login" />
@@ -75,11 +75,6 @@
         });
     </script>
 
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
     <br />
   <h3><a href="{{ url_for('login') }}">Sign in</a> to access your memories.</h3>
 
