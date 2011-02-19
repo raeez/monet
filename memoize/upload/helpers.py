@@ -17,7 +17,7 @@ def create_memory():
     else:
       m.user = None
     m.name = mem_name
-    m.items = []
+    m.items = [p.id] + m.items
     m.save()
     return m
   return None
@@ -54,7 +54,7 @@ def upload_photo(mem_id=None):
       p.caption = caption
       p.memory = m._id
       p.save()
-      m.items.append(p._id)
+      m.items = [p._id] + m.items
       m.save()
       return redirect(url_for('memory', id=m._id))
 
@@ -62,8 +62,8 @@ def build_memory_stream():
   m = Memory.find({'user' : session['_id']})
   s = []
   for memory in m:
-    pair = {'id' : memory._id, 'name' : memory.name}
-    s.append(pair)
+    mem = {'id' : memory._id, 'name' : memory.name}
+    s.append(mem)
   return s
 
 def claimed(m):
