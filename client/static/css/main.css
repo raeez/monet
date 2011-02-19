@@ -455,6 +455,12 @@ input:focus {
  * Footer
  *****************************************/
  
+#add_memory {
+    margin-top:18px;
+    float:left;
+    width: 500px;
+}
+
  #canvas_footer {
 	 background:#222222 url(../images/dark_glow_bottom.png) repeat-x top left;
  }
@@ -480,6 +486,10 @@ input:focus {
  }
  #company_info_descriptor {
 	 font-size:0.7em;
+ }
+
+ #footer_right_of_wrapper {
+     top:0;
  }
  
 /*****************************************

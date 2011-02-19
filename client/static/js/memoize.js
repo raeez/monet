@@ -8,6 +8,16 @@ $(document).ready(function(){
 	
 	$('#canvas_login_form').show();
 	loginBoxActive = false;
+
+
+    /*****************
+     * Title editability
+     */
+    $(".click").editable("http://www.appelsiini.net/projects/jeditable/php/echo.php", { 
+        indicator : "<img src='{{url_for('static', filename='images/indicator.gif')}}'>",
+        tooltip   : "Click to edit...",
+        style  : "inherit"
+    });
 	
     /*****************
      * Resizes the photos so they display nicely horizontally
