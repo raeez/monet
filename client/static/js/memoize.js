@@ -46,6 +46,7 @@ $(document).ready(function(){
         $("#share_link_value").focus().select();
 	}, function() {
 		$("#share_link_area").hide();
+        $("#share_link_value").blur();
 	});
 	
 
