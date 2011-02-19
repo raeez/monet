@@ -1,17 +1,30 @@
 // JavaScript Document
 var loginBoxActive = false;
+var maxPhotoSize = 0;
+var originalCanvasWidth;
 
 $(document).ready(function(){
-	defaultCanvasWidth = $('#photo_canvas_center').width();
+	originalCanvasWidth = $('#photo_canvas_center').width();
 	
 	$('#canvas_login_form').show();
 	loginBoxActive = false;
 	
+    /*****************
+     * Resizes the photos so they display nicely horizontally
+     */
 	photoHFit();
 	
+    /*****************
+     * Adjusts the vertical position of the landing page box to
+     * always be in the center of the page
+     */
 	wrapResize();
-	
 	$(window).resize(wrapResize);
+
+
+    /*****************
+     * Controls the form element hints for the login forms
+     */
 	$("#landing_login_form").inputHintOverlay(-1, 4);
 	$("#canvas_login_form").inputHintOverlay(1, 4);
 	
@@ -24,64 +37,115 @@ $(document).ready(function(){
 		updateLoginBoxState();
 	});
 	
+
+    /*****************
+     * Controls basic interaction with the share bar on the view page
+     */
 	$("#share_area").hover(function() {
 		$("#share_link_area").show();
+        $("#share_link_value").focus().select();
 	}, function() {
 		$("#share_link_area").hide();
 	});
 	
-	hover_in_queue = [];
-	hover_out_queue = [];
-	original_width = 0;
-	last_edited = null;
-	hoverin = 0;
-	$(".photo_div").hover(function() {
-		hover_in_queue.push([$(this), $(this).width()]);
-		updateHoverQueue(hover_in_queue, hover_out_queue);
-		if (hoverin != 0) {
-			// Be sure to fix the last thing that didn't clear
-			$(last_edited).animate({
-				width: original_width,
-			}, 500);
-			
-			hoverin = 0
-		}
-		
-		hoverin = 1;
-		
-		diff = $(this).children('.photo').width() - $(this).width();
-		$('#photo_canvas_center').width($('#photo_canvas_center').width() + diff);
-		original_width = $(this).width();
-		last_edited = $(this);
-		
-		$(this).animate({
-				width: $(this).children('.photo').width(),
-			}, 500, function() {
-		});
-		
-	}, function() {
-		if (hoverin == 1) {
-			hoverin = 0;
-			diff = $(this).width() - original_width;
-			$(this).animate({
-					width: original_width,
-				}, 500, function() {
-				$('#photo_canvas_center').width($('#photo_canvas_center').width() - diff);
-			});
-		}
-	});
+
+    /*****************
+     * Control hover actions on photos
+     *
+     */
+//	hover_in_queue = [];
+//	hover_out_queue = [];
+//	$(".photo_div").hover(function() {
+//        console.log("Hover in");
+//		hover_in_queue.push([$(this).attr('id'), $(this).width()]);
+//		updateHoverQueue(hover_in_queue, hover_out_queue);
+//	}, function() {
+//        console.log("Hover out");
+//		hover_out.push([$(this).attr('id'), $(this).width()]);
+//		updateHoverQueue(hover_in_queue, hover_out_queue);
+//	});
 	
-	/*
-	$("#canvas_login_div").mouseleave(function() {
-		loginBoxActive = false;
-		updateLoginBoxState();
-	});
-	*/
 });
 
-function updateHoverQueue(in_queue, out_queue) {
+function findInHoverQueue(search, queue) {
+    console.log("Entered findInHoverQueue!");
+    // Searches for the id within the hover queue. Returns the index if it finds it
+    // otherwise it returns -1
+    queue.forEach(function(value, index){
+        if (search == value[0]) {
+            console.log("FOUND ONE: returning index: "+index);
+            return index;
+        }
+    });
+
+    console.log('about to return -1');
+    console.log("search: " + search);
+    console.log("queue: " + queue);
+    return -1;
 }
 
+function updateHoverQueue(in_queue, out_queue) {
+    /*
+     * Stat with the in_queue first
+     * Start the latest ones in the queue
+     * Stop anything else in the queue
+     * Call the a close function for those that do NOT exist in the out_queue
+     *
+     * Call a close on everything in the out queue
+     */
+
+    // Make sure our canvas is big enough to use
+	if ($('#photo_canvas_center').width() != originalCanvasWidth + maxPhotoSize) {
+        $('#photo_canvas_center').width(originalCanvasWidth + maxPhotoSize);
+    }
+
+    console.log("updating queues")
+    console.log(in_queue);
+    console.log(out_queue);
+
+    for (i=in_queue.length-1; i >= 0; i-- ) {
+        // Start at the end of the queue, or the latest one that was added.
+        if (i == in_queue.length - 1) {
+            // This is the latest hover request we've received
+            $('#' + in_queue[i][0]).animate(
+                {width: $('#' + in_queue[i][0]).children('.photo').width()},
+                500,
+                function() {
+                    in_index = findInHoverQueue($(this).attr('id'),in_queue);
+                    console.log("Getting rid of index: " + in_index);
+                    if (in_index >= 0) {
+                        // make sure we found something
+                        in_queue.splice(in_index, 1);
+                    }
+                }
+            );
+        } else {
+            $('#' + in_queue[i][0]).stop(true,true);
+            out_index = findInHoverQueue(in_queue[i][0], out_queue);
+            if (out_index == -1) {
+                // We're only going to call a close on things that aren't already
+                // in the out queue
+                $(in_queue[i][0]).animate(
+                    {width: in_queue[i][1]}, 
+                    500
+                );
+
+            }
+        }
+    }
+
+    for (i=out_queue.length - 1; i >= 0; i-- ) {
+        $(out_queue[i][0]).animate(
+            {width: out_queue[i][1]},
+            500
+        );
+    }
+}
+
+/** photoHFit
+ * Loops through every photo, builds a list of them that should be in
+ * a given row. Calls the resizePhotoDivs method on that row
+ */
 function photoHFit() {
 	var margin = 10;
 	var max_width = $("#photo_wrapper").width();
@@ -89,10 +153,18 @@ function photoHFit() {
 	var width_accumulator = 0;
 	
 	$(".photo").each(function(){
+        if ($(this).width() > maxPhotoSize) {
+            maxPhotoSize = $(this).width();
+        }
+
 		if (width_accumulator < max_width) {
 			width_accumulator += $(this).parent('.photo_div').width() + parseInt($(this).parent().css('margin-left')) + parseInt($(this).parent().css('margin-right'));
 			row_accumulator.push($(this).parent('.photo_div'));
 		} else {
+            /*
+             * add one more photo, call the resizePhotoDivs method, then
+             * reset the row
+             */
 			resizePhotoDivs(row_accumulator, width_accumulator);
 			width_accumulator = 0 + $(this).parent('.photo_div').width() + parseInt($(this).parent().css('margin-left')) + parseInt($(this).parent().css('margin-right'));
 			row_accumulator = [];
@@ -102,41 +174,32 @@ function photoHFit() {
 	resizePhotoDivs(row_accumulator, width_accumulator);
 }
 
+/** resizePhotoDivs
+ * crops the photos on a row to be of the appropriate size
+ */
 function resizePhotoDivs(row_accumulator, default_width) {
-	console.log("row_accumulator: ");
-	console.log(row_accumulator);
-	console.log("default_width: " + default_width);
 	var i;
 	var overspill;
 	var length = row_accumulator.length;
 	
 	if (default_width > 955) {
 		overspill = default_width - 955;
-		console.log("overspill: " + overspill);
 		crop = Math.floor(overspill / length);
-		console.log("crop: " + crop);
 		
 		var width_accumulator = 0; 
-		console.log("lengthh: " + length);
 		for (i=0; i<length; i++) {
-			console.log(i);
 			photo_div = row_accumulator.pop();
-			console.log(photo_div);
 			
 			if (i == length - 1) {
-				console.log("LAST PHOTO");
 				// This means we're on the last photo. The last photo should take up the remaining slack.
 				$(photo_div).width(955 - width_accumulator - 10); // -10 because of the margin
 			} else {
 				// Else make the divs a bit smaller based on the crop size
 				newsize = $(photo_div).width() - crop;
-				console.log("original width: " + $(photo_div).width());
-				console.log("new width: " + newsize);
 				$(photo_div).width(newsize);
 			}
 			
 			width_accumulator += $(photo_div).width() + 10;
-			console.log("width_accumulator: " + width_accumulator);
 		}
 	}
 }

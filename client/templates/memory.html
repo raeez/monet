@@ -4,7 +4,6 @@
 
 {% block head %}
 {{ super() }}
-    <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}" />
 
     <link rel="stylesheet" href="{{url_for('static', filename='css/zoomooz.css')}}" type="text/css" />
     <script type="text/javascript" src="{{url_for('static', filename='js/sylvester.js')}}"></script>
@@ -13,6 +12,7 @@
 
     <script src="{{url_for('static', filename='js/jquery.jeditable.mini.js')}}"></script>
 
+<!--
     <script type="text/javascript">
 
     $(document).ready(function()
@@ -59,7 +59,7 @@
 
     });
     </script>
-
+    -->
 {% endblock %}
 
 {% block content %}
@@ -108,27 +108,29 @@
             	<div id="share_area">
                     <div id="share_bar"></div>
                     <div id="share_link_area">
-                    	<p id="share_link_prompt">Click to copy to clipboard then paste in email or IM to let friends add memories</p>
+                    	<p id="share_link_prompt">Copy selected text to clipboard then paste in email or IM to let friends add memories</p>
                         <script> document.write("<input id=\"share_link_value\" type=\"text\" value=\"" + window.location + "\"/>"); </script>
                     </div>
                 </div>
             </div>
-            <div class="canvas_center">
-              {% for item in memory[2] %}
-                <img class="photo" src="{{item[1]}}" height="175"> </img>
-              {% endfor %}
+            <div class="canvas_center" id="photo_canvas_center">
+                <div id="photo_wrapper">
+                    {% for item in memory[2] %}
+                    <div id="{{item[0]}}" class="photo_div"><img class="photo" src="{{item[2]}}" height="175" /></div>
+                    {% endfor %}
+                </div>
 
 
-  <h3>Add to this memory:</h3>
+                <h3>Add to this memory:</h3>
 
-    <form method=POST enctype=multipart/form-data action="{{url_for('memory',id=memory[1])}}">
-        <p><label>Photo:</label><input type=file name=photo></p>
-        <p><label>Title:</label><input type=text name=title></p>
-        <p><label>Caption:</label><input type=text name=caption></p>
-        <p><input type="submit" name="submit" value="Send my Photo!" /></p>
-    </form>
+                <form method=POST enctype=multipart/form-data action="{{url_for('memory',id=memory[1])}}">
+                    <p><label>Photo:</label><input type=file name=photo></p>
+                    <p><label>Title:</label><input type=text name=title></p>
+                    <p><label>Caption:</label><input type=text name=caption></p>
+                    <p><input type="submit" name="submit" value="Send my Photo!" /></p>
+                </form>
 
-  <p><a href="{{url_for('stream')}}">Browse</a> your memory stream. Or, <a href="{{url_for('new')}}">create</a> a new memory.</p>
+                <p><a href="{{url_for('stream')}}">Browse</a> your memory stream. Or, <a href="{{url_for('new')}}">create</a> a new memory.</p>
 
             </div>
             <div class="canvas_right_of_wrapper">

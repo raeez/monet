@@ -79,10 +79,15 @@ a img {
 /*****************************************
  * Primary Node Overrides
  *****************************************/
- 
+@font-face {  
+    font-family: "Trebuchet";  
+    src: url("TREBUC.TTF"); /* IE */  
+    src: local("Trebuchet"), url("TREBUC.TTF") format("truetype"); /* non-IE */  
+} 
+	 
 body {
 	background: #222222;
-	font-family: "Trebuchet MS", "Trebuchet", "Myriad Web", "Myriad", Geneva, Lucida Sans, Lucida Grande, Lucida Sans Unicode, Verdana, sans-serif;
+	font-family: "Trebuchet", "Trebuchet MS", Trebuchet, Trebuchet MS, sans-serif;
 	letter-spacing:.07em;
 	line-height:1.6em;
 	color:#ebebeb;
@@ -119,7 +124,7 @@ input {
 	padding:.2em .2em .2em .4em;
 	font-size:.7em;
 	letter-spacing:.04em;
-	font-family: "Trebuchet MS", "Trebuchet", "Myriad Web", "Myriad", Geneva, Lucida Sans, Lucida Grande, Lucida Sans Unicode, Verdana, sans-serif;
+	font-family: "Trebuchet", "Trebuchet MS", Trebuchet, Trebuchet MS, sans-serif;
 }
 input:hover {
 	border:1px solid #aaaaaa;
@@ -383,26 +388,26 @@ input:focus {
 #share_link_area {
 	position:absolute;
 	width:410px;
-	height:33px;
+	height:31px;
 	background:#11b0aa url(../images/share_link_area.jpg) no-repeat top left;
 	display:none;
 	z-index:10;
 	top:0;
 	left:39px;
-	padding:1px 5px 0px 5px;
+	padding:2px 2px 0px 3px;
 }
 
 #share_link_prompt {
 	color:#333333;
-	font-size:0.5em;
+	font-size:0.7em;
 	line-height:1em;
 	letter-spacing:0em;
 }
 #share_link_value {
-	width:400px;
+	width:407px;
 	padding:0px;
 	margin-top:2px;
-	font-size:0.6em;
+	font-size:0.7em;
 }
 
 #bottom_accent_bar {
@@ -434,6 +439,8 @@ input:focus {
 	margin:5px;
 	overflow:hidden;
 }
+
+/*
 .photo_div:hover {
 	cursor:pointer;
 	-moz-box-shadow: 2px 2px 7px #1e5957;
@@ -442,6 +449,7 @@ input:focus {
 	border:1px solid #1e5957;
 	margin:4px;
 }
+*/
 
 /*****************************************
  * Footer
