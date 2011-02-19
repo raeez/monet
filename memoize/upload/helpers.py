@@ -56,7 +56,7 @@ def upload_photo(mem_id=None):
       p.caption = caption
       p.memory = m._id
       p.save()
-      m.items = [p._id]
+      m.items.append(p._id)
       m.save()
       return redirect(url_for('memory', id=m._id))
 
