@@ -17,7 +17,7 @@ def create_memory():
     else:
       m.user = None
     m.name = mem_name
-    m.items = [p.id] + m.items
+    m.items = []
     m.save()
     return m
   return None
