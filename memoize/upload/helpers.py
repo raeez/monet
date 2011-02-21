@@ -5,22 +5,17 @@ from memoize.model import User, Photo, Quote, Memory
 from lib.db.objectid import ObjectId
 
 def create_memory():
-  mem_name = request.form.get('mem_name',None)
-
-  if not mem_name:
-    flash("missing")
+  mem_name = request.form.get('mem_name',None) or "New Memory"
+  m = Memory()
+  m.user = None
+  if 'email' in session:
+    m.user = session['_id']
   else:
-    m = Memory()
     m.user = None
-    if 'email' in session:
-      m.user = session['_id']
-    else:
-      m.user = None
-    m.name = mem_name
-    m.items = []
-    m.save()
-    return m
-  return None
+  m.name = mem_name
+  m.items = []
+  m.save()
+  return m
 
 def get_memory(_id):
   return Memory.find_one({'_id' : ObjectId(_id)})
@@ -40,6 +35,7 @@ def upload_photo(mem_id=None):
 
   if not photo:
     flash("missing")
+    return redirect(url_for('index'))
   else:
     try:
       from client.app import client as app
