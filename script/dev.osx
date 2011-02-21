@@ -26,9 +26,9 @@ sudo port install vim +python27 \
 			 MacVim +python27 \
 
 # dev env
-easy_install pip # TODO ensure that this utilises the python27 version of easy_install installed above 'py27-setuptools'
-pip install virtualenv
-virtualenv -p python2.7 --no-site-packages --distribute --clear env
+/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/easy_install pip # TODO ensure that this utilises the python27 version of easy_install installed above 'py27-setuptools'
+/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/pip install virtualenv
+/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/virtualenv -p python2.7 --no-site-packages --distribute --clear env
 . env/bin/activate
 
 # python dependencies
