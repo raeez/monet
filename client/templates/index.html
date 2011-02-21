@@ -14,18 +14,26 @@
 
 		<div id="landing_drag_area_top"></div>
     	<div id="landing_drag_area_middle">
-            <div id="drag_example_graphic"><img src="{{url_for('static', filename='images/photo_drag.png')}}" alt="Simply drag any number of photos onto Memoize to start them uploading to your own canvas" />
-        	</div>
+            <div id="drag_example_graphic"></div>
         
         <div id="landing_drag_area_content">
-        	<div id="helper_text">Simply drag or <a href="#">upload photos</a> here. Share the link of your new canvas and let friends add their memories
+            <div id="helper_text">
+                <div id="inline_upload_leadtext">Simply drag or</div>
+                <div id="inline_upload"><form id="file_upload" action="{{url_for('new')}}" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" multiple>
+                    <button>Upload</button>
+                    <div>upload photos</div>
+                </form></div>
+                here. Share the link of your new canvas and let friends add their memories
+
             </div>
             
             <div id="upload_area">
-            <form id="formUpload" class="upload" action="dummy_return.json" method="POST" enctype="multipart/form-data">
-                <input type="file" name="file" multiple>
-            </form>
+                <div id="files"></div>
+                <script type="text/javascript" src="{{url_for('static', filename='js/upload_init.js')}}"></script> 
             </div>
+
+            <div class="clear"></div>
         </div>
         </div>
         <div id="landing_drag_area_bottom"></div>
@@ -50,31 +58,14 @@
             </form>
         </div>
         
-        <div id="mobile_app_graphic">
+
+        <div id="mobile_app_area">
+            <div id="mobile_app_graphic"></div>
         	<div id="mobile_app_text">Better yet, <a href="#">get our app</a> and start snapping away together</div>
-            <img src="{{url_for('static', filename='images/mobile_app.png')}}" alt="Get our mobile app and upload from your phone with friends to the same canvas!" />
         </div>
     
     </div>
-
-
-	<script>
-        /*global $ */
-        $(function () {
-            $('.upload').fileUploadUI({
-                    uploadTable: $('.upload_files'),
-                    downloadTable: $('.download_files'),
-                    buildUploadRow: function (files, index) {
-                    var file = files[index];
-                },
-                
-                buildDownloadRow: function (file) {
-                    return $('<tr><td>' + file.name + '<\/td><\/tr>');
-                }
-            });
-        });
-    </script>
-
+<!--
     <br />
   <h3><a href="{{ url_for('login') }}">Sign in</a> to access your memories.</h3>
 
@@ -107,3 +98,4 @@
         <p><input type="submit" name="submit" value="Send my Photo!" /></p>
     </form>
 {% endblock %}
+-->

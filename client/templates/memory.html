@@ -11,6 +11,7 @@
     <script type="text/javascript" src="{{url_for('static', filename='js/jquery.zoomooz.js')}}"></script>
 
     <script src="{{url_for('static', filename='js/jquery.jeditable.mini.js')}}"></script>
+
     <script type="text/javascript">
     /*****************
      * Title editability
@@ -29,11 +30,6 @@
 
     $(document).ready(function()
     {
-        $(".click").editable("http://www.appelsiini.net/projects/jeditable/php/echo.php", { 
-            indicator : "<img src='{{url_for('static', filename='images/indicator.gif')}}'>",
-            tooltip   : "Click to edit...",
-            style  : "inherit"
-        });
         
         $(".photo").toggle(function(evt) {
             console.log("clicked");
@@ -87,13 +83,18 @@
                 </div>
                 <div id="login">
 
-                  {% if 'email' in session %}
-                    <div id="canvas_login_prompt">You are logged in as {{session['email']}}.Log out <a href="{{ url_for('logout') }}">here</a>.</div>
-                {% else %}
-
                 	<div id="canvas_login_prompt">
-                        Login <a id="canvas_login_text" href="#">here</a> to claim this memory<br />
-                        or <a href="">connect</a> with Facebook
+
+                    {% if 'email' in session %}
+                        Welcome {{session['email']}} | <a href="{{ url_for('logout') }}">Log out</a>
+                        <br />
+                        <a href="{{url_for('new')}}">New</a> memory | <a href="{{url_for('stream')}}">Recall</a> memories
+                    </div>
+
+                    {% else %}
+                        Don't forget this memory!
+                        <br/>
+                        Login <a id="canvas_login_text" href="#">here</a> to keep it forever
                     </div>
                     
                     <div id="canvas_login_div">
@@ -103,6 +104,7 @@
                             <input id="canvas_login_submit" type="submit" class="input_button" name="submit" value="Login" />
                         </form>
                     </div>
+
                 {% endif %}
                     
                 </div>
@@ -127,6 +129,16 @@
             </div>
             <div class="canvas_center" id="photo_canvas_center">
                 <div id="photo_wrapper">
+                    <div id="add_artifact">
+
+                        Add Artifact:
+
+                        <form method=POST enctype=multipart/form-data action="{{url_for('memory',id=memory['id'])}}">
+                            <input type=file name=photo class="file_upload">
+                            <input type="submit" name="submit" value="Add Photo" />
+                        </form>
+                    </div>
+
                     {% for item in memory['items'] %}
                     <div id="{{item[0]}}" class="photo_div"><img class="photo" src="{{item[2]}}" height="175" /></div>
                     {% endfor %}
@@ -148,20 +160,6 @@
             <div class="canvas_left_of_wrapper">&nbsp;</div>
             <div class="canvas_center">
 
-                <div id="add_memory">
-                    <a href="{{url_for('stream')}}">Browse</a> your memory stream. Or, <a href="{{url_for('new')}}">create</a> a new memory.
-
-                    <h3>Add to this memory:</h3>
-
-                    <form method=POST enctype=multipart/form-data action="{{url_for('memory',id=memory['id'])}}">
-                        <p><label>Photo:</label><input type=file name=photo></p>
-                        <p><label>Title:</label><input type=text name=title></p>
-                        <p><label>Caption:</label><input type=text name=caption></p>
-                        <p><input type="submit" name="submit" value="Send my Photo!" /></p>
-                    </form>
-
-
-                </div>
 
             	<div id="company_info">
                 Collected through <a href="">Memoize</a><br/>

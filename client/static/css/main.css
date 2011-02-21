@@ -86,6 +86,7 @@ a img {
 } 
 	 
 body {
+    height:100%;
 	background: #222222;
 	font-family: "Trebuchet", "Trebuchet MS", Trebuchet, Trebuchet MS, sans-serif;
 	letter-spacing:.07em;
@@ -147,6 +148,7 @@ input:focus {
 .input_button:active {
 	background:#444444;
 }
+
 .field100 {
 	width:100%;
 }
@@ -216,6 +218,9 @@ input:focus {
 }
 
 #drag_example_graphic{
+    background:transparent url("../images/photo_drag.png") no-repeat top left;
+    width:253px;
+    height:229px;
 	position:absolute;
 	left:-140px;
 	top:30px;
@@ -258,6 +263,13 @@ input:focus {
 
 
 #mobile_app_graphic{
+    width:200px;
+    height:223px;
+    background:transparent url("../images/mobile_app.png") no-repeat top left;
+	position:absolute;
+    left:430px;
+}
+#mobile_app_area{
 	position:relative;
 	top:-145px;
 	left:100px;
@@ -295,6 +307,7 @@ input:focus {
 }
 
 #canvas_header #login {
+    text-align:right;
 	float:right;
 	width:250px;
 	font-size:.8em;
@@ -455,10 +468,13 @@ input:focus {
  * Footer
  *****************************************/
  
-#add_memory {
-    margin-top:18px;
+#add_artifact {
     float:left;
-    width: 500px;
+    padding:20px;
+    width:135px;
+    height:135px;
+    border:2px dashed #aaaaaa;
+    margin:5px;
 }
 
  #canvas_footer {

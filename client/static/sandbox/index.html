@@ -15,9 +15,7 @@
 	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
 	<script src="../js/jquery.fileupload.js"></script>
 	<script src="../js/jquery.fileupload-ui.js"></script>
-	<script src="../js/jquery.ui.progressbar.js"></script>
-	<script src="../js/jquery.ui.core.js"></script>
-	<script src="../js/jquery.ui.widget.js"></script>
+
     <script src="../js/memoize.js"></script>
 
 </head>
@@ -30,18 +28,26 @@
 
 		<div id="landing_drag_area_top"></div>
     	<div id="landing_drag_area_middle">
-            <div id="drag_example_graphic"><img src="../images/photo_drag.png" alt="Simply drag any number of photos onto Memoize to start them uploading to your own canvas" />
-        	</div>
+            <div id="drag_example_graphic"></div>
         
         <div id="landing_drag_area_content">
-        	<div id="helper_text">Simply drag or <a href="#">upload photos</a> here. Share the link of your new canvas and let friends add their memories
+            <div id="helper_text">
+                <div id="inline_upload_leadtext">Simply drag or</div>
+                <div id="inline_upload"><form id="file_upload" action="upload.php" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" multiple>
+                    <button>Upload</button>
+                    <div>upload photos</div>
+                </form></div>
+                here. Share the link of your new canvas and let friends add their memories
+
             </div>
             
             <div id="upload_area">
-            <form id="formUpload" class="upload" action="dummy_return.json" method="POST" enctype="multipart/form-data">
-                <input type="file" name="file" multiple>
-            </form>
+                <div id="files"></div>
+                <script type="text/javascript" src="../js/upload_init.js"></script> 
             </div>
+
+            <div class="clear"></div>
         </div>
         </div>
         <div id="landing_drag_area_bottom"></div>
@@ -53,30 +59,12 @@
                 <input id="landing_login_submit" type="submit" class="input_button" name="submit" value="Login" />
             </form>
         </div>
-        
-        <div id="mobile_app_graphic">
+
+        <div id="mobile_app_area">
+            <div id="mobile_app_graphic"></div>
         	<div id="mobile_app_text">Better yet, <a href="#">get our app</a> and start snapping away together</div>
-        	<img src="../images/mobile_app.png" alt="Get our mobile app and upload from your phone with friends to the same canvas!" />
         </div>
-    
+        
     </div>
-
-
-	<script>
-        /*global $ */
-        $(function () {
-            $('.upload').fileUploadUI({
-                    uploadTable: $('.upload_files'),
-                    downloadTable: $('.download_files'),
-                    buildUploadRow: function (files, index) {
-                    var file = files[index];
-                },
-                
-                buildDownloadRow: function (file) {
-                    return $('<tr><td>' + file.name + '<\/td><\/tr>');
-                }
-            });
-        });
-    </script>
 
 </body></html>

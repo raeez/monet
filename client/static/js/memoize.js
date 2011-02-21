@@ -10,14 +10,6 @@ $(document).ready(function(){
 	loginBoxActive = false;
 
 
-    /*****************
-     * Title editability
-     */
-    $(".click").editable("http://www.appelsiini.net/projects/jeditable/php/echo.php", { 
-        indicator : "<img src='{{url_for('static', filename='images/indicator.gif')}}'>",
-        tooltip   : "Click to edit...",
-        style  : "inherit"
-    });
 	
     /*****************
      * Resizes the photos so they display nicely horizontally
@@ -226,6 +218,8 @@ function updateLoginBoxState() {
 }
 
 function wrapResize() {
+    $('body').height($(window).height());
+
 	$('#landing_wrapper').css("top", function() {
 		if ($(window).height() > 300) {
 			return $(window).height() / 2 - 180;
