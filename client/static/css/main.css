@@ -261,7 +261,29 @@ input:focus {
 	margin-top:5px;
 }
 
-
+#drag_example_right_graphic{
+    width:265px;
+    height:178px;
+    background:transparent url("../images/photo_drag_right.png") no-repeat top left;
+	position:absolute;
+    left:430px;
+}
+#drag_example_right{
+	position:relative;
+	top:-145px;
+	left:100px;
+	text-align:right;
+	z-index:5;
+}
+#drag_example_right_text {
+	font-size:18px;
+	text-align:right;
+	width:283px;
+	position:absolute;
+	top:120px;
+	left:208px;
+}
+/*
 #mobile_app_graphic{
     width:200px;
     height:223px;
@@ -284,6 +306,7 @@ input:focus {
 	top:120px;
 	left:230px;
 }
+*/
 
 /*****************************************
  * Canvas Header
