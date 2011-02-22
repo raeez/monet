@@ -14,9 +14,15 @@
 }
 
 .file_upload_content {
+    background:#222222;
     position:absolute;
+    bottom:0;
     z-index:2;
-    padding:40px 10px 10px 10px;
+    width:90px;
+    padding:.6em 5px 5px .7em;
+    opacity: .85;
+    -ms-filter: 'alpha(opacity=.85)';
+    filter: alpha(opacity=.85);
 }
 
 .file_upload_preview {
@@ -25,7 +31,8 @@
 }
 
 .file_upload_preview img {
-    width: 100px;
+    margin:0 auto;
+    height: 100px;
 }
 
 .file_upload_progress .ui-progressbar-value {

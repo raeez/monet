@@ -68,6 +68,11 @@ def new():
     return upload_photo()
   return render_template('new.html')
 
+@main_module.route('/new_static', methods=['GET', 'POST'])
+def new_static():
+    if request.method == 'POST':
+        return '{"name":"picture.jpg","type":"image/jpeg","size":"345000", "thumb_url":"/static/sandbox/images/2.jpg", "image_url":"/static/sandbox/images/2.jpg", "canvas_url":"http://memoize.com/mLi8b"}'
+
 @main_module.route('/memory/<id>', methods=['GET', 'POST'])
 def memory(id):
   if request.method == "POST":

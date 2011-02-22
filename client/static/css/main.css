@@ -167,6 +167,21 @@ input:focus {
 .invisible {
 	display:none;
 }
+.opacity10 {
+    opacity: .10;
+    -ms-filter: 'alpha(opacity=.10)';
+    filter: alpha(opacity=.10);
+}
+.opacity40 {
+    opacity: .40;
+    -ms-filter: 'alpha(opacity=.40)';
+    filter: alpha(opacity=.40);
+}
+.opacity65 {
+    opacity: .65;
+    -ms-filter: 'alpha(opacity=.65)';
+    filter: alpha(opacity=.65);
+}
  
 /*****************************************
  * Landing Page
@@ -188,7 +203,7 @@ input:focus {
 
 #landing_drag_area_middle {
 	width:639px; /* 639 + 144 = 783 */
-	min-height:145px;
+	min-height:185px;
 	padding:0px 72px;
 	/*height:277px;  277 + 72 + 65 = 412 */
 	background:transparent url(../images/Landing_DragAreaBG_middle.png) repeat-y top left;
@@ -228,6 +243,36 @@ input:focus {
 
 #landing_drag_area_content{
 	width:495px;
+    position:relative;
+    z-index:10;
+}
+
+#example_fileholders_container{
+    position:absolute;
+
+}
+.example_fileholders {
+    width:100px;
+    height:100px;
+    margin:5px;
+    float:left;
+    border: 2px dashed #aaa;
+    position:relative;
+}
+
+#canvas_link_area{
+    display:none;
+    margin-top:1em;
+    padding-left:20px;
+    background:#222;
+    color:#aaa;
+    font-size:.8em;
+    opacity: .85;
+    -ms-filter: 'alpha(opacity=.85)';
+    filter: alpha(opacity=.85);
+}
+#canvas_link {
+    font-size:1.6em;
 }
 
 #helper_text {
@@ -235,7 +280,8 @@ input:focus {
 }
 
 #upload_area {
-	margin-top:20px;
+    position:relative;
+	margin-top:15px;
 }
 
 #landing_login{

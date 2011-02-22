@@ -20,7 +20,7 @@
             <div id="helper_text">
                 <div id="inline_upload_leadtext">Simply drag or</div>
                 <div id="inline_upload">
-                    <form id="file_upload" action="{{url_for('new')}}" method="POST" enctype="multipart/form-data">
+                    <form id="file_upload" action="/new_static" method="POST" enctype="multipart/form-data">
                         <input type=hidden name=title>
                         <input type=hidden name=caption>
                         <input type=hidden name=mem_name value="Name this memory!">
@@ -32,9 +32,33 @@
                 here. Share the link of your new canvas and let friends add their memories
 
             </div>
+
+            <div id="canvas_link_area">
+                Your memories can now be found at:
+                <div id="canvas_link"></div>
+                Share with trusted friends so they can add memories too
+            </div>
             
             <div id="upload_area">
-                <div id="files"></div>
+                <div id="example_fileholders_container">
+                    <div class="example_fileholders"></div> 
+                    <div class="example_fileholders opacity65"></div> 
+                    <div class="example_fileholders opacity40"></div> 
+                    <div class="example_fileholders opacity10"></div> 
+                </div>
+                <div id="files">
+<!--                
+                    <div class="upload_file_div">
+                        <div class="file_upload_content">
+                            IMG22019.jpg
+                        </div>
+
+                        <div class="file_upload_preview">
+                            <img src="/static/sandbox/images/2.jpg"/>
+                        </div>
+                    </div>
+                    -->
+                </div>
                 <script type="text/javascript" src="{{url_for('static', filename='js/upload_init.js')}}"></script> 
             </div>
 
