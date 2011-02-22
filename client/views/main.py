@@ -106,11 +106,6 @@ def rename():
 
   abort(403)
 
-def new():
-  if request.method == 'POST':
-    return upload_photo()
-  return render_template('new.html')
-
 ###############
 ## LOGGED IN ##
 ###############
