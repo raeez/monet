@@ -3,6 +3,7 @@
 from flask import session, url_for, request, flash, redirect
 from memoize.model import User, Photo, Quote, Memory
 from lib.db.objectid import ObjectId
+import json
 
 def create_memory():
   mem_name = request.form.get('mem_name',None) or "New Memory"
@@ -25,34 +26,36 @@ def get_photo(_id):
 
 def upload_photo(mem_id=None):
   photo = request.files.get('photo', None)
-  title = request.form.get('title', None)
-  caption = request.form.get('caption', None)
 
   if not mem_id:
     m = create_memory()
   else:
     m = get_memory(mem_id)
 
+  from client.app import client as app
   if not photo:
-    flash("missing")
-    return redirect(url_for('index'))
+    return err('missing photo')
   else:
     try:
-      from client.app import client as app
       filename = app.photos.save(request.files['photo'])
     except UploadNotAllowed:
-      flash("fail")
+      return err('upload not allowed')
     else:
       p = Photo()
       p.filename = filename
-      p.user = None
-      p.title = title
-      p.caption = caption
+      p.user = session.get('_id', None)
+      p.title = request.files.get('title', None)
+      p.caption = request.files.get('caption', None)
       p.memory = m._id
       p.save()
       m.items = [p._id] + m.items
       m.save()
-      return redirect(url_for('memory', id=m._id))
+      return succeed({'memory_url' : url_for('memory', id=m._id),
+                      'thumb_url' : app.photos.url(p.filename), # TODO start building these
+                      'image_url' : app.photos.url(p.filename),
+                      'title' : p.title,
+                      'caption' : p.caption,
+                      'type' : 'image/jpeg'})
 
 def build_memory_stream():
   m = Memory.find({'user' : session['_id']})
@@ -64,3 +67,11 @@ def build_memory_stream():
 
 def claimed(m):
   return not (not m.user)
+
+def error(error_list):
+  assert isinstance(error_list, list)
+  return json.dumps({"success" : False, "errors" : error_list})
+
+def succeed(resp):
+  assert isinstance(resp, dict)
+  return json.dumps(dict({"success" : True, "errors" : []}, **resp)) # succint dictionary merge

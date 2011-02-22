@@ -131,10 +131,11 @@
                 <div id="photo_wrapper">
                     <div id="add_artifact">
 
-                        Add Artifact:
+                        Add artifact:
 
-                        <form method=POST enctype=multipart/form-data action="{{url_for('memory',id=memory['id'])}}">
-                            <input type=file name=photo class="file_upload">
+                        <form method=POST enctype=multipart/form-data action="{{url_for('create')}}">
+                            <input type=file name=photo multiple class="file_upload"/>
+                            <input type=hidden name=memory_id value="{{memory['id']}}"/>
                             <input type="submit" name="submit" value="Add Photo" />
                         </form>
                     </div>

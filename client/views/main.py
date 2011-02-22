@@ -62,16 +62,13 @@ def logout():
 ## NOT LOGGED IN ##
 ###################
 
-@main_module.route('/new', methods=['GET', 'POST'])
-def new():
-  if request.method == 'POST':
-    return upload_photo()
-  return render_template('new.html')
+@main_module.route('/create', methods=['POST'])
+def create():
+  return upload_photo(request.form.get('memory_id', None))
 
-@main_module.route('/new_static', methods=['GET', 'POST'])
-def new_static():
-    if request.method == 'POST':
-        return '{"name":"picture.jpg","type":"image/jpeg","size":"345000", "thumb_url":"/static/sandbox/images/2.jpg", "image_url":"/static/sandbox/images/2.jpg", "canvas_url":"http://memoize.com/mLi8b"}'
+@main_module.route('/new', methods=['GET'])
+def new():
+  return render_template('index.html')
 
 @main_module.route('/memory/<id>', methods=['GET'])
 def memory(id):
@@ -79,7 +76,6 @@ def memory(id):
 
   if not m:
     abort(404)
-
   else:
     from client.app import client as app
     items = []

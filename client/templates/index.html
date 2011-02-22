@@ -20,10 +20,7 @@
             <div id="helper_text">
                 <div id="inline_upload_leadtext">Simply drag or</div>
                 <div id="inline_upload">
-                    <form id="file_upload" action="{{url_for('new')}}" method="POST" enctype="multipart/form-data">
-                        <input type=hidden name=title>
-                        <input type=hidden name=caption>
-                        <input type=hidden name=mem_name value="Name this memory!">
+                    <form id="file_upload" action="{{url_for('create')}}" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="submit" value="Send my Photo!" />
                         <input type="file" name="photo" multiple>
                         <button>Upload</button>
@@ -33,9 +30,9 @@
 
             </div>
 
-            <div id="canvas_link_area">
-                Your memories can now be found at:
-                <div id="canvas_link"></div>
+            <div id="memory_url_area">
+                Your memory can now be found at:
+                <div id="memory_url"></div>
                 Share with trusted friends so they can add memories too
             </div>
             
@@ -66,7 +63,8 @@
         </div>
         </div>
         <div id="landing_drag_area_bottom"></div>
-        
+
+        {% if not session['email'] %}
         <div id="landing_login">
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
@@ -78,15 +76,17 @@
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-            {% endwith %}
-
+              {% endwith %}
         	<form id="landing_login_form" action="/login" method="post">
             	<div id="landing_login_email"><input type="text" name="email" title="Login with new or existing email" class="field100" /></div>
                 <div id="landing_login_pass"><input type="password" name="password" title="New or existing pass" class="field100" /></div>
                 <input id="landing_login_submit" type="submit" class="input_button" name="submit" value="Login" />
             </form>
         </div>
-        
+          {% else %}
+          <p>{{session['email']}}. Log out <a href="{{url_for('logout')}}">here</a>.</p>
+          {% endif %}
+
 
         <div id="drag_example_right">
             <div id="drag_example_right_graphic"></div>
@@ -100,26 +100,7 @@
 
   <h3> Build a new Memory!</h3>
 
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    {% for message in messages %} 
-        <ul class="flashes">
-          {% if message == "missing" %}
-            <li>You must fill in all the fields!</li>
-          {% endif %}
-          {% if message == "fail" %}
-            <li>We don't support that file; sorry!</li>
-          {% endif %}
-          {% if message == "success" %}
-            <li>Upload Success! Try another.</li>
-          {% endif %}
-        </ul>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-
-
-    <form method=POST enctype=multipart/form-data action="{{url_for('new')}}">
+    <form method=POST enctype=multipart/form-data action="{{url_for('create')}}">
         <p><label>Photo:</label><input type=file name=photo></p>
         <p><label>Title:</label><input type=text name=title></p>
         <label>Caption:</label><input type=text name=caption></p>

@@ -260,7 +260,7 @@ input:focus {
     position:relative;
 }
 
-#canvas_link_area{
+#memory_url_area{
     display:none;
     margin-top:1em;
     padding-left:20px;
@@ -271,7 +271,7 @@ input:focus {
     -ms-filter: 'alpha(opacity=.85)';
     filter: alpha(opacity=.85);
 }
-#canvas_link {
+#memory_url {
     font-size:1.6em;
 }
 

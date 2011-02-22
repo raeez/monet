@@ -51,12 +51,12 @@ $(function () {
         onComplete: function (event, files, index, xhr, handler) {
             var json = handler.response;
 
-            link = '<a href="'+json.canvas_url+'" target="_blank">'+json.canvas_url+'</a>';
-            if ($("#canvas_link").html() != link) {
-                $("#canvas_link").html(link);
+            link = '<a href="'+json.memory_url+'" target="_blank">'+json.memory_url+'</a>';
+            if ($("#memory_url").html() != link) {
+                $("#memory_url").html(link);
             }
-            if (!$("#canvas_link_area").is(":visible")) {
-                $("#canvas_link_area").show();
+            if (!$("#memory_url_area").is(":visible")) {
+                $("#memory_url_area").show();
             }
             /*
             console.log("COMPLETED==================");
