@@ -222,7 +222,7 @@ function wrapResize() {
 
 	$('#landing_wrapper').css("top", function() {
 		if ($(window).height() > 300) {
-			return $(window).height() / 2 - 180;
+			return $(window).height() / 2 - 205;
 		} else {
 			return -30;
 		}

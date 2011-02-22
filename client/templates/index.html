@@ -20,7 +20,7 @@
             <div id="helper_text">
                 <div id="inline_upload_leadtext">Simply drag or</div>
                 <div id="inline_upload">
-                    <form id="file_upload" action="/new_static" method="POST" enctype="multipart/form-data">
+                    <form id="file_upload" action="{{url_for('new')}}" method="POST" enctype="multipart/form-data">
                         <input type=hidden name=title>
                         <input type=hidden name=caption>
                         <input type=hidden name=mem_name value="Name this memory!">
