@@ -3,7 +3,7 @@
 from flask import Module, session, redirect, url_for, request, render_template, flash, abort
 from flaskext.uploads import UploadNotAllowed
 from memoize.model import User
-from memoize.upload.helpers import get_memory, get_photo, create_memory, upload_photo, build_memory_stream, claimed
+from memoize.upload.helpers import get_memory, get_photo, create_memory, upload_photo, build_memory_stream, claimed, claim_memory
 from lib.db.objectid import ObjectId
 import bcrypt
 
@@ -28,7 +28,7 @@ def index():
 ###########
 
 @main_module.route('/login', methods=['GET', 'POST'])
-def login(claim=None):
+def login():
   log['request'].debug("request %s" % repr(request.path))
 
   if 'email' in session:
@@ -48,10 +48,16 @@ def login(claim=None):
       session['id'] = str(user._id)
       session['password'] = request.form['password']
       log['login'].debug(session['email'])
-      if claim:
-        claim_memory(claim)
       return redirect(url_for('index'))
   return render_template('login.html')
+
+@main_module.route('/claim/<id>', methods=['GET'])
+def claim(id):
+  m = get_memory(id)
+  if m:
+    return claim_memory(m)
+  abort(400)
+
 
 @main_module.route('/logout')
 def logout():
@@ -85,7 +91,7 @@ def memory(id):
       p = get_photo(i)
       triple = (p._id, p.title, app.photos.url(p.filename))
       items.append(triple)
-    return render_template('memory.html', memory={'id' : m._id, 'name' : m.name, 'items' : items})
+    return render_template('memory.html', memory={'claimed' : not (not m.user), 'id' : m._id, 'name' : m.name, 'items' : items})
 
 @main_module.route('/rename_memory', methods=['POST'])
 def rename():

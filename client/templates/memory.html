@@ -86,6 +86,9 @@
                 	<div id="canvas_login_prompt">
 
                     {% if 'email' in session %}
+                        {% if not memory['claimed'] %}
+                          <a href="{{url_for('claim', id=memory['id'])}}">Claim</a> this memory!
+                        {% endif %}
                         Welcome {{session['email']}} | <a href="{{ url_for('logout') }}">Log out</a>
                         <br />
                         <a href="{{url_for('new')}}">New</a> memory | <a href="{{url_for('stream')}}">Recall</a> memories
@@ -94,11 +97,11 @@
                     {% else %}
                         Don't forget this memory!
                         <br/>
-                        Login <a id="canvas_login_text" href="{{url_for('login', claim=memory['id'])}}">here</a> to keep it forever
+                        Login <a id="canvas_login_text" href="{{url_for('login')}}">here</a> to keep it forever
                     </div>
                     
                     <div id="canvas_login_div">
-                        <form id="canvas_login_form" action="{{url_for('login', claim=memory['id'])}}" method="post">
+                        <form id="canvas_login_form" action="{{url_for('login')}}" method="post">
                             <div id="canvas_login_email"><input type="text" name="email" title="Login with new or existing email" class="field100" /></div>
                             <div id="canvas_login_pass"><input type="password" name="password" title="New or existing pass" class="field100" /></div>
                             <input id="canvas_login_submit" type="submit" class="input_button" name="submit" value="Login" />

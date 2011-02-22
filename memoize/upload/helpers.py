@@ -34,12 +34,12 @@ def upload_photo(mem_id=None):
 
   from client.app import client as app
   if not photo:
-    return err('missing photo')
+    return error(['missing photo'])
   else:
     try:
       filename = app.photos.save(request.files['photo'])
     except UploadNotAllowed:
-      return err('upload not allowed')
+      return error(['upload not allowed'])
     else:
       p = Photo()
       p.filename = filename
@@ -68,14 +68,21 @@ def build_memory_stream():
 def claimed(m):
   return not (not m.user)
 def claim_memory(m):
+  assert isinstance(m, Memory)
   if 'email' in session:
-    memory = get_memory(m)
-    memory.user = session['id']
+    m.user = session['id']
+    m.save()
+    return(succeed())
+  return(error(["not logged in!"]))
 
-def error(error_list):
+def error(error_list=None):
+  if not error_list:
+    error_list = []
   assert isinstance(error_list, list)
   return json.dumps({"success" : False, "errors" : error_list})
 
-def succeed(resp):
+def succeed(resp=None):
+  if not resp:
+    resp = {}
   assert isinstance(resp, dict)
   return json.dumps(dict({"success" : True, "errors" : []}, **resp)) # succint dictionary merge
