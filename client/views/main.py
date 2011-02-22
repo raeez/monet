@@ -73,11 +73,8 @@ def new_static():
     if request.method == 'POST':
         return '{"name":"picture.jpg","type":"image/jpeg","size":"345000", "thumb_url":"/static/sandbox/images/2.jpg", "image_url":"/static/sandbox/images/2.jpg", "canvas_url":"http://memoize.com/mLi8b"}'
 
-@main_module.route('/memory/<id>', methods=['GET', 'POST'])
+@main_module.route('/memory/<id>', methods=['GET'])
 def memory(id):
-  if request.method == "POST":
-    return upload_photo(id)
-
   m = get_memory(id)
 
   if not m:
