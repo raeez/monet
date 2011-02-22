@@ -10,7 +10,7 @@ def create_memory():
   m = Memory()
   m.user = None
   if 'email' in session:
-    m.user = session['_id']
+    m.user = session['id']
   else:
     m.user = None
   m.name = mem_name
@@ -58,7 +58,7 @@ def upload_photo(mem_id=None):
                       'type' : 'image/jpeg'})
 
 def build_memory_stream():
-  m = Memory.find({'user' : session['_id']})
+  m = Memory.find({'user' : session['id']})
   s = []
   for memory in m:
     mem = {'id' : memory._id, 'name' : memory.name}
@@ -67,6 +67,10 @@ def build_memory_stream():
 
 def claimed(m):
   return not (not m.user)
+def claim_memory(m):
+  if 'email' in session:
+    memory = get_memory(m)
+    memory.user = session['id']
 
 def error(error_list):
   assert isinstance(error_list, list)

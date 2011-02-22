@@ -28,7 +28,7 @@ def index():
 ###########
 
 @main_module.route('/login', methods=['GET', 'POST'])
-def login():
+def login(claim=None):
   log['request'].debug("request %s" % repr(request.path))
 
   if 'email' in session:
@@ -41,13 +41,15 @@ def login():
     #if this user has not logged in before
     if user is None:
       flash('null')
-      return redirect(url_for('login'))
+      return redirect(url_for('login', claim=claim))
 
     if bcrypt.hashpw(request.form['password'], user.password) == user.password:
       session['email'] = request.form['email']
-      session['_id'] = str(user._id)
+      session['id'] = str(user._id)
       session['password'] = request.form['password']
       log['login'].debug(session['email'])
+      if claim:
+        claim_memory(claim)
       return redirect(url_for('index'))
   return render_template('login.html')
 
@@ -92,7 +94,7 @@ def rename():
 
   m = get_memory(request.form['id'])
   if claimed(m):
-    if ('email' in session) and (m.user == session['_id']):
+    if ('email' in session) and (m.user == session['id']):
       m.name = request.form['new_name']
       m.save()
       return
@@ -110,7 +112,7 @@ def rename():
 def stream():
   log['request'].debug("request %s" % repr(request.path))
 
-  if 'email' not in session and '_id' not in session:
+  if 'email' not in session and 'id' not in session:
     return redirect(url_for('login'))
 
   return render_template('stream.html', stream=build_memory_stream())
