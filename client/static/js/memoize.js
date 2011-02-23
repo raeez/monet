@@ -167,7 +167,7 @@ function photoHFit() {
         }
 
 		if (width_accumulator < max_width) {
-			width_accumulator += $(this).parent('.photo_div').width() + parseInt($(this).parent().css('margin-left')) + parseInt($(this).parent().css('margin-right'));
+			width_accumulator += $(this).parent('.photo_div').width() + margin;
 			row_accumulator.push($(this).parent('.photo_div'));
 		} else {
             /*
@@ -175,7 +175,8 @@ function photoHFit() {
              * reset the row
              */
 			resizePhotoDivs(row_accumulator, width_accumulator);
-			width_accumulator = 0 + $(this).parent('.photo_div').width() + parseInt($(this).parent().css('margin-left')) + parseInt($(this).parent().css('margin-right'));
+
+			width_accumulator = 0 + $(this).parent('.photo_div').width() + margin;
 			row_accumulator = [];
 			row_accumulator.push($(this).parent('.photo_div'));
 		}
@@ -190,9 +191,19 @@ function resizePhotoDivs(row_accumulator, default_width) {
 	var i;
 	var overspill;
 	var length = row_accumulator.length;
-	
-	if (default_width > 955) {
-		overspill = default_width - 955;
+    var max_width = 955;
+    
+    for (i=0; i<row_accumulator.length; i++) {
+        if ($(row_accumulator[i]).hasClass("no_crop")) {
+            length -= 1;
+            max_width = max_width - $(row_accumulator[i]).width() - 14; //dont forget margin and border!
+            default_width = default_width - $(row_accumulator[i]).width();
+            row_accumulator.splice(i,1);
+        }
+    }
+
+	if (default_width >= max_width) {
+		overspill = default_width - max_width;
 		crop = Math.floor(overspill / length);
 		
 		var width_accumulator = 0; 
@@ -201,7 +212,8 @@ function resizePhotoDivs(row_accumulator, default_width) {
 			
 			if (i == length - 1) {
 				// This means we're on the last photo. The last photo should take up the remaining slack.
-				$(photo_div).width(955 - width_accumulator - 10); // -10 because of the margin
+                foo = max_width - width_accumulator;
+				$(photo_div).width(max_width - width_accumulator - 10); // -10 because of the margin
 			} else {
 				// Else make the divs a bit smaller based on the crop size
 				newsize = $(photo_div).width() - crop;
@@ -224,7 +236,7 @@ function updateLoginBoxState() {
 }
 
 function wrapResize() {
-    $('body').height($(window).height());
+    //$('body').height($(window).height());
 
 	$('#landing_wrapper').css("top", function() {
 		if ($(window).height() > 300) {

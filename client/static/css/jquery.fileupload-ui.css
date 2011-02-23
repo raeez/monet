@@ -10,11 +10,14 @@
     line-height:1.2em;
 }
 .upload_file_canvas_div {
-    width:175px;
-    height:175px;
+    width:171px;
+    height:171px;
     border: 2px dashed #aaa;
     font-size:0.6em;
     line-height:1.2em;
+}
+.mock_photo {
+    width:171px;
 }
 .file_upload iframe, .file_upload button {
   display: none;
@@ -105,13 +108,11 @@
     cursor: pointer;
     top: 0;
     right: 0;
-    
-    -o-transform: translate(-1300px, 0px) scale(10);
-    -moz-transform: translate(-1300px, 0) scale(10);
+    -o-transform: translate(-500px, 70px) scale(10);
+    -moz-transform: translate(-500px, 70px) scale(10);
     opacity: 0;
     -ms-filter: 'alpha(opacity=0)';
     filter: alpha(opacity=0);
-   
 }
 
 #inline_upload_leadtext {

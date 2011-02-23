@@ -4,11 +4,12 @@
 
 {% block head %}
 {{ super() }}
-
+<!--
     <link rel="stylesheet" href="{{url_for('static', filename='css/zoomooz.css')}}" type="text/css" />
     <script type="text/javascript" src="{{url_for('static', filename='js/sylvester.js')}}"></script>
     <script type="text/javascript" src="{{url_for('static', filename='js/purecssmatrix.js')}}"></script>
     <script type="text/javascript" src="{{url_for('static', filename='js/jquery.zoomooz.js')}}"></script>
+    -->
 
     <script src="{{url_for('static', filename='js/jquery.jeditable.mini.js')}}"></script>
 
@@ -133,7 +134,8 @@
             <div class="canvas_center" id="photo_canvas_center">
                 <div id="photo_wrapper">
 
-                    <div id="add_artifact" class="photo_div">
+                    <div id="add_artifact" class="photo_div no_crop">
+                        <div class="photo">
                         <form id="canvas_file_upload" action="{{url_for('create')}}" method="POST" enctype="multipart/form-data">
                             <input type="file" name="photo" multiple>
                             <input type=hidden name=memory_id value="{{memory['id']}}"/>
@@ -149,6 +151,7 @@
                             Or <span class="blue_hover">upload</span> them here
                         </div>
                     </div>
+                    </div>
 
                     <div id="new_artifacts">
                         
@@ -159,11 +162,9 @@
                     {% endfor %}
 
                 <script type="text/javascript" src="{{url_for('static', filename='js/upload_init.js')}}"></script> 
-                </div>
 
                 <div class="clear"></div>
-
-
+                </div>
             </div>
             <div class="canvas_right_of_wrapper">
             	<div id="bottom_accent_bar"></div>

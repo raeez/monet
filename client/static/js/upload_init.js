@@ -12,25 +12,50 @@ $("#canvas_file_upload").fileUploadUI({
         downloadTable: $('#new_artifacts'),
         progressSelector: $('.file_upload_progress'),
         cancelSelector: $('.file_upload_cancel'),
+        onDragEnter: function(event) {
+            $("#add_artifact").css("-moz-box-shadow", "2px 2px 11px #1e5957");
+            $("#add_artifact").css("-webkit-box-shadow", "2px 2px 11px #1e5957");
+            $("#add_artifact").css("box-shadow", "2px 2px 11px #1e5957");
+        },
+        onAbort: function(event) {
+            $("#add_artifact").css("-moz-box-shadow", "2px 2px 7px #111");
+            $("#add_artifact").css("-webkit-box-shadow", "2px 2px 7px #111");
+            $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
+        },
+        onDragLeave: function(event) {
+            $("#add_artifact").css("-moz-box-shadow", "2px 2px 7px #111");
+            $("#add_artifact").css("-webkit-box-shadow", "2px 2px 7px #111");
+            $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
+        },
+        onDrop: function(event) {
+            $("#add_artifact").css("-moz-box-shadow", "2px 2px 7px #111");
+            $("#add_artifact").css("-webkit-box-shadow", "2px 2px 7px #111");
+            $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
+        },
+        beforeSend:function (event, files, index, xhr, handler, callBack) {
+            photoHFit();
+            callBack();
+        },
         onComplete: function (event, files, index, xhr, handler) {
             photoHFit();
         },
         buildUploadRow: function (files, index) {
             return $(
-            '       <div class="upload_file_canvas_div photo_div">'+
+            '       <div class="upload_file_canvas_div photo_div no_crop">'+
             '           <div class="file_upload_canvas_content">'+
                             files[index].name +
             '               <div class="file_upload_progress"><\/div>'+
             '               <div class="file_upload_cancel"><\/div>'+
             '           <\/div>'+
             '           <div class="file_upload_canvas_preview"><\/div>'+
+            '           <div class="photo"><div class="mock_photo><\/div><\/div>"'+
             '       <\/div>'
             );
         },
         buildDownloadRow: function (file) {
             return $(
             '       <div class="photo_div">'+
-            '           <img src="'+file.thumb_url+'" height="175"\/>'+
+            '           <img class="photo" src="'+file.thumb_url+'" height="175"\/>'+
             '       <\/div>'
             );
         }
