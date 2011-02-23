@@ -56,6 +56,12 @@ $(document).ready(function(){
      * Control hover actions on photos
      *
      */
+    $("#add_artifact").hover(function(){
+        $(".blue_hover").css("color", "#11b0aa");
+    }, function(){
+        $(".blue_hover").css("color", "#189792");
+    });
+
 //	hover_in_queue = [];
 //	hover_out_queue = [];
 //	$(".photo_div").hover(function() {
@@ -71,19 +77,19 @@ $(document).ready(function(){
 });
 
 function findInHoverQueue(search, queue) {
-    console.log("Entered findInHoverQueue!");
+    //console.log("Entered findInHoverQueue!");
     // Searches for the id within the hover queue. Returns the index if it finds it
     // otherwise it returns -1
     queue.forEach(function(value, index){
         if (search == value[0]) {
-            console.log("FOUND ONE: returning index: "+index);
+            //console.log("FOUND ONE: returning index: "+index);
             return index;
         }
     });
 
-    console.log('about to return -1');
-    console.log("search: " + search);
-    console.log("queue: " + queue);
+    //console.log('about to return -1');
+    //console.log("search: " + search);
+    //console.log("queue: " + queue);
     return -1;
 }
 
@@ -102,9 +108,9 @@ function updateHoverQueue(in_queue, out_queue) {
         $('#photo_canvas_center').width(originalCanvasWidth + maxPhotoSize);
     }
 
-    console.log("updating queues")
-    console.log(in_queue);
-    console.log(out_queue);
+    //console.log("updating queues")
+    //console.log(in_queue);
+   //console.log(out_queue);
 
     for (i=in_queue.length-1; i >= 0; i-- ) {
         // Start at the end of the queue, or the latest one that was added.
@@ -115,7 +121,7 @@ function updateHoverQueue(in_queue, out_queue) {
                 500,
                 function() {
                     in_index = findInHoverQueue($(this).attr('id'),in_queue);
-                    console.log("Getting rid of index: " + in_index);
+                    //console.log("Getting rid of index: " + in_index);
                     if (in_index >= 0) {
                         // make sure we found something
                         in_queue.splice(in_index, 1);

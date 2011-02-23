@@ -132,20 +132,33 @@
             </div>
             <div class="canvas_center" id="photo_canvas_center">
                 <div id="photo_wrapper">
-                    <div id="add_artifact">
 
-                        Add artifact:
-
-                        <form method=POST enctype=multipart/form-data action="{{url_for('create')}}">
-                            <input type=file name=photo multiple class="file_upload"/>
+                    <div id="add_artifact" class="photo_div">
+                        <form id="canvas_file_upload" action="{{url_for('create')}}" method="POST" enctype="multipart/form-data">
+                            <input type="file" name="photo" multiple>
                             <input type=hidden name=memory_id value="{{memory['id']}}"/>
-                            <input type="submit" name="submit" value="Add Photo" />
+                            <input type="hidden" name="submit" value="Add Photo" />
                         </form>
+                        
+                        <div class="file_upload_canvas_content" style="top:0;">
+                            Add more photos:
+                        </div>
+
+                        <div id="add_artifact_text">
+                            Drag in more photos<br/>
+                            Or <span class="blue_hover">upload</span> them here
+                        </div>
+                    </div>
+
+                    <div id="new_artifacts">
+                        
                     </div>
 
                     {% for item in memory['items'] %}
                     <div id="{{item[0]}}" class="photo_div"><img class="photo" src="{{item[2]}}" height="175" /></div>
                     {% endfor %}
+
+                <script type="text/javascript" src="{{url_for('static', filename='js/upload_init.js')}}"></script> 
                 </div>
 
                 <div class="clear"></div>

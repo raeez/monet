@@ -1,29 +1,72 @@
 $(function () {
+
+/****************************************
+ * FILE UPLOAD ON CANVAS PAGE
+ * *************************************/
+
+$("#canvas_file_upload").fileUploadUI({
+    
+        fieldName: "photo",
+        dropZone: $('html'),
+        uploadTable: $('#new_artifacts'),
+        downloadTable: $('#new_artifacts'),
+        progressSelector: $('.file_upload_progress'),
+        cancelSelector: $('.file_upload_cancel'),
+        onComplete: function (event, files, index, xhr, handler) {
+            photoHFit();
+        },
+        buildUploadRow: function (files, index) {
+            return $(
+            '       <div class="upload_file_canvas_div photo_div">'+
+            '           <div class="file_upload_canvas_content">'+
+                            files[index].name +
+            '               <div class="file_upload_progress"><\/div>'+
+            '               <div class="file_upload_cancel"><\/div>'+
+            '           <\/div>'+
+            '           <div class="file_upload_canvas_preview"><\/div>'+
+            '       <\/div>'
+            );
+        },
+        buildDownloadRow: function (file) {
+            return $(
+            '       <div class="photo_div">'+
+            '           <img src="'+file.thumb_url+'" height="175"\/>'+
+            '       <\/div>'
+            );
+        }
+
+});
+
+
+/****************************************
+ * FILE UPLOAD ON LANDING PAGE
+ * *************************************/
+
     $('#file_upload').fileUploadUI({
         onDragEnter: function(event) {
-            console.log("onDragEnter:");
-            console.log(event);
+            //console.log("onDragEnter:");
+            //console.log(event);
             $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_top.png) no-repeat top left");
             $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_middle.png) repeat-y top left");
             $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_bottom.png) no-repeat top left");
         },
         onAbort: function(event) {
-            console.log("onAbort:");
-            console.log(event);
+            //console.log("onAbort:");
+            //console.log(event);
             $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_top.png) no-repeat top left");
             $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_middle.png) repeat-y top left");
             $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_bottom.png) no-repeat top left");
         },
         onDragLeave: function(event) {
-            console.log("onDragLeave:");
-            console.log(event);
+            //console.log("onDragLeave:");
+            //console.log(event);
             $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_top.png) no-repeat top left");
             $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_middle.png) repeat-y top left");
             $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_bottom.png) no-repeat top left");
         },
         onDrop: function(event) {
-            console.log("onDrop:");
-            console.log(event);
+            //console.log("onDrop:");
+            //console.log(event);
             $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_top.png) no-repeat top left");
             $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_middle.png) repeat-y top left");
             $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_bottom.png) no-repeat top left");
@@ -36,7 +79,7 @@ $(function () {
         progressSelector: $('.file_upload_progress'),
         cancelSelector: $('.file_upload_cancel'),
         onProgress: function (event, files, index, xhr, handler) {
-            console.log("PROGRESS!");
+            //console.log("PROGRESS!");
             if (handler.progressbar) {
                 handler.progressbar.progressbar(
                     'value',
