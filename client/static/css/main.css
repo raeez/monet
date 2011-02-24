@@ -410,28 +410,30 @@ input:focus {
 }
 
 
-#canvas_header .click input {
-	font-size:1em;
-	font-weight:normal;
-	color: #1e5957;
-	background:transparent;
-	border:0;
-	margin:0;
-	padding:0;
-	font-family:inherit;
+#canvas_title {
+    font-size:1.8em;
+    width:700px;
+    float:left;
+}
+#canvas_title .click {
+    padding:5px 5px 6px 5px;
 }
 
-#canvas_header .click {
-	margin:0;
-	padding:0px 5px;
-}
-
-#canvas_header .click:hover {
+#canvas_title .click:hover {
 	border:2px #ccc dashed;
 	cursor:text;
-	padding:0px 3px;
+	padding:3px 3px 4px 3px;
 }
 
+#canvas_title .click input {
+    font-size:0.7em;
+	color: #aaa;
+	background:#444;
+    border:0;
+	margin:0;
+	padding:0px 0px 0px 3px;
+	font-family:inherit;
+}
 /*****************************************
  * Canvas Page
  *****************************************/
