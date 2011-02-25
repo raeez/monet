@@ -12,7 +12,7 @@ echo "****************************************"
 echo ""
 
 #mongodb snapshot sources
-sudo apt-add-repository 'deb http://downloads.mongodb.org/distros/ubuntu 10.10 10gen'
+#sudo apt-add-repository 'deb http://downloads.mongodb.org/distros/ubuntu 10.10 10gen'
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
 sudo apt-get -y update
 sudo apt-get -y upgrade
@@ -29,9 +29,15 @@ sudo apt-get -y install git \
 # dev env
 wget -c http://pypi.python.org/packages/2.7/s/setuptools/setuptools-0.6c11-py2.7.egg#md5=fe1f997bc722265116870bc7919059ea
 sudo sh setuptools-0.6c11-py2.7.egg
-sudo python2.7 /usr/local/bin/setuptools-2.7 pip
+
+sudo python2.7 /usr/local/bin/easy_install-2.7 pip
 sudo python2.7 /usr/local/bin/pip-2.7 install virtualenv
+
+#sudo python2.7 /usr/local/bin/setuptools-2.7 pip
+#sudo python2.7 /usr/local/bin/pip-2.7 install virtualenv
+
 virtualenv -p python2.7 --no-site-packages --distribute --clear env
+
 . env/bin/activate
 
 # python dependencies
