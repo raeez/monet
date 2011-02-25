@@ -68,13 +68,14 @@ $("#canvas_file_upload").fileUploadUI({
  * *************************************/
 
     $('#file_upload').fileUploadUI({
-        onDragEnter: function(event) {
+        /*equivalent to drop_zone_enlarge function already defined
+	onDragEnter: function(event) {
             //console.log("onDragEnter:");
             //console.log(event);
             $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_top.png) no-repeat top left");
             $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_middle.png) repeat-y top left");
             $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_bottom.png) no-repeat top left");
-        },
+        },*/
         onAbort: function(event) {
             //console.log("onAbort:");
             //console.log(event);
@@ -82,13 +83,14 @@ $("#canvas_file_upload").fileUploadUI({
             $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_middle.png) repeat-y top left");
             $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_bottom.png) no-repeat top left");
         },
-        onDragLeave: function(event) {
+        /* equivalent to "dropzonereduce function already defined
+	onDragLeave: function(event) {
             //console.log("onDragLeave:");
             //console.log(event);
             $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_top.png) no-repeat top left");
             $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_middle.png) repeat-y top left");
             $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_bottom.png) no-repeat top left");
-        },
+        },*/
         onDrop: function(event) {
             //console.log("onDrop:");
             //console.log(event);
