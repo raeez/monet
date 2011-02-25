@@ -214,7 +214,8 @@
                 if (typeof uploadHandler.dropZone.switchClass === func) {
 		    $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_top.png) no-repeat top left");
             	    $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_middle.png) repeat-y top left");
-                    $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_bottom.png) no-repeat top left");
+                    $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_bottom.png) no-repeat top left");	
+
                     uploadHandler.dropZone.switchClass(
                         uploadHandler.cssClassSmall,
                         uploadHandler.cssClassLarge
@@ -232,6 +233,7 @@
 		$("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_top.png) no-repeat top left");
             	$("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_middle.png) repeat-y top left");
             	$("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_bottom.png) no-repeat top left");
+
                 uploadHandler.dropZone.switchClass(
                     uploadHandler.cssClassLarge,
                     uploadHandler.cssClassSmall
