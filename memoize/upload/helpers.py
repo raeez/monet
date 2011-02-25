@@ -55,6 +55,7 @@ def upload_photo(mem_id=None):
                       'image_url' : app.photos.url(p.filename),
                       'title' : p.title,
                       'caption' : p.caption,
+                      'memory' : str(m._id),
                       'type' : 'image/jpeg'})
 
 def build_memory_stream():

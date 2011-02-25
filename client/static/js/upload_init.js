@@ -77,8 +77,6 @@ $("#canvas_file_upload").fileUploadUI({
             $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_bottom.png) no-repeat top left");
         },*/
         onAbort: function(event) {
-            //console.log("onAbort:");
-            //console.log(event);
             $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_top.png) no-repeat top left");
             $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_middle.png) repeat-y top left");
             $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_bottom.png) no-repeat top left");
@@ -128,6 +126,10 @@ $("#canvas_file_upload").fileUploadUI({
             if (!$("#memory_url_area").is(":visible")) {
                 $("#memory_url_area").show();
             }
+
+            $("#memory_id").val(json.memory);
+
+            wrapResize(50);
             /*
             console.log("COMPLETED==================");
             console.log("event, files, index, xhr, handler, json");

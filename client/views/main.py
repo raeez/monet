@@ -99,15 +99,16 @@ def rename():
     abort(400)
 
   m = get_memory(request.form['id'])
-  if claimed(m):
-    if ('email' in session) and (m.user == session['id']):
+  if m:
+    if claimed(m):
+      if ('email' in session) and (m.user == session['id']):
+        m.name = request.form['new_name']
+        m.save()
+        return
+    else:
       m.name = request.form['new_name']
       m.save()
       return
-  else:
-    m.name = request.form['new_name']
-    m.save()
-    return
 
   abort(403)
 
