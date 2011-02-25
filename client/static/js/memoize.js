@@ -10,6 +10,7 @@ $(document).ready(function(){
 	loginBoxActive = false;
 
 
+    $("#multi_key").val(randomString());
 	
     /*****************
      * Resizes the photos so they display nicely horizontally
@@ -75,6 +76,19 @@ $(document).ready(function(){
 //	});
 	
 });
+
+
+function randomString() {
+	var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+	var string_length = 16;
+	var randomstring = '';
+	for (var i=0; i<string_length; i++) {
+		var rnum = Math.floor(Math.random() * chars.length);
+		randomstring += chars.substring(rnum,rnum+1);
+	}
+    return randomstring;
+}
+
 
 function findInHoverQueue(search, queue) {
     //console.log("Entered findInHoverQueue!");
@@ -235,12 +249,13 @@ function updateLoginBoxState() {
 	}
 }
 
-function wrapResize() {
-    //$('body').height($(window).height());
+function wrapResize(adjustment) {
+    adjustment = typeof(adjustment) != 'undefined' ? adjustment : 0;
+    var standard_offset = 205;
 
 	$('#landing_wrapper').css("top", function() {
 		if ($(window).height() > 300) {
-			return $(window).height() / 2 - 205;
+			return $(window).height() / 2 - (standard_offset + adjustment);
 		} else {
 			return -30;
 		}
