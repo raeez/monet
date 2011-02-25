@@ -155,7 +155,6 @@ $("#canvas_file_upload").fileUploadUI({
             );
         },
         buildDownloadRow: function (file) {
-	    alert(file);
             return $(
             '       <div class="upload_file_div">'/*+
             '           <div class="file_upload_content">'+
