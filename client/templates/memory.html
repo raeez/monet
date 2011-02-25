@@ -17,15 +17,42 @@
     /*****************
      * Title editability
      */
-$(document).ready(function() {
+$(document).ready(function(value) {
     $(".click").editable("/rename_memory", { 
         indicator : "<img src='{{url_for('static', filename='images/indicator.gif')}}'>",
         tooltip   : "Click to edit. Push enter to save.",
         style  : "inherit",
         id: "id",
-        name: "new_name"
+        name: "new_name",
+	onblur: "submit"
     });
 });
+
+/*$(function() {
+    $(".click").editable(function(value,settings){
+	$.ajax({
+		type: 'POST',
+		url: "/rename_memory",
+		data: {"new_name": value},
+		dataType: 'json',
+		success: function(){
+			alert('success');
+		}
+	});
+	return(value);
+
+    },
+    { 
+        indicator : "<img src='{{url_for('static', filename='images/indicator.gif')}}'>",
+        tooltip   : "Click to edit. Push enter to save.",
+        style  : "inherit",
+        id: "id",
+        name: "new_name",
+	onblur: "submit"
+    });
+});*/
+
+
 </script>
 
 <!--

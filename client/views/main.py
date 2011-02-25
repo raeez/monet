@@ -106,6 +106,7 @@ def rename():
       return
   else:
     m.name = request.form['new_name']
+    m.save()
     return
 
   abort(403)
