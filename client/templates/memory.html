@@ -18,14 +18,17 @@
      * Title editability
      */
 $(document).ready(function() {
-    $(".click").editable("/rename_memory", { 
+	$(".click").editable("/rename_memory", { 
         indicator : "<img src='{{url_for('static', filename='images/indicator.gif')}}'>",
         tooltip   : "Click to edit. Push enter to save.",
         style  : "inherit",
         id: "id",
-        name: "new_name"
+        name: "new_name",
+	onblur: "submit",
+	});
     });
-});
+
+
 </script>
 
 <!--

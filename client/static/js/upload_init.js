@@ -148,7 +148,7 @@ $("#canvas_file_upload").fileUploadUI({
             return $(
             '       <div class="upload_file_div">'+
             '           <div class="file_upload_content">'+
-                            files[index].name +
+                            'uploading...' +
             '               <div class="file_upload_progress"><\/div>'+
             '               <div class="file_upload_cancel"><\/div>'+
             '           <\/div>'+
@@ -158,10 +158,10 @@ $("#canvas_file_upload").fileUploadUI({
         },
         buildDownloadRow: function (file) {
             return $(
-            '       <div class="upload_file_div">'+
+            '       <div class="upload_file_div">'/*+
             '           <div class="file_upload_content">'+
-                            file.name +
-            '           <\/div>'+
+			    file.name + 
+            '           <\/div>'*/+
             '           <div class="file_upload_preview"><img src="'+file.thumb_url+'"\/><\/div>'+
             '       <\/div>'
             );

@@ -66,9 +66,9 @@
             return null;
         };
 
-        this.addNode = function (parentNode, node, callBack) {
+        this.addNode = function (parentNode, node, callBack, handler) {
             if (node) {
-                node.css('display', 'none').appendTo(parentNode).fadeIn(function () {
+		node.css('display', 'none').prependTo(parentNode).fadeIn(function () {
                     if (typeof callBack === func) {
                         try {
                             callBack();
@@ -78,7 +78,8 @@
                             throw e;
                         }
                     }
-                });
+                });			
+                //node.css('display', 'none').appendTo(parentNode).fadeIn(function () {
             } else if (typeof callBack === func) {
                 callBack();
             }
@@ -214,7 +215,8 @@
                 if (typeof uploadHandler.dropZone.switchClass === func) {
 		    $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_top.png) no-repeat top left");
             	    $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_middle.png) repeat-y top left");
-                    $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_bottom.png) no-repeat top left");
+                    $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_bottom.png) no-repeat top left");	
+
                     uploadHandler.dropZone.switchClass(
                         uploadHandler.cssClassSmall,
                         uploadHandler.cssClassLarge
@@ -232,6 +234,7 @@
 		$("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_top.png) no-repeat top left");
             	$("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_middle.png) repeat-y top left");
             	$("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_bottom.png) no-repeat top left");
+
                 uploadHandler.dropZone.switchClass(
                     uploadHandler.cssClassLarge,
                     uploadHandler.cssClassSmall
