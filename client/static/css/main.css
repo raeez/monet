@@ -386,13 +386,13 @@ input:focus {
 #canvas_header #login {
     text-align:right;
 	float:right;
-	width:250px;
+	width:315px;
 	font-size:.8em;
 	color:#aaaaaa;
 	line-height:1.4em;
 }
 #canvas_login_div {
-	width:218px;
+	width:350px;
 	display:none;
 }
 #canvas_login_email {
@@ -412,7 +412,7 @@ input:focus {
 
 #canvas_title {
     font-size:1.8em;
-    width:700px;
+    width:640px;
     float:left;
 }
 #canvas_title .click {

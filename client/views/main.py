@@ -24,15 +24,50 @@ def index():
   return render_template('index.html')
 
 ###########
-## INDEX ##
+## USERS ##
 ###########
+
+@main_module.route('/new_user', methods=['GET', 'POST'])
+def new_user():
+    if not request.form['email'] or not request.form['password'] or not request.form['confirm']:
+        abort(400)
+
+    username = request.form['email']
+    password = request.form['password']
+    confirm = request.form['confirm']
+
+    if pasword != confirm:
+        abort(400)
+
+    u = User()
+    u.email = username
+    u.password = bcrypt.hashpw(password, password)
+    u.save()
+
+    session['email'] = u.email
+    session['id'] = str(u._id)
+    session['password'] = password
+    log['login'].debug(session['email'])
+
+    return
+
+@main_module.route('/check_for_email', methods=['GET', 'POST'])
+def check_for_email():
+    if not request.form['email']:
+        abort(400)
+    user = User.find_one({'email' : request.form['email']})
+
+    if user is None:
+        return 0
+    else:
+        return 1
 
 @main_module.route('/login', methods=['GET', 'POST'])
 def login():
   log['request'].debug("request %s" % repr(request.path))
 
   if 'email' in session:
-    return redirect(url_for('index'))
+    return redirect(request.referrer)
   elif request.method == 'POST':
     log['login'].debug("request %s" % repr(request.form))
     #auth
@@ -48,8 +83,8 @@ def login():
       session['id'] = str(user._id)
       session['password'] = request.form['password']
       log['login'].debug(session['email'])
-      return redirect(url_for('index'))
-  return render_template('login.html')
+      return redirect(request.referrer)
+  return redirect(request.referrer)
 
 @main_module.route('/claim/<id>', methods=['GET'])
 def claim(id):
@@ -85,6 +120,9 @@ def memory(id):
   if not m:
     abort(404)
   else:
+    if 'email' in session:
+      claim_memory(m)
+
     from client.app import client as app
     show_hidden = request.args.get('show_hidden', '0')
     items = []

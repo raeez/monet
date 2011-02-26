@@ -92,18 +92,20 @@ $(document).ready(function() {
                 	<div id="canvas_login_prompt">
 
                     {% if 'email' in session %}
+                        <!--
                         {% if not memory['claimed'] %}
                           <a href="{{url_for('claim', id=memory['id'])}}">Claim</a> this memory!
                         {% endif %}
-                        Welcome {{session['email']}} | <a href="{{ url_for('logout') }}">Log out</a>
+                        -->
+                        Welcome {{session['email']}}
                         <br />
-                        <a href="{{url_for('new')}}">New</a> memory | <a href="{{url_for('stream')}}">Recall</a> memories
+                        <a href="{{url_for('new')}}">New</a> memory | <a href="{{url_for('stream')}}">Recall</a> memories | <a href="{{ url_for('logout') }}">Log out</a>
                     </div>
 
                     {% else %}
                         Don't forget this memory!
                         <br/>
-                        Login <a id="canvas_login_text" href="{{url_for('login')}}">here</a> to keep it forever
+                        Login <a id="canvas_login_text" href="#">here</a> to keep it forever
                     </div>
                     
                     <div id="canvas_login_div">
