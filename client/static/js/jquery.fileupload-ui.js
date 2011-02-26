@@ -66,9 +66,9 @@
             return null;
         };
 
-        this.addNode = function (parentNode, node, callBack) {
+        this.addNode = function (parentNode, node, callBack, handler) {
             if (node) {
-                node.css('display', 'none').appendTo(parentNode).fadeIn(function () {
+		node.css('display', 'none').prependTo(parentNode).fadeIn(function () {
                     if (typeof callBack === func) {
                         try {
                             callBack();
@@ -78,7 +78,8 @@
                             throw e;
                         }
                     }
-                });
+                });			
+                //node.css('display', 'none').appendTo(parentNode).fadeIn(function () {
             } else if (typeof callBack === func) {
                 callBack();
             }
