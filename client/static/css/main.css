@@ -502,6 +502,12 @@ input:focus {
 	font-size:0.7em;
 }
 
+#hidden_prompt {
+    font-size:0.8em;
+    color:#aaa;
+    padding-left:5px;
+}
+
 #bottom_accent_bar {
 	background:#189792 url(../images/teal_accent_bottom_inner.jpg) no-repeat bottom left;
 	width:20px;
@@ -530,7 +536,42 @@ input:focus {
 	box-shadow: 2px 2px 7px #111;
 	margin:5px;
 	overflow:hidden;
+    position:relative;
 }
+
+.artifact_hidden {
+    opacity: .50;
+    -ms-filter: 'alpha(opacity=.50)';
+    filter: alpha(opacity=.50);
+}
+.artifact_hidden:hover {
+    opacity: 1;
+    -ms-filter: 'alpha(opacity=1)';
+    filter: alpha(opacity=1);
+}
+
+.hide_photo {
+    display:none;
+    background:#222;
+    padding:0px 5px;
+    position:absolute;
+    right:0;
+    top:0;
+    text-align:right;
+    font-size:0.7em;
+    line-height:1.4em;
+    opacity: .85;
+    -ms-filter: 'alpha(opacity=.85)';
+    filter: alpha(opacity=.85);
+}
+
+.hide_photo:hover {
+    cursor:pointer;
+    opacity: .95;
+    -ms-filter: 'alpha(opacity=.95)';
+    filter: alpha(opacity=.95);
+}
+
 
 /*
 .photo_div:hover {

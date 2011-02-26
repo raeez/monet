@@ -86,12 +86,47 @@ def memory(id):
     abort(404)
   else:
     from client.app import client as app
+    show_hidden = request.args.get('show_hidden', '0')
     items = []
     for i in m.items:
       p = get_photo(i)
-      triple = (p._id, p.title, app.photos.url(p.filename))
-      items.append(triple)
-    return render_template('memory.html', memory={'claimed' : not (not m.user), 'id' : m._id, 'name' : m.name, 'items' : items})
+
+      if p.visible == 0:
+        if show_hidden == '1':
+          pass
+        else:
+          continue
+
+      item = dict()
+      item['id'] = p._id
+      item['title'] = p.title
+      item['url'] = app.photos.url(p.filename)
+      item['visible'] = int(p.visible)
+      items.append(item)
+    return render_template('memory.html', memory={'claimed' : not (not m.user), 'id' : m._id, 'name' : m.name, 'items' : items, 'visible' : show_hidden})
+
+@main_module.route('/toggle_visibility', methods=['POST'])
+def toggle_visibility():
+    if not request.form['visibility'] or not request.form['id']:
+        abort(400)
+
+    try:
+        visibility = int(request.form['visibility'])
+    except ValueError:
+        abort(403)
+
+    p = get_photo(request.form['id'])
+    if p:
+        if visibility == 1:
+            p.visible = 0
+        elif visibility == 0:
+            p.visible = 1
+        else:
+            abort(403)
+        p.save()
+        return 1
+
+    abort(403)
 
 @main_module.route('/rename_memory', methods=['POST'])
 def rename():

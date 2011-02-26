@@ -24,6 +24,28 @@ $(document).ready(function(){
 	wrapResize();
 	$(window).resize(wrapResize);
 
+    /* ************************************************* *
+     * Controls the hide button on photo_divs
+     * **************************************************/
+    $(".hide_photo").click(function(){
+        var visible;
+
+        if ($(this).parent().hasClass("artifact_hidden")) {
+            visible = 0;
+            $.post("/toggle_visibility", {'visibility':visible, 'id':$(this).parent().attr("id")});
+            $(this).html("<a href='#'>hide</a>");
+            $(this).parent().removeClass("artifact_hidden");
+        } else { 
+            visible = 1; 
+            $.post("/toggle_visibility", {'visibility':visible, 'id':$(this).parent().attr("id")});
+            $(this).parent(".photo_div").hide('fast', function(){
+                $(this).parent(".photo_div").remove();
+                photoHFit();
+            });
+        }
+
+    });
+
 
     /*****************
      * Controls the form element hints for the login forms
@@ -61,6 +83,12 @@ $(document).ready(function(){
         $(".blue_hover").css("color", "#11b0aa");
     }, function(){
         $(".blue_hover").css("color", "#189792");
+    });
+
+    $(".photo_div").hover(function() {
+        $(this).children(".hide_photo").show();
+    }, function() {
+        $(this).children(".hide_photo").hide();
     });
 
 //	hover_in_queue = [];
@@ -176,24 +204,26 @@ function photoHFit() {
 	var width_accumulator = 0;
 	
 	$(".photo").each(function(){
-        if ($(this).width() > maxPhotoSize) {
-            maxPhotoSize = $(this).width();
+        if ($(this).parent().css("display") != "none") {
+            if ($(this).width() > maxPhotoSize) {
+                maxPhotoSize = $(this).width();
+            }
+
+            if (width_accumulator < max_width) {
+                width_accumulator += $(this).parent('.photo_div').width() + margin;
+                row_accumulator.push($(this).parent('.photo_div'));
+            } else {
+                /*
+                 * add one more photo, call the resizePhotoDivs method, then
+                 * reset the row
+                 */
+                resizePhotoDivs(row_accumulator, width_accumulator);
+
+                width_accumulator = 0 + $(this).parent('.photo_div').width() + margin;
+                row_accumulator = [];
+                row_accumulator.push($(this).parent('.photo_div'));
+            }
         }
-
-		if (width_accumulator < max_width) {
-			width_accumulator += $(this).parent('.photo_div').width() + margin;
-			row_accumulator.push($(this).parent('.photo_div'));
-		} else {
-            /*
-             * add one more photo, call the resizePhotoDivs method, then
-             * reset the row
-             */
-			resizePhotoDivs(row_accumulator, width_accumulator);
-
-			width_accumulator = 0 + $(this).parent('.photo_div').width() + margin;
-			row_accumulator = [];
-			row_accumulator.push($(this).parent('.photo_div'));
-		}
 	});
 	resizePhotoDivs(row_accumulator, width_accumulator);
 }

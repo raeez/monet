@@ -160,12 +160,31 @@ $(document).ready(function() {
                     </div>
 
                     {% for item in memory['items'] %}
-                    <div id="{{item[0]}}" class="photo_div"><img class="photo" src="{{item[2]}}" height="175" /></div>
+                        {% if item['visible'] == 1 or item['visible'] == None %}
+                            <div id="{{item['id']}}" class="photo_div">
+                                <div class="hide_photo"><a href="#">hide</a></div>
+                                <img class="photo" src="{{item['url']}}" height="175" />
+                            </div>
+                        {% endif %}
+
+                        {% if item['visible'] == 0 %}
+                            <div id="{{item['id']}}" class="photo_div artifact_hidden">
+                                <div class="hide_photo">hidden photo<br/><a href='#'>show</a></div>
+                                <img class="photo" src="{{item['url']}}" height="175" />
+                            </div>
+                        {% endif %}
                     {% endfor %}
 
                 <script type="text/javascript" src="{{url_for('static', filename='js/upload_init.js')}}"></script> 
 
                 <div class="clear"></div>
+                {% if memory['visible'] == '1' %}
+                <div id="hidden_prompt"><a href="/memory/{{memory['id']}}?show_hidden=0">Do not show</a> hidden photos</div>
+                {% endif %}
+                {% if memory['visible'] == '0' %}
+                <div id="hidden_prompt"><a href="/memory/{{memory['id']}}?show_hidden=1">Show</a> hidden photos</div>
+                {% endif %}
+
                 </div>
             </div>
             <div class="canvas_right_of_wrapper">

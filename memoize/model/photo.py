@@ -18,6 +18,10 @@ class Photo(Container):
   def val_caption(self):
     assert len(self.caption) < 255, "username must be less than 255 characters long"
 
+  @mandatory(int, visible=1)
+  def val_visible(self):
+    pass
+
   @pointer(Memory, memory=None)
   def val_memory(self):
     pass

@@ -46,15 +46,18 @@ def upload_photo(mem_id=None):
       p.user = session.get('_id', None)
       p.title = request.files.get('title', None)
       p.caption = request.files.get('caption', None)
+      p.visible = 1;
       p.memory = m._id
       p.save()
       m.items = [p._id] + m.items
       m.save()
-      return succeed({'memory_url' : url_for('memory', id=m._id),
+      return succeed({'id' : str(p._id),
+                      'memory_url' : url_for('memory', id=m._id),
                       'thumb_url' : app.photos.url(p.filename), # TODO start building these
                       'image_url' : app.photos.url(p.filename),
                       'title' : p.title,
                       'caption' : p.caption,
+                      'visible' : p.visible,
                       'memory' : str(m._id),
                       'type' : 'image/jpeg'})
 
