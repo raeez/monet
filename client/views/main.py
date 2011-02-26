@@ -19,8 +19,8 @@ main_module = Module(__name__)
 def index():
   log['request'].debug("request %s" % repr(request.path))
 
-  if 'email' in session:
-    return redirect(url_for('stream'))
+  #if 'email' in session:
+  #  return redirect(url_for('stream'))
   return render_template('index.html')
 
 ###########
@@ -29,19 +29,22 @@ def index():
 
 @main_module.route('/new_user', methods=['GET', 'POST'])
 def new_user():
-    if not request.form['email'] or not request.form['password'] or not request.form['confirm']:
-        abort(400)
+    if not request.form['email'] or not request.form['new_pass'] or not request.form['confirm']:
+        flash("The form submission broke. Please refresh and try again")
+        return redirect(request.referrer)
 
-    username = request.form['email']
-    password = request.form['password']
+    email = request.form['email']
+    password = request.form['new_pass']
     confirm = request.form['confirm']
 
-    if pasword != confirm:
-        abort(400)
+    if password != confirm:
+        flash("The passwords must match. Please send us matching passwords")
+        return redirect(request.referrer)
 
     u = User()
-    u.email = username
-    u.password = bcrypt.hashpw(password, password)
+    u.name = email
+    u.email = email
+    u.password = bcrypt.hashpw(password, bcrypt.gensalt(10))
     u.save()
 
     session['email'] = u.email
@@ -49,7 +52,7 @@ def new_user():
     session['password'] = password
     log['login'].debug(session['email'])
 
-    return
+    return redirect(request.referrer)
 
 @main_module.route('/check_for_email', methods=['GET', 'POST'])
 def check_for_email():
@@ -58,9 +61,9 @@ def check_for_email():
     user = User.find_one({'email' : request.form['email']})
 
     if user is None:
-        return 0
+        return '0'
     else:
-        return 1
+        return '1'
 
 @main_module.route('/login', methods=['GET', 'POST'])
 def login():
@@ -75,14 +78,17 @@ def login():
 
     #if this user has not logged in before
     if user is None:
-      flash('null')
-      return redirect(url_for('login', claim=claim))
+      flash("Hmm.. User doesn't exist, please make an account")
+      return redirect(request.referrer)
 
     if bcrypt.hashpw(request.form['password'], user.password) == user.password:
       session['email'] = request.form['email']
       session['id'] = str(user._id)
       session['password'] = request.form['password']
       log['login'].debug(session['email'])
+      return redirect(request.referrer)
+    else:
+      flash("Oh no! This is the wrong password. Please try again")
       return redirect(request.referrer)
   return redirect(request.referrer)
 

@@ -68,26 +68,60 @@
 
         {% if not session['email'] %}
         <div id="landing_login">
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    {% for message in messages %} 
-                        {% if message == 'null' %}
-                            <div class="error">
-                            Incorrect password for this username. Try again or enter a new email & password to create a new account <br />
-                        </div>
+        	<form id="landing_login_form" class="login_form" action="/login" method="post">
+
+                <div class="login_welcome" style="display:none;">
+                    Welcome back <span class="login_welcome_email"></span>
+                </div>
+
+                <div class="login_new_message" style="display:none;">
+                    You're new! Cool. Make & confirm a password
+                </div>
+
+                <div class="login_email_div">
+                    <div class="login_label_div"><label for="email">Login email:</label></div>
+                    <div class="login_email"><input type="text" name="email" id="email" title="New or existing email" class="field100" /></div>
+                    <div class="clear"></div>
+                </div>
+
+                <div class="login_prompt">
+                    New here? Enter your email & we'll make a new free, spamless account to save memories with
+                </div>
+
+                <div class="login_checking" style="display:none;">
+                    Keep typing. Checking for your email ...
+                </div>
+
+                <div class="login_enter_pass_div">
+                    <div class="login_label_div login_label_div_pass"><label for="existing_pass">Your pass:</label></div>
+                    <div class="login_existing_pass"><input type="password" id="existing_pass" name="password" title="password for this email" class="field100" /></div>
+                    <input type="submit" class="login_submit input_button" name="submit" value="Login" />
+                    <div class="clear"></div>
+                </div>
+
+                <div class="login_new_pass_div">
+                    <div class="login_label_div login_label_div_pass"><label for="existing_pass">New pass:</label></div>
+                    <div class="login_new_pass"><input type="password" id="new_pass" name="new_pass" title="password"/></div>
+                    <div class="login_new_confirm_pass"><input type="password" id="confirm_pass" name="confirm" title="confirm pass"/></div>
+                    <input type="submit" class="login_submit input_button" name="submit" value="Create" />
+                    <div class="clear"></div>
+                </div>
+
+                <div class="login_error_messages">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %} 
+                                {{message}}
+                            {% endfor %}
                         {% endif %}
-                    {% endfor %}
-                {% endif %}
-              {% endwith %}
-        	<form id="landing_login_form" action="/login" method="post">
-            	<div id="landing_login_email"><input type="text" name="email" title="Login with new or existing email" class="field100" /></div>
-                <div id="landing_login_pass"><input type="password" name="password" title="New or existing pass" class="field100" /></div>
-                <input id="landing_login_submit" type="submit" class="input_button" name="submit" value="Login" />
+                      {% endwith %}
+                </div>
             </form>
         </div>
-          {% else %}
-          <p>{{session['email']}}. Log out <a href="{{url_for('logout')}}">here</a>.</p>
-          {% endif %}
+
+      {% else %}
+      <div id="welcome_user">Welcome {{session['email']}} | <a href="{{url_for('logout')}}">Log out</a></div>
+      {% endif %}
 
 
         <div id="drag_example_right">

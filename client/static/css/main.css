@@ -33,6 +33,11 @@
 	color:#189792;
 }
 
+/* Warning Red */
+.memoize_red {
+    color:#e3372d;
+}
+
 /*****************************************
  * Reset Browser Defaults
  *****************************************/
@@ -297,22 +302,90 @@ input:focus {
 	top:-25px;
 	left:52px;
 	float:left;
-	width:218px;
+	width:287px;
 	z-index:10;
 }
 
-#landing_login_email {
-	width:210px;
+.inputHintOverlay{
+    color:#666;
 }
-#landing_login_pass {
-	width:160px;
+
+.login_label_div {
+    width:70px;
+    float:left;
+    line-height:1.2em;
+    text-align:right;
+}
+.login_label_div_pass {
+    margin-top:5px;
+}
+.login_email {
+    margin-left:5px;
+	width:204px;
+    float:left;
+}
+
+.login_email_div {
+    margin-top:5px;
+}
+.login_prompt, .login_checking, .login_welcome, .login_new_message {
+    margin-top:5px;
+    font-size:0.7em;
+    line-height:1.3em;
+    padding-left:3px;
+    color:#aaa;
+}
+.login_enter_pass_div {
+    display:none;
+}
+.login_new_pass_div {
+    display:none;
+}
+
+.login_existing_pass {
+	width:154px;
 	float:left;
 	margin-top:5px;
+    margin-left:5px;
 }
-#landing_login_submit {
+
+.login_new_pass {
+    margin: 5px 0px 0px 5px;
+    float:left;
+}
+.login_new_pass input {
+    width:70px;
+}
+.login_new_confirm_pass {
+    margin: 5px 0px 0px 5px;
+    float:left;
+}
+.login_new_confirm_pass input {
+    width:70px;
+}
+
+.login_submit {
 	width:45px;
 	float:right;
 	margin-top:5px;
+}
+
+.login_error_messages {
+    margin-top:5px;
+    font-size:0.7em;
+    line-height:1.3em;
+    padding-left:3px;
+    color:#e3372d;
+}
+
+#welcome_user {
+    font-size:0.7em;
+	position:relative;
+	top:-25px;
+	left:52px;
+	float:left;
+	width:287px;
+	z-index:10;
 }
 
 #drag_example_right_graphic{

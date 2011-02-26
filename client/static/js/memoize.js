@@ -47,10 +47,10 @@ $(document).ready(function(){
     });
 
 
-    /*****************
-     * Controls the form element hints for the login forms
-     */
-	$("#landing_login_form").inputHintOverlay(-1, 4);
+    /* ************************************************* *
+     * Login Forms
+     * **************************************************/
+	$("#landing_login_form").inputHintOverlay(-3, 6);
 	$("#canvas_login_form").inputHintOverlay(1, 4);
 	
 	$("div.inputHintOverlay").hover(function() {
@@ -61,6 +61,62 @@ $(document).ready(function(){
 		loginBoxActive = true;
 		updateLoginBoxState();
 	});
+
+
+    $(".login_email").focus(function() {
+        $(".login_prompt").hide();
+        $(".login_checking").show();
+    });
+    $(".login_email").focusout(function() {
+        checkForEmail();
+    });
+    $(".login_email input").keyup(function() {
+        checkForEmail();
+    });
+
+    $(".login_new_confirm_pass input").blur(function() {
+        if ($(".login_new_confirm_pass input").val() != $(".login_new_pass input").val()) {
+            $(".login_error_messages").html("Passwords must match");
+        } else {
+            $(".login_error_messages").html("");
+        }
+    });
+
+    function checkForEmail() {
+        //http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
+        var re = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i
+
+        email = $(".login_email input").val();
+        if (email == '') {
+            hideAllLogin();
+            $(".login_prompt").show();
+        }
+        if (re.test(email)) {
+            $.post("/check_for_email", {"email":email}, function(data) {
+                if (data == '1') {
+                    hideAllLogin();
+                    $(".login_welcome").show();
+                    $(".login_welcome_email").html(email);
+                    $(".login_enter_pass_div").show();
+                    $(".login_form").attr("action", "/login");
+                } else {
+                    hideAllLogin();
+                    $(".login_new_message").show();
+                    $(".login_new_pass_div").show();
+                    $(".login_form").attr("action", "/new_user");
+                }
+            });
+        }
+    }
+
+    function hideAllLogin() {
+        $(".login_prompt").hide();
+        $(".login_checking").hide();
+        $(".login_welcome").hide();
+        $(".login_new_message").hide();
+        $(".login_enter_pass_div").hide();
+        $(".login_new_pass_div").hide();
+    }
 	
 
     /*****************
