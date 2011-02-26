@@ -139,11 +139,11 @@ def rename():
       if ('email' in session) and (m.user == session['id']):
         m.name = request.form['new_name']
         m.save()
-        return
+        return m.name
     else:
       m.name = request.form['new_name']
       m.save()
-      return
+      return m.name
 
   abort(403)
 
