@@ -53,7 +53,6 @@ $("#canvas_file_upload").fileUploadUI({
             );
         },
         buildDownloadRow: function (file) {
-            console.log(file);
             return $(
             '       <div id="'+file.id+'" class="photo_div">'+
             '           <div class="hide_photo">hide</div>'+
