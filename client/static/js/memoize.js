@@ -10,7 +10,7 @@ $(document).ready(function(){
 	loginBoxActive = false;
 
 
-    $("#multi_key").val(randomString());
+    $("#multi_session").val(randomString());
 	
     /*****************
      * Resizes the photos so they display nicely horizontally

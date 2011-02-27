@@ -20,6 +20,10 @@ class Photo(Container):
 
   @mandatory(int, visible=1)
   def val_visible(self):
+    assert self.visible == 1 or self.visible == 0, "visible must be a binary value!"
+
+  @optional(str, multi_session=None)
+  def val_multi_session(self):
     pass
 
   @pointer(Memory, memory=None)

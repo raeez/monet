@@ -69,30 +69,12 @@ $("#canvas_file_upload").fileUploadUI({
  * *************************************/
 
     $('#file_upload').fileUploadUI({
-        /*equivalent to drop_zone_enlarge function already defined
-	onDragEnter: function(event) {
-            //console.log("onDragEnter:");
-            //console.log(event);
-            $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_top.png) no-repeat top left");
-            $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_middle.png) repeat-y top left");
-            $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_glow_bottom.png) no-repeat top left");
-        },*/
         onAbort: function(event) {
             $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_top.png) no-repeat top left");
             $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_middle.png) repeat-y top left");
             $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_bottom.png) no-repeat top left");
         },
-        /* equivalent to "dropzonereduce function already defined
-	onDragLeave: function(event) {
-            //console.log("onDragLeave:");
-            //console.log(event);
-            $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_top.png) no-repeat top left");
-            $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_middle.png) repeat-y top left");
-            $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_bottom.png) no-repeat top left");
-        },*/
         onDrop: function(event) {
-            //console.log("onDrop:");
-            //console.log(event);
             $("#landing_drag_area_top").css("background", "transparent url(/static/images/Landing_DragAreaBG_top.png) no-repeat top left");
             $("#landing_drag_area_middle").css("background", "transparent url(/static/images/Landing_DragAreaBG_middle.png) repeat-y top left");
             $("#landing_drag_area_bottom").css("background", "transparent url(/static/images/Landing_DragAreaBG_bottom.png) no-repeat top left");
@@ -105,7 +87,6 @@ $("#canvas_file_upload").fileUploadUI({
         progressSelector: $('.file_upload_progress'),
         cancelSelector: $('.file_upload_cancel'),
         onProgress: function (event, files, index, xhr, handler) {
-            //console.log("PROGRESS!");
             if (handler.progressbar) {
                 handler.progressbar.progressbar(
                     'value',
@@ -130,18 +111,7 @@ $("#canvas_file_upload").fileUploadUI({
 
             $("#memory_id").val(json.memory);
 
-            wrapResize(50);
-            /*
-            console.log("COMPLETED==================");
-            console.log("event, files, index, xhr, handler, json");
-            console.log(event);
-            console.log(files);
-            console.log(index);
-            console.log(xhr);
-            console.log(handler);
-            console.log(json);
-            console.log("---------------------------");
-            */
+            wrapResize(50); // Re-center since the images added space to the upload area
         },
         buildUploadRow: function (files, index) {
             return $(

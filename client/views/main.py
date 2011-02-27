@@ -117,7 +117,7 @@ def logout():
 
 @main_module.route('/create', methods=['POST'])
 def create():
-  return upload_photo(request.form.get('memory_id', None))
+  return upload_photo(request.form.get('memory_id', None), request.form.get("multi_session", None))
 
 @main_module.route('/new', methods=['GET'])
 def new():

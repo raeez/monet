@@ -21,9 +21,8 @@
                 <div id="inline_upload_leadtext">Simply drag or</div>
                 <div id="inline_upload">
                     <form id="file_upload" action="{{url_for('create')}}" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="submit" value="Send my Photo!" />
                         <input id="memory_id" type=hidden name=memory_id />
-                        <input id="multi_key" type=hidden name=multi_key />
+                        <input id="multi_session" type=hidden name=multi_session />
                         <input type="file" name="photo" multiple>
                         <button>Upload</button>
                         <div>upload photos</div>

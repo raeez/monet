@@ -6,7 +6,7 @@ from lib.db.objectid import ObjectId
 import json
 
 def create_memory():
-  mem_name = request.form.get('mem_name',None) or "New Memory"
+  mem_name = request.form.get('mem_name',None) or "Memorable Moments"
   m = Memory()
   m.user = None
   if 'email' in session:
@@ -24,11 +24,21 @@ def get_memory(_id):
 def get_photo(_id):
   return Photo.find_one({"_id" : ObjectId(_id)})
 
-def upload_photo(mem_id=None):
+def upload_photo(mem_id=None, multi_session=None):
+  # multi_seession is a randomly generated string made on the homepage
+  # This is to associate multiple uploads from the home page before
+  # A memory ID has been created.
+
   photo = request.files.get('photo', None)
 
   if not mem_id:
-    m = create_memory()
+    if multi_session:
+      p2 = Photo.find_one({'multi_session':multi_session})
+    if not p2:
+      m = create_memory()
+    else:
+      mem_id = p2.memory
+      m = get_memory(mem_id)
   else:
     m = get_memory(mem_id)
 
@@ -46,19 +56,21 @@ def upload_photo(mem_id=None):
       p.user = session.get('_id', None)
       p.title = request.files.get('title', None)
       p.caption = request.files.get('caption', None)
-      p.visible = 1;
+      p.visible = 1
+      p.multi_session = multi_session
       p.memory = m._id
       p.save()
       m.items = [p._id] + m.items
       m.save()
       return succeed({'id' : str(p._id),
+                      'memory' : str(m._id),
                       'memory_url' : url_for('memory', id=m._id),
                       'thumb_url' : app.photos.url(p.filename), # TODO start building these
                       'image_url' : app.photos.url(p.filename),
                       'title' : p.title,
                       'caption' : p.caption,
                       'visible' : p.visible,
-                      'memory' : str(m._id),
+                      'multi_session' : multi_session,
                       'type' : 'image/jpeg'})
 
 def build_memory_stream():
