@@ -89,6 +89,7 @@ def login():
       return redirect(request.referrer)
     else:
       flash("Oh no! This is the wrong password. Please try again")
+      session['fix_email'] = request.form['email']
       return redirect(request.referrer)
   return redirect(request.referrer)
 

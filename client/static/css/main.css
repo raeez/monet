@@ -336,7 +336,6 @@ input:focus {
     color:#aaa;
 }
 .login_enter_pass_div {
-    display:none;
 }
 .login_new_pass_div {
     display:none;

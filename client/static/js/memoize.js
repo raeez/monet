@@ -63,14 +63,29 @@ $(document).ready(function(){
 	});
 
 
-    $(".login_email").focus(function() {
+    $(".login_form").submit(function(e){
+        var validationFail = false;
+        $(this).find("input:text, input:password").each(function() {
+            if ($(this).parent().parent().parent().css("display") != "none") {
+                if ($(this).val() == "") {
+                    $(".login_error_messages").html("Please fill in everything");
+                    validationFail = true;
+                }
+            }
+        });
+
+        return !validationFail;
+
+    });
+
+    $(".login_email").focusin(function() {
         $(".login_prompt").hide();
         $(".login_checking").show();
     });
     $(".login_email").focusout(function() {
         checkForEmail();
     });
-    $(".login_email input").keyup(function() {
+    $(".login_email input").keyup(function(e) {
         checkForEmail();
     });
 

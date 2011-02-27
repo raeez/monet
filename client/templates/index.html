@@ -80,19 +80,33 @@
 
                 <div class="login_email_div">
                     <div class="login_label_div"><label for="email">Login email:</label></div>
+                    {% if session['fix_email'] %}
+                    <div class="login_email"><input type="text" name="email" id="email" title="New or existing email" value="{{session['fix_email']}}" class="field100" /></div>
+                    {% else %}
                     <div class="login_email"><input type="text" name="email" id="email" title="New or existing email" class="field100" /></div>
+                    {% endif %}
                     <div class="clear"></div>
                 </div>
 
-                <div class="login_prompt">
-                    New here? Enter your email & we'll make a new free, spamless account to save memories with
+                {% if session['fix_email'] %}
+                <div class="login_prompt" style="display:none">
+                    <strong>New here?</strong> Enter your email to make a new free, spamless account to save memories with
                 </div>
-
+                {% else %}
+                <div class="login_prompt">
+                    <strong>New here?</strong> Enter your email to make a new free, spamless account to save memories with
+                </div>
+                {% endif %}
+                
                 <div class="login_checking" style="display:none;">
                     Keep typing. Checking for your email ...
                 </div>
 
+                {% if session['fix_email'] %}
                 <div class="login_enter_pass_div">
+                {% else %}
+                <div class="login_enter_pass_div" style="display:none">
+                {% endif %}
                     <div class="login_label_div login_label_div_pass"><label for="existing_pass">Your pass:</label></div>
                     <div class="login_existing_pass"><input type="password" id="existing_pass" name="password" title="password for this email" class="field100" /></div>
                     <input type="submit" class="login_submit input_button" name="submit" value="Login" />
