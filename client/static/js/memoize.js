@@ -1,5 +1,4 @@
 // JavaScript Document
-var loginBoxActive = false;
 var maxPhotoSize = 0;
 var originalCanvasWidth;
 
@@ -7,7 +6,6 @@ $(document).ready(function(){
 	originalCanvasWidth = $('#photo_canvas_center').width();
 	
 	$('#canvas_login_form').show();
-	loginBoxActive = false;
 
 
     $("#multi_session").val(randomString());
@@ -58,9 +56,13 @@ $(document).ready(function(){
 	});
 	
 	$("#canvas_login_text").click(function() {
-		loginBoxActive = true;
-		updateLoginBoxState();
+        $("#canvas_login_div").show();
+        $("#canvas_login_prompt").hide();
 	});
+    $("#canvas_login_close").click(function(){
+        $("#canvas_login_prompt").show();
+        $("#canvas_login_div").hide();
+    })
 
 
     $(".login_form").submit(function(e){
@@ -337,16 +339,6 @@ function resizePhotoDivs(row_accumulator, default_width) {
 			
 			width_accumulator += $(photo_div).width() + 10;
 		}
-	}
-}
-
-function updateLoginBoxState() {
-	if (loginBoxActive == false) {
-		$('#canvas_login_prompt').css('display', 'block');
-		$('#canvas_login_div').css('display', 'none');
-	} else {
-		$('#canvas_login_prompt').css('display', 'none');
-		$('#canvas_login_div').css('display', 'block');
 	}
 }
 
