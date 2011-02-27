@@ -4,9 +4,11 @@ from flask import session, url_for, request, flash, redirect
 from memoize.model import User, Photo, Quote, Memory
 from lib.db.objectid import ObjectId
 import json
+import datetime
 
 def create_memory():
-  mem_name = request.form.get('mem_name',None) or "Memorable Moments"
+  date = datetime.date.today().strftime("%B %d, %Y")
+  mem_name = request.form.get('mem_name',None) or "Memorable Moments on " + date
   m = Memory()
   m.user = None
   if 'email' in session:

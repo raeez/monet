@@ -132,9 +132,13 @@
             </form>
         </div>
 
-      {% else %}
-      <div id="welcome_user">Welcome {{session['email']}} | <a href="{{url_for('logout')}}">Log out</a></div>
-      {% endif %}
+        {% else %}
+        <div id="welcome_user">
+            Welcome {{session['email']}}
+            <br />
+            <a href="{{url_for('stream')}}">Recall</a> memories | <a href="{{ url_for('logout') }}">Log out</a>
+        </div>
+        {% endif %}
 
 
         <div id="drag_example_right">

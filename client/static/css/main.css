@@ -378,7 +378,8 @@ input:focus {
 }
 
 #welcome_user {
-    font-size:0.7em;
+    font-size:0.8em;
+    line-height:1.5em;
 	position:relative;
 	top:-25px;
 	left:52px;
