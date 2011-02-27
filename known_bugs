@@ -1,0 +1,12 @@
+glow effect kind of screwy in chrome (mostly fixed for landing page, need to fix for memory canvas page)
+
+On landing page, file name's do not show up in under picture once the file is done uploading (-->related to buildDownloadTable function in init.js)
+
+On memory page, pictures are not inserted from left to right in order of newest to oldest
+
+On memory page, pictures are cropped weirdly - this fixes itself if you manually refresh the page
+
+Not able to rename a memory
+
+On canvas/memory page, "share" thing in the upper left hand corner is kind of weird (hard to copy the link)
+
