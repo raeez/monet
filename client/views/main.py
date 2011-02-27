@@ -67,6 +67,7 @@ def check_for_email():
 
 @main_module.route('/login', methods=['GET', 'POST'])
 def login():
+  session['fix_email'] = ''
   log['request'].debug("request %s" % repr(request.path))
 
   if 'email' in session:
@@ -104,8 +105,10 @@ def claim(id):
 @main_module.route('/logout')
 def logout():
   log['request'].debug("request %s" % repr(request.path))
-  log['logout'].debug(session['email'])
+  if 'email' in session:
+    log['logout'].debug(session['email'])
   session.pop('email', None)
+  session.pop('fix_email', None)
   return redirect(url_for('index'))
 
 ###################
@@ -169,7 +172,7 @@ def toggle_visibility():
         else:
             abort(403)
         p.save()
-        return 1
+        return '1'
 
     abort(403)
 

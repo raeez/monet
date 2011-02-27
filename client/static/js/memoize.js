@@ -51,7 +51,7 @@ $(document).ready(function(){
      * Login Forms
      * **************************************************/
 	$("#landing_login_form").inputHintOverlay(-3, 6);
-	$("#canvas_login_form").inputHintOverlay(1, 4);
+	$("#canvas_login_form").inputHintOverlay(-3, 6);
 	
 	$("div.inputHintOverlay").hover(function() {
 		$(this).children("input").toggleClass("input_hover");

@@ -456,15 +456,17 @@ input:focus {
 }
 
 #canvas_header #login {
-    text-align:right;
 	float:right;
 	width:315px;
-	font-size:.8em;
 	color:#aaaaaa;
+}
+#canvas_login_prompt {
+    text-align:right;
 	line-height:1.4em;
+	font-size:.8em;
 }
 #canvas_login_div {
-	width:350px;
+	width:287px;
 	display:none;
 }
 #canvas_login_email {
