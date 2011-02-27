@@ -67,6 +67,7 @@ def check_for_email():
 
 @main_module.route('/login', methods=['GET', 'POST'])
 def login():
+  session['fix_email'] = ''
   log['request'].debug("request %s" % repr(request.path))
 
   if 'email' in session:
@@ -89,6 +90,7 @@ def login():
       return redirect(request.referrer)
     else:
       flash("Oh no! This is the wrong password. Please try again")
+      session['fix_email'] = request.form['email']
       return redirect(request.referrer)
   return redirect(request.referrer)
 
@@ -103,8 +105,10 @@ def claim(id):
 @main_module.route('/logout')
 def logout():
   log['request'].debug("request %s" % repr(request.path))
-  log['logout'].debug(session['email'])
+  if 'email' in session:
+    log['logout'].debug(session['email'])
   session.pop('email', None)
+  session.pop('fix_email', None)
   return redirect(url_for('index'))
 
 ###################
@@ -113,7 +117,7 @@ def logout():
 
 @main_module.route('/create', methods=['POST'])
 def create():
-  return upload_photo(request.form.get('memory_id', None))
+  return upload_photo(request.form.get('memory_id', None), request.form.get("multi_session", None))
 
 @main_module.route('/new', methods=['GET'])
 def new():
@@ -168,7 +172,7 @@ def toggle_visibility():
         else:
             abort(403)
         p.save()
-        return 1
+        return '1'
 
     abort(403)
 

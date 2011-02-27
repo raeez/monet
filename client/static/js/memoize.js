@@ -1,5 +1,4 @@
 // JavaScript Document
-var loginBoxActive = false;
 var maxPhotoSize = 0;
 var originalCanvasWidth;
 
@@ -7,10 +6,9 @@ $(document).ready(function(){
 	originalCanvasWidth = $('#photo_canvas_center').width();
 	
 	$('#canvas_login_form').show();
-	loginBoxActive = false;
 
 
-    $("#multi_key").val(randomString());
+    $("#multi_session").val(randomString());
 	
     /*****************
      * Resizes the photos so they display nicely horizontally
@@ -51,26 +49,45 @@ $(document).ready(function(){
      * Login Forms
      * **************************************************/
 	$("#landing_login_form").inputHintOverlay(-3, 6);
-	$("#canvas_login_form").inputHintOverlay(1, 4);
+	$("#canvas_login_form").inputHintOverlay(-3, 6);
 	
 	$("div.inputHintOverlay").hover(function() {
 		$(this).children("input").toggleClass("input_hover");
 	});
 	
 	$("#canvas_login_text").click(function() {
-		loginBoxActive = true;
-		updateLoginBoxState();
+        $("#canvas_login_div").show();
+        $("#canvas_login_prompt").hide();
 	});
+    $("#canvas_login_close").click(function(){
+        $("#canvas_login_prompt").show();
+        $("#canvas_login_div").hide();
+    })
 
 
-    $(".login_email").focus(function() {
+    $(".login_form").submit(function(e){
+        var validationFail = false;
+        $(this).find("input:text, input:password").each(function() {
+            if ($(this).parent().parent().parent().css("display") != "none") {
+                if ($(this).val() == "") {
+                    $(".login_error_messages").html("Please fill in everything");
+                    validationFail = true;
+                }
+            }
+        });
+
+        return !validationFail;
+
+    });
+
+    $(".login_email").focusin(function() {
         $(".login_prompt").hide();
         $(".login_checking").show();
     });
     $(".login_email").focusout(function() {
         checkForEmail();
     });
-    $(".login_email input").keyup(function() {
+    $(".login_email input").keyup(function(e) {
         checkForEmail();
     });
 
@@ -340,16 +357,6 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
 			
 			width_accumulator += $(photo_div).width() + 10;
 		}
-	}
-}
-
-function updateLoginBoxState() {
-	if (loginBoxActive == false) {
-		$('#canvas_login_prompt').css('display', 'block');
-		$('#canvas_login_div').css('display', 'none');
-	} else {
-		$('#canvas_login_prompt').css('display', 'none');
-		$('#canvas_login_div').css('display', 'block');
 	}
 }
 

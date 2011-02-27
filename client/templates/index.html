@@ -21,9 +21,8 @@
                 <div id="inline_upload_leadtext">Simply drag or</div>
                 <div id="inline_upload">
                     <form id="file_upload" action="{{url_for('create')}}" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="submit" value="Send my Photo!" />
                         <input id="memory_id" type=hidden name=memory_id />
-                        <input id="multi_key" type=hidden name=multi_key />
+                        <input id="multi_session" type=hidden name=multi_session />
                         <input type="file" name="photo" multiple>
                         <button>Upload</button>
                         <div>upload photos</div>
@@ -80,19 +79,33 @@
 
                 <div class="login_email_div">
                     <div class="login_label_div"><label for="email">Login email:</label></div>
+                    {% if session['fix_email'] %}
+                    <div class="login_email"><input type="text" name="email" id="email" title="New or existing email" value="{{session['fix_email']}}" class="field100" /></div>
+                    {% else %}
                     <div class="login_email"><input type="text" name="email" id="email" title="New or existing email" class="field100" /></div>
+                    {% endif %}
                     <div class="clear"></div>
                 </div>
 
-                <div class="login_prompt">
-                    New here? Enter your email & we'll make a new free, spamless account to save memories with
+                {% if session['fix_email'] %}
+                <div class="login_prompt" style="display:none">
+                    <strong>New here?</strong> Enter your email to make a new free, spamless account to save memories with
                 </div>
-
+                {% else %}
+                <div class="login_prompt">
+                    <strong>New here?</strong> Enter your email to make a new free, spamless account to save memories with
+                </div>
+                {% endif %}
+                
                 <div class="login_checking" style="display:none;">
                     Keep typing. Checking for your email ...
                 </div>
 
+                {% if session['fix_email'] %}
                 <div class="login_enter_pass_div">
+                {% else %}
+                <div class="login_enter_pass_div" style="display:none">
+                {% endif %}
                     <div class="login_label_div login_label_div_pass"><label for="existing_pass">Your pass:</label></div>
                     <div class="login_existing_pass"><input type="password" id="existing_pass" name="password" title="password for this email" class="field100" /></div>
                     <input type="submit" class="login_submit input_button" name="submit" value="Login" />
@@ -119,9 +132,13 @@
             </form>
         </div>
 
-      {% else %}
-      <div id="welcome_user">Welcome {{session['email']}} | <a href="{{url_for('logout')}}">Log out</a></div>
-      {% endif %}
+        {% else %}
+        <div id="welcome_user">
+            Welcome {{session['email']}}
+            <br />
+            <a href="{{url_for('stream')}}">Recall</a> memories | <a href="{{ url_for('logout') }}">Log out</a>
+        </div>
+        {% endif %}
 
 
         <div id="drag_example_right">
