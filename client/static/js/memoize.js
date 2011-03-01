@@ -3,6 +3,8 @@ var maxPhotoSize = 0;
 var originalCanvasWidth;
 
 $(document).ready(function(){
+	$("span.anchorLink").anchorAnimate()
+
 	originalCanvasWidth = $('#photo_canvas_center').width();
 	
 	$('#canvas_login_form').show();
@@ -375,7 +377,38 @@ function wrapResize(adjustment) {
 	$('#header_accent_bar').height($('#canvas_header').height());
 }
 
+/*******
 
+	***	Anchor Slider by Cedric Dugas   ***
+	*** Http://www.position-absolute.com ***
+	
+	Never have an anchor jumping your content, slide it.
+
+	Don't forget to put an id to your anchor !
+	You can use and modify this script for any project you want, but please leave this comment as credit.
+	
+*****/
+
+jQuery.fn.anchorAnimate = function(settings) {
+
+ 	settings = jQuery.extend({
+		speed : 200
+	}, settings);	
+	
+	return this.each(function(){
+		var caller = this;
+		$(caller).mouseenter(function (event) {	
+			event.preventDefault();
+			var elementClick = $(caller).attr("id");
+			
+			var destination = $("#"+elementClick+"_anchor").offset().top;
+			$("html:not(:animated),body:not(:animated)").stop(true, true);
+			$("html:not(:animated),body:not(:animated)").animate({ scrollTop: destination}, settings.speed, function() {
+			});
+		  	return false;
+		})
+	})
+}
 /*
  * jQuery Input Hint Overlay plugin v1.1.14, 2010-12-14
  * Only tested with jQuery 1.4.1 (early versions - YMMV)

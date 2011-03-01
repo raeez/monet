@@ -5,6 +5,7 @@ from memoize.model import User, Photo, Quote, Memory
 from lib.db.objectid import ObjectId
 import json
 import datetime
+import random
 
 def create_memory():
   date = datetime.date.today().strftime("%B %d, %Y")
@@ -76,11 +77,34 @@ def upload_photo(mem_id=None, multi_session=None):
                       'type' : 'image/jpeg'})
 
 def build_memory_stream():
+  from client.app import client as app
   m = Memory.find({'user' : session['id']})
   s = []
   for memory in m:
-    mem = {'id' : memory._id, 'name' : memory.name}
-    s.append(mem)
+    visible_items = []
+    rand_items = []
+
+    for item_id in memory.items:
+      p = get_photo(item_id)
+      photo = dict()
+      photo['id'] = p._id
+      photo['thumb_url'] = app.photos.url(p.filename)
+
+      if p.visible == 1:
+        visible_items.append(photo)
+
+    if len(visible_items) > 4:
+      rand_items = random.sample(visible_items, 4)
+      more_photos = 1
+    else:
+      rand_items = visible_items
+      more_photos = 0
+
+    mem = { 'id' : memory._id,
+            'name' : memory.name,
+            'rand_items':rand_items,
+            'more_photos':more_photos}
+    s.insert(0,mem)
   return s
 
 def claimed(m):
