@@ -44,7 +44,7 @@ def new_user():
     u = User()
     u.name = email
     u.email = email
-    u.password = bcrypt.hashpw(password, bcrypt.gensalt(10))
+    u.set_password(password)
     u.save()
 
     session['email'] = u.email
