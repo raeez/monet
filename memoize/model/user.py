@@ -29,3 +29,8 @@ class User(Container):
   @optional(int, last_login=None)
   def val_last_login(self):
     assert self.last_login > 1286688330, "Ivalid time-stamp for member 'time'"
+
+  def set_password(self, new_password):
+    import bcrypt
+    self.password = bcrypt.hashpw(new_password, bcrypt.gensalt(10))
+    self.save()
