@@ -89,6 +89,10 @@ a img {
     src: url("TREBUC.TTF"); /* IE */  
     src: local("Trebuchet"), url("TREBUC.TTF") format("truetype"); /* non-IE */  
 } 
+
+html {
+    height:100%;
+}
 	 
 body {
     height:100%;
@@ -726,6 +730,35 @@ input:focus {
      top:0;
  }
  
+/*****************************************
+ * Stream
+ *****************************************/
+
+#left_lane {
+    background:red;
+    z-index:1;
+    position:fixed;
+    top:0;
+    left:0;
+    right:50%;
+    height:500px;
+    text-align:right;
+}
+#contents {
+    background:green;
+    margin-right:240px;
+    margin-top:100px;
+}
+
+#lane_wrap {
+    position:relative;
+    z-index:2;
+    background:url(../images/)
+    height:2000px;
+    width:460px;
+    margin:0 auto;
+}
+
 /*****************************************
  * Miscellaneous
  *****************************************/

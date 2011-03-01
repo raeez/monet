@@ -112,6 +112,7 @@ $("#canvas_file_upload").fileUploadUI({
             $("#memory_id").val(json.memory);
 
             wrapResize(50); // Re-center since the images added space to the upload area
+
         },
         buildUploadRow: function (files, index) {
             return $(
