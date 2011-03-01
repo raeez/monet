@@ -290,7 +290,8 @@ function photoHFit() {
                  * add one more photo, call the resizePhotoDivs method, then
                  * reset the row
                  */
-                resizePhotoDivs(row_accumulator, width_accumulator);
+//              resizePhotoDivs(row_accumulator, width_accumulator);
+                resizePhotoDivs(row_accumulator, width_accumulator, this);
 
                 width_accumulator = 0 + $(this).parent('.photo_div').width() + margin;
                 row_accumulator = [];
@@ -298,17 +299,19 @@ function photoHFit() {
             }
         }
 	});
-	resizePhotoDivs(row_accumulator, width_accumulator);
+//	resizePhotoDivs(row_accumulator, width_accumulator);
+	resizePhotoDivs(row_accumulator, width_accumulator, this);
 }
 
 /** resizePhotoDivs
  * crops the photos on a row to be of the appropriate size
  */
-function resizePhotoDivs(row_accumulator, default_width) {
+function resizePhotoDivs(row_accumulator, default_width, photo) {
 	var i;
 	var overspill;
 	var length = row_accumulator.length;
-    var max_width = 955;
+    	var max_width = 955;
+	var threshold;
     
     for (i=0; i<row_accumulator.length; i++) {
         if ($(row_accumulator[i]).hasClass("no_crop")) {
@@ -322,6 +325,7 @@ function resizePhotoDivs(row_accumulator, default_width) {
 	if (default_width >= max_width) {
 		overspill = default_width - max_width;
 		crop = Math.floor(overspill / length);
+		threshold = Math.floor(max_width/length);
 		
 		var width_accumulator = 0; 
 		for (i=0; i<length; i++) {
@@ -329,11 +333,25 @@ function resizePhotoDivs(row_accumulator, default_width) {
 			
 			if (i == length - 1) {
 				// This means we're on the last photo. The last photo should take up the remaining slack.
-                foo = max_width - width_accumulator;
-				$(photo_div).width(max_width - width_accumulator - 10); // -10 because of the margin
+                	foo = max_width - width_accumulator;
+			var new_width = max_width - width_accumulator - 10; // -10 because of the margin
+			
+			if (new_width < 1.0*threshold){
+				new_width = 1.0*threshold;	
+			}
+			var pic_width_diff = -1*($(photo).offset() - new_width);
+			//$(photo).css({"left": pic_width_diff + "px"});
+			//console.log("photo left--->", $(photo).css('left'));
+			$(photo_div).width(new_width);
+
 			} else {
 				// Else make the divs a bit smaller based on the crop size
 				newsize = $(photo_div).width() - crop;
+				if (newsize < 1.0*threshold){
+					newsize = 1.0*threshold;
+				}
+				var pic_width_newsize = -1*($(photo).offset() - newsize);
+				//$(photo).css({"left": pic_width_newsize + "px"});
 				$(photo_div).width(newsize);
 			}
 			
