@@ -3,7 +3,6 @@ var maxPhotoSize = 0;
 var originalCanvasWidth;
 
 $(document).ready(function(){
-    console.log("BLAHHHHH@");
 	$("span.anchorLink").anchorAnimate()
 
 	originalCanvasWidth = $('#photo_canvas_center').width();
@@ -183,30 +182,23 @@ $(document).ready(function(){
      * Stream page get more random photos
      * **************************************************/
    
-    console.log("AHHHHHH");
     timers = [];
-    console.log($(".more_photos"));
     $(".more_photos").each(function() {
-        console.log("SETTING A TIMER");
-        randomnumber=Math.floor(Math.random()*5000) + 5000;
+        randomnumber=Math.floor(Math.random()*3000) + 4000;
         id = $(this).attr('id');
-        t = setTimeout("randPhoto('"+id+"')", randomnumber);
-        console.log("SETTING A TIMER");
-        console.log(t);
+        t = setInterval("randPhoto('"+id+"')", randomnumber);
         timers.push(t);
     });
 
 });
 
 function randPhoto(mem_id) {
+    mem_id = mem_id.slice(7,mem_id.length);
     div = $("#memdiv_" + mem_id);
-    console.log(mem_id);
-    console.log(div);
     $.getJSON("/get_rand_photo", {"mem_id":mem_id}, function(json){
         content = "<div class='artifact_item'><img src='"+json.thumb_url+"' height='200px'/></div>";
         $(div).find(".artifact_previews").append(content);
         moveAmount = $(div).find(".artifact_item:first").width() + 10;
-        console.log(moveAmount);
         $(div).find(".artifact_previews").animate({
             left:-moveAmount
         }, 'slow', function(){
