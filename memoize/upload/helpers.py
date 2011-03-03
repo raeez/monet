@@ -76,22 +76,25 @@ def upload_photo(mem_id=None, multi_session=None):
                       'multi_session' : multi_session,
                       'type' : 'image/jpeg'})
 
+def getVisiblePhotos(items):
+    from client.app import client as app
+    visible_items = []
+    for item_id in items:
+        p = get_photo(item_id)
+        photo = dict()
+        photo['id'] = p._id
+        photo['thumb_url'] = app.photos.url(p.filename)
+
+        if p.visible == 1:
+          visible_items.append(photo)
+    return visible_items
+
 def build_memory_stream():
-  from client.app import client as app
   m = Memory.find({'user' : session['id']})
   s = []
   for memory in m:
-    visible_items = []
+    visible_items = getVisiblePhotos(memory.items)
     rand_items = []
-
-    for item_id in memory.items:
-      p = get_photo(item_id)
-      photo = dict()
-      photo['id'] = p._id
-      photo['thumb_url'] = app.photos.url(p.filename)
-
-      if p.visible == 1:
-        visible_items.append(photo)
 
     if len(visible_items) > 4:
       rand_items = random.sample(visible_items, 4)
@@ -106,6 +109,17 @@ def build_memory_stream():
             'more_photos':more_photos}
     s.insert(0,mem)
   return s
+
+
+def rand_photo(m):
+    if m:
+        visible_items = getVisiblePhotos(m.items)
+        rand_item = random.sample(visible_items,1)
+        photo = rand_item[0]
+
+        return json.dumps({"id":str(photo['id']), "thumb_url":photo['thumb_url']})
+    else:
+        return None
 
 def claimed(m):
   return not (not m.user)

@@ -3,9 +3,10 @@
 from flask import Module, session, redirect, url_for, request, render_template, flash, abort
 from flaskext.uploads import UploadNotAllowed
 from memoize.model import User
-from memoize.upload.helpers import get_memory, get_photo, create_memory, upload_photo, build_memory_stream, claimed, claim_memory
+from memoize.upload.helpers import get_memory, get_photo, create_memory, upload_photo, build_memory_stream, claimed, claim_memory, rand_photo
 from lib.db.objectid import ObjectId
 import bcrypt
+import random
 
 from client.log import log
 
@@ -207,3 +208,19 @@ def stream():
     return redirect(url_for('login'))
 
   return render_template('stream.html', stream=build_memory_stream())
+
+@main_module.route('/get_rand_photo', methods=['GET'])
+def get_rand_photo():
+    if not request.args['mem_id']:
+        abort(400)
+
+    m = get_memory(request.args['mem_id'])
+
+    if m:
+        photo = rand_photo(m)
+        if photo:
+            return photo
+        else:
+            abort(400)
+    else:
+        abort(404)

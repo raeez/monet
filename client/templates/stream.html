@@ -36,9 +36,9 @@
 
         {% for memory in stream %}
         {% if memory['more_photos'] == 1 %}
-        <div class="memory_div more_photos">
+        <div class="memory_div more_photos" id="memdiv_{{memory['id']}}">
         {% else %}
-        <div class="memory_div">
+        <div class="memory_div" id="memdiv_{{memory['id']}}">
         {% endif %}
             <div name="{{memory['id']}}" id="{{memory['id']}}_anchor"></div>
 
@@ -53,7 +53,6 @@
                         <img src="{{item['thumb_url']}}" height="200px"/>
                     </div>
                     {% endfor %}
-                    <div class="clear"></div>
                 </div>
             </div>
 

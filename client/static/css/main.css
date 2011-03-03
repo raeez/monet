@@ -793,6 +793,7 @@ input:focus {
     height:100%;
     width:460px;
     margin:0 auto;
+    padding-bottom:20px;
 }
 
 #lane_wrap #title {
@@ -841,6 +842,7 @@ input:focus {
     overflow:hidden;
 }
 #memory_lane .artifact_previews {
+    position:relative;
     width:2440px;
 }
 
