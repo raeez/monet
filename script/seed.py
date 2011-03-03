@@ -19,6 +19,6 @@ import bcrypt
 
 u = User()
 u.name = "Raeez Lorgat"
-u.password = bcrypt.hashpw('a123', bcrypt.gensalt(10))
+u.set_password('a123')
 u.email = 'raeez@mit.edu'
 u.save()

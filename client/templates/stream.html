@@ -7,6 +7,67 @@
 {% endblock %}
 
 {% block content %}
+
+
+<div id="memory_lane_page">
+
+<div id="left_lane_positioning">
+    <div id="left_lane">
+        <div id="logo"><a href="{{url_for('new')}}">Memoize</a></div>
+        <div id="table_of_contents">
+            {% for memory in stream %}
+            <div class="toc_item">
+                <div class="toc_marker"></div>
+                <div class="toc_memory "><span id="{{memory['id']}}" class="anchorLink"><a href="{{url_for('memory', id=memory['id'])}}">{{memory['name']}}</a></span></div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div id="lane_wrap">
+    <div id="memory_lane">
+        <div id="title">
+            <span class="title_text">Recalling the most recent memories</span>
+            <br/>
+            <span class="title_subtext">of {{session['email']}} | <a href="{{url_for('new')}}">New</a> memory | <a href="{{ url_for('logout') }}">Log out</a>
+        </div>
+
+
+        {% for memory in stream %}
+        {% if memory['more_photos'] == 1 %}
+        <div class="memory_div more_photos" id="memdiv_{{memory['id']}}">
+        {% else %}
+        <div class="memory_div" id="memdiv_{{memory['id']}}">
+        {% endif %}
+            <div name="{{memory['id']}}" id="{{memory['id']}}_anchor"></div>
+
+            <div class="header">
+                {{memory['name']}}
+            </div>
+
+            <div class="center">
+                <div class="artifact_previews">
+                    {% for item in memory['rand_items'] %}
+                    <div class="artifact_item">
+                        <img src="{{item['thumb_url']}}" height="200px"/>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="footer">
+                <a href="{{url_for('memory', id=memory['id'])}}">{{url_for('memory', id=memory['id'])}}</a>
+            </div>
+        </div>
+
+        {% endfor %}
+    </div>
+</div>
+
+</div>
+
+<!--
   <h1>Viewing memories from {{session['email']}} </h1>
   <p>Log out <a href="{{ url_for('logout') }}">here</a>.</p>
 
@@ -17,5 +78,5 @@
   </ul>
 
   <p><a href="{{url_for('stream')}}">Browse</a> your memory stream. Or, <a href="{{url_for('new')}}">create</a> a new memory.</p>
-
+-->
 {% endblock %}

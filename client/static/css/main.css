@@ -89,6 +89,10 @@ a img {
     src: url("TREBUC.TTF"); /* IE */  
     src: local("Trebuchet"), url("TREBUC.TTF") format("truetype"); /* non-IE */  
 } 
+
+html {
+    height:100%;
+}
 	 
 body {
     height:100%;
@@ -728,6 +732,130 @@ input:focus {
      top:0;
  }
  
+/*****************************************
+ * Stream
+ *****************************************/
+
+#memory_lane_page {
+    background:#333;
+    min-height:100%;
+    width:100%;
+}
+
+#left_lane_positioning {
+    background:transparent;
+    z-index:1;
+    position:fixed;
+    top:0;
+    left:0;
+    right:50%;
+    height:500px;
+    text-align:right;
+}
+#left_lane {
+    background:transparent;
+    margin-right:250px;
+    margin-top:15px;
+}
+#left_lane #logo {
+    color:#11b0aa;
+    font-size:2.3em;
+}
+
+#table_of_contents {
+    margin-top:32px;
+}
+
+#table_of_contents .toc_item {
+    margin-top:7px;
+    height:18px;
+    text-align:right;
+}
+
+#table_of_contents .toc_marker {
+    width:3px;
+    height:18px;
+    float:right;
+    background:#aaa;
+}
+
+#table_of_contents .toc_memory {
+    padding-right:10px;
+    padding-top:2px;
+    font-size:0.8em;
+    line-height:1.2em;
+}
+
+#lane_wrap {
+    position:relative;
+    z-index:2;
+    background:#222 url(../images/memory_lane_bg.png) repeat-y top center;
+    height:100%;
+    width:460px;
+    margin:0 auto;
+    padding-bottom:20px;
+}
+
+#lane_wrap #title {
+    width:400px;
+    height:50px;
+    margin:0 auto;
+    background:#333;
+	-moz-box-shadow: 0px 0px 10px #000;
+	-webkit-box-shadow: 0px 0px 10px #000;
+	box-shadow: 0px 0px 10px #000;
+    padding:5px 10px 5px 10px;
+}
+
+#lane_wrap #title .title_text {
+    font-size:1.3em;
+}
+#lane_wrap #title .title_subtext {
+    font-size:0.7em;
+}
+
+#memory_lane .memory_div {
+    width:420px;
+    height:260px;
+	-moz-box-shadow: 2px 2px 10px #000;
+	-webkit-box-shadow: 2px 2px 10px #000;
+	box-shadow: 2px 2px 10px #000;
+    background:#333;
+    margin:20px auto 0px auto;
+}
+
+#memory_lane .memory_div .header {
+    height:32px;
+    background:transparent url(../images/memory_lane_top_accent.jpg) top left no-repeat;
+    padding:8px 0px 0px 23px;
+    font-size:1.0em;
+}
+#memory_lane .memory_div .center {
+    height:200px;
+    background:#222;
+    overflow:hidden;
+}
+#memory_lane .artifact_item {
+    float:left;
+    margin-right:10px;
+    max-width:600px;
+    overflow:hidden;
+}
+#memory_lane .artifact_previews {
+    position:relative;
+    width:2440px;
+}
+
+#memory_lane .memory_div .footer {
+    height:18px;
+    background:transparent url(../images/memory_lane_bottom_accent.jpg) top right no-repeat;
+    text-align:right;
+    padding:2px 15px 0px 0px;
+    font-size:0.7em;
+    line-height:1.2em;
+    color:#aaa;
+}
+
 /*****************************************
  * Miscellaneous
  *****************************************/

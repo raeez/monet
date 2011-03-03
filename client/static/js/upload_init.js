@@ -111,7 +111,10 @@ $("#canvas_file_upload").fileUploadUI({
 
             $("#memory_id").val(json.memory);
 
+            $(".file_upload_link").attr("href", json.memory_url);
+
             wrapResize(50); // Re-center since the images added space to the upload area
+
         },
         buildUploadRow: function (files, index) {
             return $(
@@ -131,7 +134,7 @@ $("#canvas_file_upload").fileUploadUI({
             '           <div class="file_upload_content">'+
 			    file.name + 
             '           <\/div>'*/+
-            '           <div class="file_upload_preview"><img src="'+file.thumb_url+'"\/><\/div>'+
+            '           <a class="file_upload_link" target="_blank"><div class="file_upload_preview"><img src="'+file.thumb_url+'"\/><\/div></a>'+
             '       <\/div>'
             );
         }

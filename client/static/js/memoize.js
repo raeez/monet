@@ -3,6 +3,8 @@ var maxPhotoSize = 0;
 var originalCanvasWidth;
 
 $(document).ready(function(){
+	$("span.anchorLink").anchorAnimate()
+
 	originalCanvasWidth = $('#photo_canvas_center').width();
 	
 	$('#canvas_login_form').show();
@@ -176,8 +178,35 @@ $(document).ready(function(){
 //		updateHoverQueue(hover_in_queue, hover_out_queue);
 //	});
 	
+    /* ************************************************* *
+     * Stream page get more random photos
+     * **************************************************/
+   
+    timers = [];
+    $(".more_photos").each(function() {
+        randomnumber=Math.floor(Math.random()*3000) + 4000;
+        id = $(this).attr('id');
+        t = setInterval("randPhoto('"+id+"')", randomnumber);
+        timers.push(t);
+    });
+
 });
 
+function randPhoto(mem_id) {
+    mem_id = mem_id.slice(7,mem_id.length);
+    div = $("#memdiv_" + mem_id);
+    $.getJSON("/get_rand_photo", {"mem_id":mem_id}, function(json){
+        content = "<div class='artifact_item'><img src='"+json.thumb_url+"' height='200px'/></div>";
+        $(div).find(".artifact_previews").append(content);
+        moveAmount = $(div).find(".artifact_item:first").width() + 10;
+        $(div).find(".artifact_previews").animate({
+            left:-moveAmount
+        }, 'slow', function(){
+            $(div).find(".artifact_item:first").remove();
+            $(div).find(".artifact_previews").css("left", "0");
+        });
+    });
+}
 
 function randomString() {
 	var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
@@ -271,6 +300,7 @@ function updateHoverQueue(in_queue, out_queue) {
  * a given row. Calls the resizePhotoDivs method on that row
  */
 function photoHFit() {
+    console.log("START ----------------------------------");
 	var margin = 10;
 	var max_width = $("#photo_wrapper").width();
 	var row_accumulator = [];
@@ -283,7 +313,7 @@ function photoHFit() {
             }
 
             if (width_accumulator < max_width) {
-                width_accumulator += $(this).parent('.photo_div').width() + margin;
+                width_accumulator += $(this).width() + margin;
                 row_accumulator.push($(this).parent('.photo_div'));
             } else {
                 /*
@@ -293,7 +323,7 @@ function photoHFit() {
 //              resizePhotoDivs(row_accumulator, width_accumulator);
                 resizePhotoDivs(row_accumulator, width_accumulator, this);
 
-                width_accumulator = 0 + $(this).parent('.photo_div').width() + margin;
+                width_accumulator = 0 + $(this).width() + margin;
                 row_accumulator = [];
                 row_accumulator.push($(this).parent('.photo_div'));
             }
@@ -301,6 +331,7 @@ function photoHFit() {
 	});
 //	resizePhotoDivs(row_accumulator, width_accumulator);
 	resizePhotoDivs(row_accumulator, width_accumulator, this);
+    console.log("END ----------------------------------");
 }
 
 /** resizePhotoDivs
@@ -310,7 +341,7 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
 	var i;
 	var overspill;
 	var length = row_accumulator.length;
-    	var max_width = 955;
+    var max_width = 955;
 	var threshold;
     
     for (i=0; i<row_accumulator.length; i++) {
@@ -321,6 +352,8 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
             row_accumulator.splice(i,1);
         }
     }
+    console.log(row_accumulator);
+    console.log(default_width);
 
 	if (default_width >= max_width) {
 		overspill = default_width - max_width;
@@ -329,6 +362,7 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
 		
 		var width_accumulator = 0; 
 		for (i=0; i<length; i++) {
+            //console.log(i);
 			photo_div = row_accumulator.pop();
 			
 			if (i == length - 1) {
@@ -341,20 +375,25 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
 			}*/
 //			var pic_width_diff = -1*($(photo).offset() - new_width);			
 			
+
+            /*
+			if (new_width < 1.0*threshold){
+				new_width = 1.0*threshold;	
+			}
+            */
+			var pic_width_diff = -1*($(photo).offset() - new_width);
+
 			//$(photo).css({"left": pic_width_diff + "px"});
 			//console.log("photo left--->", $(photo).css('left'));
 			
-			$(photo_div).width(new_width); //<--- photo_div
+			//$(photo_div).width(new_width); //<--- photo_div
 //			$(photo).width(new_width);
 
 			} else {
 				// Else make the divs a bit smaller based on the crop size
 
-				newsize = $(photo_div).width() - crop; //<--- photo_div
-/*				newsize = $(photo).width() - crop;
-				if (newsize < 1.0*threshold){
-					newsize = 1.0*threshold;
-				}*/
+				newsize = $(photo_div).children(".photo").width() - crop;
+
 				var pic_width_newsize = -1*($(photo).offset() - newsize);
 				//$(photo).css({"left": pic_width_newsize + "px"});
 				$(photo_div).width(newsize);// <--- photo_div
@@ -383,7 +422,38 @@ function wrapResize(adjustment) {
 	$('#header_accent_bar').height($('#canvas_header').height());
 }
 
+/*******
 
+	***	Anchor Slider by Cedric Dugas   ***
+	*** Http://www.position-absolute.com ***
+	
+	Never have an anchor jumping your content, slide it.
+
+	Don't forget to put an id to your anchor !
+	You can use and modify this script for any project you want, but please leave this comment as credit.
+	
+*****/
+
+jQuery.fn.anchorAnimate = function(settings) {
+
+ 	settings = jQuery.extend({
+		speed : 200
+	}, settings);	
+	
+	return this.each(function(){
+		var caller = this;
+		$(caller).mouseenter(function (event) {	
+			event.preventDefault();
+			var elementClick = $(caller).attr("id");
+			
+			var destination = $("#"+elementClick+"_anchor").offset().top;
+			$("html:not(:animated),body:not(:animated)").stop(true, true);
+			$("html:not(:animated),body:not(:animated)").animate({ scrollTop: destination}, settings.speed, function() {
+			});
+		  	return false;
+		})
+	})
+}
 /*
  * jQuery Input Hint Overlay plugin v1.1.14, 2010-12-14
  * Only tested with jQuery 1.4.1 (early versions - YMMV)
