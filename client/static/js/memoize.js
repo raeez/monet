@@ -300,6 +300,7 @@ function updateHoverQueue(in_queue, out_queue) {
  * a given row. Calls the resizePhotoDivs method on that row
  */
 function photoHFit() {
+    console.log("START ----------------------------------");
 	var margin = 10;
 	var max_width = $("#photo_wrapper").width();
 	var row_accumulator = [];
@@ -312,7 +313,7 @@ function photoHFit() {
             }
 
             if (width_accumulator < max_width) {
-                width_accumulator += $(this).parent('.photo_div').width() + margin;
+                width_accumulator += $(this).width() + margin;
                 row_accumulator.push($(this).parent('.photo_div'));
             } else {
                 /*
@@ -322,7 +323,7 @@ function photoHFit() {
 //              resizePhotoDivs(row_accumulator, width_accumulator);
                 resizePhotoDivs(row_accumulator, width_accumulator, this);
 
-                width_accumulator = 0 + $(this).parent('.photo_div').width() + margin;
+                width_accumulator = 0 + $(this).width() + margin;
                 row_accumulator = [];
                 row_accumulator.push($(this).parent('.photo_div'));
             }
@@ -330,6 +331,7 @@ function photoHFit() {
 	});
 //	resizePhotoDivs(row_accumulator, width_accumulator);
 	resizePhotoDivs(row_accumulator, width_accumulator, this);
+    console.log("END ----------------------------------");
 }
 
 /** resizePhotoDivs
@@ -339,7 +341,7 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
 	var i;
 	var overspill;
 	var length = row_accumulator.length;
-    	var max_width = 955;
+    var max_width = 955;
 	var threshold;
     
     for (i=0; i<row_accumulator.length; i++) {
@@ -350,6 +352,8 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
             row_accumulator.splice(i,1);
         }
     }
+    console.log(row_accumulator);
+    console.log(default_width);
 
 	if (default_width >= max_width) {
 		overspill = default_width - max_width;
@@ -358,6 +362,7 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
 		
 		var width_accumulator = 0; 
 		for (i=0; i<length; i++) {
+            //console.log(i);
 			photo_div = row_accumulator.pop();
 			
 			if (i == length - 1) {
@@ -365,9 +370,11 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
                 	foo = max_width - width_accumulator;
 			var new_width = max_width - width_accumulator - 10; // -10 because of the margin
 			
+            /*
 			if (new_width < 1.0*threshold){
 				new_width = 1.0*threshold;	
 			}
+            */
 			var pic_width_diff = -1*($(photo).offset() - new_width);
 			//$(photo).css({"left": pic_width_diff + "px"});
 			//console.log("photo left--->", $(photo).css('left'));
@@ -375,10 +382,12 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
 
 			} else {
 				// Else make the divs a bit smaller based on the crop size
-				newsize = $(photo_div).width() - crop;
+				newsize = $(photo_div).children(".photo").width() - crop;
+                /*
 				if (newsize < 1.0*threshold){
 					newsize = 1.0*threshold;
 				}
+                */
 				var pic_width_newsize = -1*($(photo).offset() - newsize);
 				//$(photo).css({"left": pic_width_newsize + "px"});
 				$(photo_div).width(newsize);
