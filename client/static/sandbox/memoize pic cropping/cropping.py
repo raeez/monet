@@ -24,7 +24,7 @@ def getSizeList(sizeDict):
     
 
 
-def constraintValidBasic(newPics, row, maxSize):
+def constraintValidBasic(newPics, row, maxSize, relaxed=False):
     constraint = 0.20 ###<--- max amt to reduce picture by ###
     newRow = newPics + row
     cropBool, cropTotal = toCrop(newRow, maxSize)
@@ -111,10 +111,65 @@ def violatedPics(currentRowState, cropped, cropTotal, maxWidth, origWidth,
 
 ##    if cropLeft < cropped - oldPicSize:
 
-def checkPerfectCrop(rowToCheck, constraint, maxRowWidth):
+### checkPerfectCrop always takes in **original** picture sizes
+def checkPerfectCrop(rowToCheck, constraint, maxRowWidth, relaxed=False):
     rowWidth = sum([pic for pic in rowToCheck])
     amtToCrop = rowWidth - maxRowWidth
+    if relaxed == True:
+        ### somehow modify the constraint (make it looser)
+        constraint *= relaxNumber
     if amtToCrop > 0 and constraint*rowWidth > amtToCrop:
-        return True
+        return (True,)
     else:
-        return False
+        if amtToCrop < 0:
+            ### the row is too small, won't fill up entire row
+            return 0
+        elif constraint*rowWidth < amtToCrop:
+            ### can't crop enough ---> will still be too big
+            return 1
+            
+### this function sizes the current Row + returns pics to be moved from
+##        current row to next row
+def cropFunction(newPics, currentRow, maxWidth, constraint,relaxed=False):
+    newRow = newPics + currentRow ###<--- append newly added pics to currentRow
+    CropAmt = newRow - maxWidth ###<--- amount to ultimately crop from this row
+
+    if relaxed == True:
+        ### some modification to constraint ###
+        ### means you don't need to mod constraint in other functions ###
+        constraint = relax*constraint 
+
+    isPerfect = checkPerfectCrop(newRow, constraint, maxWidth, relaxed)
+    if isPerfect == True:
+        ### greedily crop the pics in this row
+        newSizes = constraintValidBasic(newPics, currentRow, maxSize,relaxed)
+        return []###<--- no pics were moved from this row to the next
+    else:
+        ### move pic from row to next row
+
+        ### check if current row has perfect crop after moving last pic in row
+
+
+        ### skip this step if relaxed = True? if relaxed and reaches here,
+##        it's already proven to be too big ---> skip to relax stage again
+        isCurrPerfect = checkPerfectCrop(newRow[:-1], constraint, maxWidth)
+        
+        if isCurrPerfect == True:
+            return newRow[-1] ##<--- moved pic acts as new pic for next row
+        elif isCurrPerfect == 0:
+            ### row is too small after move, need to relax before 
+            movedPics = cropFunction(newPics, currentRow, maxWidth, constraint, relaxed=True)
+            return movedPics###<--- return any pics moved from this row to next
+        elif isCurrPerfect == 1:
+            ### row is still too big, try moving another photo
+            movedPics = cropFunction(newPics, currentRow[:-2], maxWidth, constraint)
+            return movedPics + currentRow[-2]
+
+### some sort of overall pic cropping function ###
+### new pics = pics just uploaded
+### for row in canvas:
+##        new pics = cropFunction(newPics, row, constraint, maxWidth)
+
+### actual cropping (divs, pics, etc) gets done inside
+        
+        
