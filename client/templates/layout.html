@@ -7,11 +7,16 @@
 	<title>Memoize: A Home for Shared Memories</title>
     
     <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
-    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/base/jquery-ui.css" id="theme">
+    <!--<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/base/jquery-ui.css" id="theme"> -->
+    <link rel="stylesheet" href="{{url_for('static', filename='css/jquery-ui.css')}}">
     <link rel="stylesheet" href="{{url_for('static', filename='css/jquery.fileupload-ui.css')}}">
 
+    <!--
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
 	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
+    -->
+    <script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/jquery-ui.min.js')}}"></script>
     <script src="{{url_for('static', filename='js/jquery.fileupload.js')}}"></script>
     <script src="{{url_for('static', filename='js/jquery.fileupload-ui.js')}}"></script>
 

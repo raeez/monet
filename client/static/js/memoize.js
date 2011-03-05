@@ -300,7 +300,7 @@ function updateHoverQueue(in_queue, out_queue) {
  * a given row. Calls the resizePhotoDivs method on that row
  */
 function photoHFit() {
-    console.log("START ----------------------------------");
+    //console.log("START ----------------------------------");
 	var margin = 10;
 	var max_width = $("#photo_wrapper").width();
 	var row_accumulator = [];
@@ -331,7 +331,7 @@ function photoHFit() {
 	});
 //	resizePhotoDivs(row_accumulator, width_accumulator);
 	resizePhotoDivs(row_accumulator, width_accumulator, this);
-    console.log("END ----------------------------------");
+    //console.log("END ----------------------------------");
 }
 
 /** resizePhotoDivs
@@ -352,8 +352,8 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
             row_accumulator.splice(i,1);
         }
     }
-    console.log(row_accumulator);
-    console.log(default_width);
+    //console.log(row_accumulator);
+    //console.log(default_width);
 
 	if (default_width >= max_width) {
 		overspill = default_width - max_width;
