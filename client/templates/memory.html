@@ -115,7 +115,7 @@ $(document).ready(function() {
                     <div id="canvas_login_div" style="display:none;">
                     {% endif %}
                         <div id="canvas_login_close">X</div>
-                        <form id="canvas_login_form" action="{{url_for('login')}}" method="post">
+                        <form id="canvas_login_form" class="login_form" action="{{url_for('login')}}" method="post">
 
                             <div class="login_blank" style="">&nbsp;</div>
 
@@ -260,10 +260,10 @@ $(document).ready(function() {
 
                 <div class="clear"></div>
                 {% if memory['visible'] == '1' %}
-                <div id="hidden_prompt"><a href="/memory/{{memory['id']}}?show_hidden=0">Do not show</a> hidden photos</div>
+                <div id="hidden_prompt" class="showing_hidden"><a href="/memory/{{memory['id']}}?show_hidden=0">Do not show</a> hidden photos</div>
                 {% endif %}
                 {% if memory['visible'] == '0' %}
-                <div id="hidden_prompt"><a href="/memory/{{memory['id']}}?show_hidden=1">Show</a> hidden photos</div>
+                <div id="hidden_prompt" class="not_showing_hidden"><a href="/memory/{{memory['id']}}?show_hidden=1">Show</a> hidden photos</div>
                 {% endif %}
 
                 </div>
@@ -282,8 +282,11 @@ $(document).ready(function() {
 
 
             	<div id="company_info">
-                Collected through <a href="">Memoize</a><br/>
+                Collected through <a href="{{url_for('index')}}">Memoize</a><br/>
+                <!--
                 <span id="company_info_descriptor"><a href="">About</a> | <a href="">Team</a> | <a href="">Contact</a></span>       
+                <span id="company_info_descriptor">Copyright &#169; 2011 | Memoize </span>
+                -->
                 </div>
                 <div class="clear"></div>
 

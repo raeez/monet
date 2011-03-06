@@ -40,6 +40,7 @@
         {% else %}
         <div class="memory_div" id="memdiv_{{memory['id']}}">
         {% endif %}
+        <a href="{{url_for('memory', id=memory['id'])}}">
             <div name="{{memory['id']}}" id="{{memory['id']}}_anchor"></div>
 
             <div class="header">
@@ -59,6 +60,7 @@
             <div class="footer">
                 <a href="{{url_for('memory', id=memory['id'])}}">{{url_for('memory', id=memory['id'])}}</a>
             </div>
+        </a>
         </div>
 
         {% endfor %}
