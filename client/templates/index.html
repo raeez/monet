@@ -69,12 +69,18 @@
         <div id="landing_login">
         	<form id="landing_login_form" class="login_form" action="/login" method="post">
 
+                <div class="login_blank" style="">&nbsp;</div>
+
                 <div class="login_welcome" style="display:none;">
                     Welcome back <span class="login_welcome_email"></span>
                 </div>
 
                 <div class="login_new_message" style="display:none;">
                     You're new! Cool. Make & confirm a password
+                </div>
+
+                <div class="login_checking" style="display:none;">
+                    Keep typing. Checking for your email ...
                 </div>
 
                 <div class="login_email_div">
@@ -89,7 +95,7 @@
 
                 {% if session['fix_email'] %}
                 <div class="login_prompt" style="display:none">
-                    <strong>New here?</strong> Enter your email to make a new free, spamless account to save memories with
+                    <span style="color:#ebebeb;"><strong>New here?</strong></span> Enter your email to make a new free, spamless account to save memories with
                 </div>
                 {% else %}
                 <div class="login_prompt">
@@ -97,10 +103,6 @@
                 </div>
                 {% endif %}
                 
-                <div class="login_checking" style="display:none;">
-                    Keep typing. Checking for your email ...
-                </div>
-
                 {% if session['fix_email'] %}
                 <div class="login_enter_pass_div">
                 {% else %}

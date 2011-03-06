@@ -303,7 +303,7 @@ input:focus {
 
 #landing_login{
 	position:relative;
-	top:-25px;
+	top:-44px;
 	left:52px;
 	float:left;
 	width:287px;
@@ -332,7 +332,7 @@ input:focus {
 .login_email_div {
     margin-top:5px;
 }
-.login_prompt, .login_checking, .login_welcome, .login_new_message {
+.login_prompt, .login_checking, .login_welcome, .login_new_message, .login_blank {
     margin-top:5px;
     font-size:0.7em;
     line-height:1.3em;
@@ -636,6 +636,12 @@ input:focus {
 }
 
 .photo:hover {
+}
+
+.mock_photo {
+    width:175px;
+    height:175px;
+    background:transparent;
 }
 
 #photo_wrapper {

@@ -8,7 +8,7 @@ $(document).ready(function(){
 	originalCanvasWidth = $('#photo_canvas_center').width();
 	
 	$('#canvas_login_form').show();
-
+    checkForEmail(); // Will see if the form is already filled in with an email
 
     $("#multi_session").val(randomString());
 	
@@ -77,14 +77,27 @@ $(document).ready(function(){
                 }
             }
         });
+        if (!testEmail($(".login_email input").val())) {
+            $(".login_error_messages").html("Need a valid email address");
+            validationFail = true;
+        }
+        if ($(".login_new_confirm_pass input").val() != $(".login_new_pass input").val()) {
+            $(".login_error_messages").html("Passwords must match");
+            validationFail = true;
+        }
 
         return !validationFail;
 
     });
 
     $(".login_email").focusin(function() {
-        $(".login_prompt").hide();
-        $(".login_checking").show();
+        if (!testEmail($(".login_email input").val())) {
+            hideAllLogin();
+            $(".login_checking").show();
+            $(".login_prompt").show();
+        } else {
+            checkForEmail();
+        }
     });
     $(".login_email").focusout(function() {
         checkForEmail();
@@ -101,16 +114,22 @@ $(document).ready(function(){
         }
     });
 
-    function checkForEmail() {
+    function testEmail(email) {
         //http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
         var re = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i
+        return re.test(email)
+    }
+
+    function checkForEmail() {
 
         email = $(".login_email input").val();
         if (email == '') {
             hideAllLogin();
             $(".login_prompt").show();
+            $(".login_blank").show();
+            return
         }
-        if (re.test(email)) {
+        if (testEmail(email)) {
             $.post("/check_for_email", {"email":email}, function(data) {
                 if (data == '1') {
                     hideAllLogin();
@@ -125,10 +144,15 @@ $(document).ready(function(){
                     $(".login_form").attr("action", "/new_user");
                 }
             });
+        } else {
+            hideAllLogin();
+            $(".login_checking").show();
+            $(".login_prompt").show();
         }
     }
 
     function hideAllLogin() {
+        $(".login_blank").hide();
         $(".login_prompt").hide();
         $(".login_checking").hide();
         $(".login_welcome").hide();
@@ -169,11 +193,9 @@ $(document).ready(function(){
 //	hover_in_queue = [];
 //	hover_out_queue = [];
 //	$(".photo_div").hover(function() {
-//        console.log("Hover in");
 //		hover_in_queue.push([$(this).attr('id'), $(this).width()]);
 //		updateHoverQueue(hover_in_queue, hover_out_queue);
 //	}, function() {
-//        console.log("Hover out");
 //		hover_out.push([$(this).attr('id'), $(this).width()]);
 //		updateHoverQueue(hover_in_queue, hover_out_queue);
 //	});
@@ -221,19 +243,14 @@ function randomString() {
 
 
 function findInHoverQueue(search, queue) {
-    //console.log("Entered findInHoverQueue!");
     // Searches for the id within the hover queue. Returns the index if it finds it
     // otherwise it returns -1
     queue.forEach(function(value, index){
         if (search == value[0]) {
-            //console.log("FOUND ONE: returning index: "+index);
             return index;
         }
     });
 
-    //console.log('about to return -1');
-    //console.log("search: " + search);
-    //console.log("queue: " + queue);
     return -1;
 }
 
@@ -252,10 +269,6 @@ function updateHoverQueue(in_queue, out_queue) {
         $('#photo_canvas_center').width(originalCanvasWidth + maxPhotoSize);
     }
 
-    //console.log("updating queues")
-    //console.log(in_queue);
-   //console.log(out_queue);
-
     for (i=in_queue.length-1; i >= 0; i-- ) {
         // Start at the end of the queue, or the latest one that was added.
         if (i == in_queue.length - 1) {
@@ -265,7 +278,6 @@ function updateHoverQueue(in_queue, out_queue) {
                 500,
                 function() {
                     in_index = findInHoverQueue($(this).attr('id'),in_queue);
-                    //console.log("Getting rid of index: " + in_index);
                     if (in_index >= 0) {
                         // make sure we found something
                         in_queue.splice(in_index, 1);
@@ -300,7 +312,6 @@ function updateHoverQueue(in_queue, out_queue) {
  * a given row. Calls the resizePhotoDivs method on that row
  */
 function photoHFit() {
-    //console.log("START ----------------------------------");
 	var margin = 10;
 	var max_width = $("#photo_wrapper").width();
 	var row_accumulator = [];
@@ -331,7 +342,6 @@ function photoHFit() {
 	});
 //	resizePhotoDivs(row_accumulator, width_accumulator);
 	resizePhotoDivs(row_accumulator, width_accumulator, this);
-    //console.log("END ----------------------------------");
 }
 
 /** resizePhotoDivs
@@ -350,19 +360,17 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
             max_width = max_width - $(row_accumulator[i]).width() - 14; //dont forget margin and border!
             default_width = default_width - $(row_accumulator[i]).width();
             row_accumulator.splice(i,1);
+            i -= 1; // Need to dcrement the index because we just removed the item for the next index!
         }
     }
-    //console.log(row_accumulator);
-    //console.log(default_width);
 
-	if (default_width >= max_width) {
+	if (default_width >= max_width && default_width > 0 && max_width > 0 ) {
 		overspill = default_width - max_width;
 		crop = Math.floor(overspill / length);
 		threshold = Math.floor(max_width/length);
 		
 		var width_accumulator = 0; 
 		for (i=0; i<length; i++) {
-            //console.log(i);
 			photo_div = row_accumulator.pop();
 			
 			if (i == length - 1) {
@@ -377,7 +385,6 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
             */
 			var pic_width_diff = -1*($(photo).offset() - new_width);
 			//$(photo).css({"left": pic_width_diff + "px"});
-			//console.log("photo left--->", $(photo).css('left'));
 			$(photo_div).width(new_width);
 
 			} else {
