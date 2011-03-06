@@ -117,12 +117,18 @@ $(document).ready(function() {
                         <div id="canvas_login_close">X</div>
                         <form id="canvas_login_form" action="{{url_for('login')}}" method="post">
 
+                            <div class="login_blank" style="">&nbsp;</div>
+
                             <div class="login_welcome" style="display:none;">
                                 Welcome back <span class="login_welcome_email"></span>
                             </div>
 
                             <div class="login_new_message" style="display:none;">
                                 You're new! Cool. Make & confirm a password
+                            </div>
+
+                            <div class="login_checking" style="display:none;">
+                                Keep typing. Checking for your email ...
                             </div>
 
                             <div class="login_email_div">
@@ -145,10 +151,6 @@ $(document).ready(function() {
                             </div>
                             {% endif %}
                             
-                            <div class="login_checking" style="display:none;">
-                                Keep typing. Checking for your email ...
-                            </div>
-
                             {% if messages %}
                             <div class="login_enter_pass_div">
                             {% else %}

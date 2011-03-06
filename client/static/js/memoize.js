@@ -66,8 +66,7 @@ $(document).ready(function(){
         $("#canvas_login_div").hide();
     })
 
-
-    $(".login_form").submit(function(e){
+    $("form").submit(function(e){
         var validationFail = false;
         $(this).find("input:text, input:password").each(function() {
             if ($(this).parent().parent().parent().css("display") != "none") {
