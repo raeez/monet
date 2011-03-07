@@ -110,9 +110,12 @@
     right: 0;
     -o-transform: translate(-500px, 70px) scale(10);
     -moz-transform: translate(-500px, 70px) scale(10);
+    -webkit-transform: translate(-500px, 70px) scale(10);
+    
     opacity: 0;
     -ms-filter: 'alpha(opacity=0)';
     filter: alpha(opacity=0);
+   
 }
 
 #inline_upload_leadtext {
@@ -140,14 +143,10 @@
     right: 0;
     -o-transform: translate(-70px, 0px) scale(1.5);
     -moz-transform: translate(-70px, 0) scale(1.5);
+    -webkit-transform: translate(-70px, 0) scale(1.5);
     opacity: 0;
     -ms-filter: 'alpha(opacity=0)';
     filter: alpha(opacity=0);
-    
-    /*
-    -o-transform: translate(-300px, -300px) scale(10);
-    -moz-transform: translate(-800px, 0) scale(10);
-    */
 }
 /*
 .file_upload, .file_upload_small, .file_upload_large, .file_upload_highlight {

@@ -2,30 +2,33 @@
 var maxPhotoSize = 0;
 var originalCanvasWidth;
 
+/*============================================================ 
+ * On Startup
+ *==========================================================*/
 $(document).ready(function(){
+    /* ************************************************* *
+     * STREAM - Scrolls the page on table of contents hover
+     * **************************************************/
 	$("span.anchorLink").anchorAnimate()
 
 	originalCanvasWidth = $('#photo_canvas_center').width();
 	
-	$('#canvas_login_form').show();
-    checkForEmail(); // Will see if the form is already filled in with an email
 
     $("#multi_session").val(randomString());
 	
-    /*****************
-     * Resizes the photos so they display nicely horizontally
-     */
+    /* ************************************************* *
+     * CANVAS - Runs the initial horizontal fit on the canvas
+     * **************************************************/
 	photoHFit();
 	
-    /*****************
-     * Adjusts the vertical position of the landing page box to
-     * always be in the center of the page
-     */
+    /* ************************************************* *
+     * INDEX - Vertically centers the uploader in the page
+     * **************************************************/
 	wrapResize();
 	$(window).resize(wrapResize);
 
     /* ************************************************* *
-     * Controls the hide button on photo_divs
+     * CANVAS - Controls the hide button on photo_divs
      * **************************************************/
     $(".hide_photo").click(function(){
         var visible;
@@ -38,20 +41,29 @@ $(document).ready(function(){
         } else { 
             visible = 1; 
             $.post("/toggle_visibility", {'visibility':visible, 'id':$(this).parent().attr("id")});
-            $(this).parent(".photo_div").hide('fast', function(){
-                $(this).parent(".photo_div").remove();
-                photoHFit();
-            });
+
+            if ($("#hidden_prompt").hasClass("showing_hidden")) {
+                $(this).parent().addClass("artifact_hidden");
+                $(this).html("hidden photo<br/><a href='#'>show</a>");
+            } else {
+                $(this).parent(".photo_div").hide('fast', function(){
+                    $(this).parent(".photo_div").remove();
+                    photoHFit();
+                });
+            }
         }
 
     });
 
 
     /* ************************************************* *
-     * Login Forms
+     * CANVAS & INDEX - Login Form Methods
      * **************************************************/
-	$("#landing_login_form").inputHintOverlay(-3, 6);
-	$("#canvas_login_form").inputHintOverlay(-3, 6);
+	$('#canvas_login_form').show();
+    checkForEmail(); // Will see if the form is already filled in with an email
+
+	$("#landing_login_form").inputHintOverlay(-1, 6);
+	$("#canvas_login_form").inputHintOverlay(-1, 6);
 	
 	$("div.inputHintOverlay").hover(function() {
 		$(this).children("input").toggleClass("input_hover");
@@ -66,8 +78,7 @@ $(document).ready(function(){
         $("#canvas_login_div").hide();
     })
 
-
-    $(".login_form").submit(function(e){
+    $("form").submit(function(e){
         var validationFail = false;
         $(this).find("input:text, input:password").each(function() {
             if ($(this).parent().parent().parent().css("display") != "none") {

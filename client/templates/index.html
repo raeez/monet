@@ -16,52 +16,53 @@
     	<div id="landing_drag_area_middle">
             <div id="drag_example_graphic"></div>
         
-        <div id="landing_drag_area_content">
-            <div id="helper_text">
-                <div id="inline_upload_leadtext">Simply drag or</div>
-                <div id="inline_upload">
-                    <form id="file_upload" action="{{url_for('create')}}" method="POST" enctype="multipart/form-data">
-                        <input id="memory_id" type=hidden name=memory_id />
-                        <input id="multi_session" type=hidden name=multi_session />
-                        <input type="file" name="photo" multiple>
-                        <button>Upload</button>
-                        <div>upload photos</div>
-                </form></div>
-                here. Share the link of your new canvas and let friends add their memories
+            <div id="landing_drag_area_content">
+                <div id="helper_text">
+                    <div id="inline_upload_leadtext">Simply drag or</div>
+                    <div id="inline_upload">
+                        <form id="file_upload" action="{{url_for('create')}}" method="POST" enctype="multipart/form-data">
+                            <input id="memory_id" type=hidden name=memory_id />
+                            <input id="multi_session" type=hidden name=multi_session />
+                            <input type="file" name="photo" multiple>
+                            <button>Upload</button>
+                            <div>upload photos</div>
+                    </form></div>
+                    here. Share the link of your new canvas and let friends add their memories
 
-            </div>
-
-            <div id="memory_url_area">
-                Your memory can now be found at:
-                <div id="memory_url"></div>
-                Share with trusted friends so they can add memories too
-            </div>
-            
-            <div id="upload_area">
-                <div id="example_fileholders_container">
-                    <div class="example_fileholders"></div> 
-                    <div class="example_fileholders opacity65"></div> 
-                    <div class="example_fileholders opacity40"></div> 
-                    <div class="example_fileholders opacity10"></div> 
                 </div>
-                <div id="files">
-<!--                
-                    <div class="upload_file_div">
-                        <div class="file_upload_content">
-                            IMG22019.jpg
-                        </div>
 
-                        <div class="file_upload_preview">
-                            <img src="/static/sandbox/images/2.jpg"/>
-                        </div>
+                <div id="memory_url_area">
+                    Your memory can now be found at:
+                    <div id="memory_url"></div>
+                    Share with trusted friends so they can add memories too
+                </div>
+                
+                <div id="upload_area">
+                    <div id="example_fileholders_container">
+                        <div class="example_fileholders"></div> 
+                        <div class="example_fileholders opacity65"></div> 
+                        <div class="example_fileholders opacity40"></div> 
+                        <div class="example_fileholders opacity10"></div> 
+                        <div class="clear"></div>
                     </div>
-                    -->
-                </div>
-                <script type="text/javascript" src="{{url_for('static', filename='js/upload_init.js')}}"></script> 
-            </div>
+                    <div id="files">
+    <!--                
+                        <div class="upload_file_div">
+                            <div class="file_upload_content">
+                                IMG22019.jpg
+                            </div>
 
-            <div class="clear"></div>
-        </div>
+                            <div class="file_upload_preview">
+                                <img src="/static/sandbox/images/2.jpg"/>
+                            </div>
+                        </div>
+                        -->
+                    </div>
+                    <script type="text/javascript" src="{{url_for('static', filename='js/upload_init.js')}}"></script> 
+                </div>
+
+                <div class="clear"></div>
+            </div>
         </div>
         <div id="landing_drag_area_bottom"></div>
 
@@ -99,7 +100,7 @@
                 </div>
                 {% else %}
                 <div class="login_prompt">
-                    <strong>New here?</strong> Enter your email to make a new free, spamless account to save memories with
+                    <span style="color:#ebebeb;"><strong>New here?</strong></span> Enter your email to make a new free, spamless account to save memories with
                 </div>
                 {% endif %}
                 
