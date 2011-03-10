@@ -18,6 +18,12 @@
      * Title editability
      */
 $(document).ready(function() {
+    loadartifacts(0,100);
+
+    $(window).scroll(function(){
+        loadViewportPhotos();
+    });
+
 	$(".click").editable("/rename_memory", { 
         indicator : "<img src='{{url_for('static', filename='images/indicator.gif')}}'>",
         tooltip   : "Click to edit. Push enter to save.",
@@ -78,10 +84,20 @@ $(document).ready(function() {
 
 {% block content %}
 
+<div id="memory_id" style="display:none">{{memory['id']}}</div>
+
 	<div id="canvas_header">
     	<div class="canvas_outer_wrapper">
             <div class="canvas_left_of_wrapper">
-            	<div id="header_accent_bar"></div>
+                <div id="header_accent_bar">
+                    <div id="share_area">
+                        <div id="share_bar"></div>
+                        <div id="share_link_area">
+                            <p id="share_link_prompt">Copy selected text then paste in email or IM to let friends add memories</p>
+                            <script> document.write("<input id=\"share_link_value\" type=\"text\" value=\"" + window.location + "\"/>"); </script>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="canvas_center">
                 <div id="canvas_title">
@@ -188,26 +204,20 @@ $(document).ready(function() {
             </div>
             <div class="canvas_right_of_wrapper">
 			</div>
-			<div class="clear"></div>
          </div>
     </div>
     
     <div id="canvas">
     	<div class="canvas_outer_wrapper">
             <div class="canvas_left_of_wrapper">
-            	<div id="share_area">
-                    <div id="share_bar"></div>
-                    <div id="share_link_area">
-                    	<p id="share_link_prompt">Copy selected text then paste in email or IM to let friends add memories</p>
-                        <script> document.write("<input id=\"share_link_value\" type=\"text\" value=\"" + window.location + "\"/>"); </script>
-                    </div>
-                </div>
+                &nbsp;
             </div>
             <div class="canvas_center" id="photo_canvas_center">
-                <div id="photo_wrapper">
+                <div id="header_block"></div>
+                <div id="artifact_wrapper">
 
-                    <div id="add_artifact" class="photo_div no_crop">
-                        <div class="photo">
+                    <div id="add_artifact" class="artifact no_crop">
+                        <div class="photo_container">
                         <form id="canvas_file_upload" action="{{url_for('create')}}" method="POST" enctype="multipart/form-data">
                             <input type="file" name="photo" multiple>
                             <input type=hidden name=memory_id value="{{memory['id']}}"/>
@@ -227,7 +237,7 @@ $(document).ready(function() {
 
                     <div id="new_artifacts">
                         <!--
-                        <div class="upload_file_canvas_div photo_div no_crop">
+                        <div class="upload_file_canvas_div artifact no_crop">
                             <div class="file_upload_canvas_content">
                                 foobar
                                 <div class="file_upload_progress"></div>
@@ -240,18 +250,18 @@ $(document).ready(function() {
                         
                     </div>
 
-                    {% for item in memory['items'] %}
-                        {% if item['visible'] == 1 or item['visible'] == None %}
-                            <div id="{{item['id']}}" class="photo_div">
+                    {% for artifact in memory['artifacts'] %}
+                        {% if artifact['visible'] == 1 or artifact['visible'] == None %}
+                            <div id="artifact_{{artifact['id']}}" class="artifact">
                                 <div class="hide_photo"><a href="#">hide</a></div>
-                                <img class="photo" src="{{item['url']}}" height="175" />
+                                <div class="photo_container" style="width:{{artifact['width']}}px; height:{{artifact['height']}}px"></div>
                             </div>
                         {% endif %}
 
-                        {% if item['visible'] == 0 %}
-                            <div id="{{item['id']}}" class="photo_div artifact_hidden">
+                        {% if artifact['visible'] == 0 %}
+                            <div id="artifact_{{artifact['id']}}" class="artifact artifact_hidden">
                                 <div class="hide_photo">hidden photo<br/><a href='#'>show</a></div>
-                                <img class="photo" src="{{item['url']}}" height="175" />
+                                <div class="photo_container" style="width:{{artifact['width']}}px; height:{{artifact['height']}}px"></div>
                             </div>
                         {% endif %}
                     {% endfor %}
@@ -259,20 +269,20 @@ $(document).ready(function() {
                 <script type="text/javascript" src="{{url_for('static', filename='js/upload_init.js')}}"></script> 
 
                 <div class="clear"></div>
-                {% if memory['visible'] == '1' %}
+                {% if memory['visible'] == 1 %}
                 <div id="hidden_prompt" class="showing_hidden"><a href="/memory/{{memory['id']}}?show_hidden=0">Do not show</a> hidden photos</div>
                 {% endif %}
-                {% if memory['visible'] == '0' %}
+                {% if memory['visible'] == 0 %}
                 <div id="hidden_prompt" class="not_showing_hidden"><a href="/memory/{{memory['id']}}?show_hidden=1">Show</a> hidden photos</div>
                 {% endif %}
 
                 </div>
+                <div id="footer_block"></div>
             </div>
-            <div class="canvas_right_of_wrapper">
-            	<div id="bottom_accent_bar"></div>
-            </div>
+            <div class="canvas_right_of_wrapper"></div>
             <div class="clear"></div>
         </div>
+        <div class="clear"></div>
     </div>
     
     <div id="canvas_footer">

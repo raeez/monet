@@ -1,6 +1,7 @@
 // JavaScript Document
 var maxPhotoSize = 0;
 var originalCanvasWidth;
+window.artifacts = []
 
 /*============================================================ 
  * On Startup
@@ -28,26 +29,30 @@ $(document).ready(function(){
 	$(window).resize(wrapResize);
 
     /* ************************************************* *
-     * CANVAS - Controls the hide button on photo_divs
+     * CANVAS - Controls the hide button on artifacts
      * **************************************************/
     $(".hide_photo").click(function(){
         var visible;
 
+        // Note, IDs of artifacts are prefixed with 'artifact_'. We must strip this first
+        id = $(this).parent().attr("id");
+        id = id.slice(9,id.length);
+
         if ($(this).parent().hasClass("artifact_hidden")) {
             visible = 0;
-            $.post("/toggle_visibility", {'visibility':visible, 'id':$(this).parent().attr("id")});
+            $.post("/toggle_visibility", {'visibility':visible, 'id':id});
             $(this).html("<a href='#'>hide</a>");
             $(this).parent().removeClass("artifact_hidden");
         } else { 
             visible = 1; 
-            $.post("/toggle_visibility", {'visibility':visible, 'id':$(this).parent().attr("id")});
+            $.post("/toggle_visibility", {'visibility':visible, 'id':id});
 
             if ($("#hidden_prompt").hasClass("showing_hidden")) {
                 $(this).parent().addClass("artifact_hidden");
                 $(this).html("hidden photo<br/><a href='#'>show</a>");
             } else {
-                $(this).parent(".photo_div").hide('fast', function(){
-                    $(this).parent(".photo_div").remove();
+                $(this).parent(".artifact").hide('fast', function(){
+                    $(this).parent(".artifact").remove();
                     photoHFit();
                 });
             }
@@ -195,7 +200,7 @@ $(document).ready(function(){
         $(".blue_hover").css("color", "#189792");
     });
 
-    $(".photo_div").hover(function() {
+    $(".artifact").hover(function() {
         $(this).children(".hide_photo").show();
     }, function() {
         $(this).children(".hide_photo").hide();
@@ -203,7 +208,7 @@ $(document).ready(function(){
 
 //	hover_in_queue = [];
 //	hover_out_queue = [];
-//	$(".photo_div").hover(function() {
+//	$(".artifact").hover(function() {
 //		hover_in_queue.push([$(this).attr('id'), $(this).width()]);
 //		updateHoverQueue(hover_in_queue, hover_out_queue);
 //	}, function() {
@@ -225,25 +230,87 @@ $(document).ready(function(){
 
 });
 
+/** loadartifacts([offset[, end]])
+ * Loads the artifacts in json format for this memory
+ *
+ * For the given memory, loads just the containers for all of the artifacts
+ * It also places those containers on the page and calls the progressive
+ * artifact content loader.
+ *
+ * @param offset - The photo index to start loading from
+ * @param numartifacts - The number of artifacts to pull
+ *
+ * @returns Void
+ *
+ */
+function loadartifacts(offset, numartifacts) {
+    loaded_artifacts = null;
+    memory_id = $("#memory_id").html();
+    if ($("#hidden_prompt").hasClass("showing_hidden")) {
+        show_hidden = 1;
+    } else {show_hidden = 0;}
+
+    $.post("/get_artifacts/"+memory_id, {"offset":offset, "numartifacts":numartifacts, "show_hidden":show_hidden}, function(data) {
+        window.artifacts = data;
+        loadViewportPhotos();
+    });
+}
+
+function loadViewportPhotos() {
+    if (window.artifacts == "") {return false;}
+    load_top = $(window).scrollTop() - 200;
+    load_bottom = $(window).scrollTop() + $(window).height() + 700;
+
+    var artifacts = jsonParse(window.artifacts);
+
+    for (var i in artifacts) {
+            /*
+        if (window.stopScrolling == true) {
+             * If we're scrolling quickly past here, we don't want to get stuck loading
+             * a bunch of photos we won't see. Since Javascript doesn't have good
+             * threading controls, we have the scroll callback change a global variable
+             * from underneath us thereby stopping the loop and quitting this iteration
+             * of the loadViewportPhotos function
+            return
+        }
+             */
+        var artifact = artifacts[i];
+        artifact_top = $("#artifact_"+artifact.id).offset().top;
+        if (artifact_top >= load_top && artifact_top <= load_bottom) {
+            div_width = $("#artifact_"+artifact.id).width();
+            photo_width = $("#artifact_"+artifact.id).children(".photo_container").width();
+            centering = (photo_width - div_width) / -2;
+
+            imgdiv = "<img src="+artifact.thumb_url+" height='175' class='photo'/>"
+            $("#artifact_"+artifact.id).children(".photo_container").css('position', 'relative');
+            $("#artifact_"+artifact.id).children(".photo_container").css('left', centering);
+            $("#artifact_"+artifact.id).children(".photo_container").html(imgdiv);
+        }
+    }
+}
+
+/** Fills in images based on viewport
+ */
+
 function randPhoto(mem_id) {
     mem_id = mem_id.slice(7,mem_id.length);
     div = $("#memdiv_" + mem_id);
     $.getJSON("/get_rand_photo", {"mem_id":mem_id}, function(json){
-        content = "<div class='artifact_item'><img src='"+json.thumb_url+"' height='200px'/></div>";
+        content = "<div class='artifact_artifact'><img src='"+json.thumb_url+"' height='200px'/></div>";
         $(div).find(".artifact_previews").append(content);
-        moveAmount = $(div).find(".artifact_item:first").width() + 10;
+        moveAmount = $(div).find(".artifact_artifact:first").width() + 10;
         $(div).find(".artifact_previews").animate({
             left:-moveAmount
         }, 'slow', function(){
-            $(div).find(".artifact_item:first").remove();
+            $(div).find(".artifact_artifact:first").remove();
             $(div).find(".artifact_previews").css("left", "0");
         });
     });
 }
 
 function randomString() {
-	var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
-	var string_length = 16;
+	var chars = "ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+	var string_length = 20;
 	var randomstring = '';
 	for (var i=0; i<string_length; i++) {
 		var rnum = Math.floor(Math.random() * chars.length);
@@ -285,7 +352,7 @@ function updateHoverQueue(in_queue, out_queue) {
         if (i == in_queue.length - 1) {
             // This is the latest hover request we've received
             $('#' + in_queue[i][0]).animate(
-                {width: $('#' + in_queue[i][0]).children('.photo').width()},
+                {width: $('#' + in_queue[i][0]).children('.photo_container').width()},
                 500,
                 function() {
                     in_index = findInHoverQueue($(this).attr('id'),in_queue);
@@ -318,17 +385,32 @@ function updateHoverQueue(in_queue, out_queue) {
     }
 }
 
+
+/* STRATEGY:
+ * First compute the row, div area, and width of each element on the page
+ * Then detect the elements that need to be moved
+ * Move the elements to the correct locations.
+ */
+/*
+$(".artifact")
+
+artifact_position = new Object()
+calculateWidth
+calculateRow
+*/
+
 /** photoHFit
  * Loops through every photo, builds a list of them that should be in
  * a given row. Calls the resizePhotoDivs method on that row
  */
+
 function photoHFit() {
 	var margin = 10;
-	var max_width = $("#photo_wrapper").width();
+	var max_width = $("#artifact_wrapper").width();
 	var row_accumulator = [];
 	var width_accumulator = 0;
 	
-	$(".photo").each(function(){
+	$(".photo_container").each(function(){
         if ($(this).parent().css("display") != "none") {
             if ($(this).width() > maxPhotoSize) {
                 maxPhotoSize = $(this).width();
@@ -336,7 +418,7 @@ function photoHFit() {
 
             if (width_accumulator < max_width) {
                 width_accumulator += $(this).width() + margin;
-                row_accumulator.push($(this).parent('.photo_div'));
+                row_accumulator.push($(this).parent('.artifact'));
             } else {
                 /*
                  * add one more photo, call the resizePhotoDivs method, then
@@ -347,7 +429,7 @@ function photoHFit() {
 
                 width_accumulator = 0 + $(this).width() + margin;
                 row_accumulator = [];
-                row_accumulator.push($(this).parent('.photo_div'));
+                row_accumulator.push($(this).parent('.artifact'));
             }
         }
 	});
@@ -365,13 +447,21 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
     var max_width = 955;
 	var threshold;
     
+    var row_id = randomString();
+
+    // Add all of the divs in the row to a new html row inside of #artifact_wrapper
+    //$("#artifact_wrapper").append("<div id='"+row_id+"' class='artifact_row'></div>");
+
     for (i=0; i<row_accumulator.length; i++) {
+
+        //$("#"+row_id).append($(row_accumulator[i]));
+
         if ($(row_accumulator[i]).hasClass("no_crop")) {
             length -= 1;
             max_width = max_width - $(row_accumulator[i]).width() - 14; //dont forget margin and border!
             default_width = default_width - $(row_accumulator[i]).width();
             row_accumulator.splice(i,1);
-            i -= 1; // Need to dcrement the index because we just removed the item for the next index!
+            i -= 1; // Need to dcrement the index because we just removed the artifact for the next index!
         }
     }
 
@@ -382,12 +472,12 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
 		
 		var width_accumulator = 0; 
 		for (i=0; i<length; i++) {
-			photo_div = row_accumulator.pop();
+			artifact = row_accumulator.pop();
 			
 			if (i == length - 1) {
 				// This means we're on the last photo. The last photo should take up the remaining slack.
-                	foo = max_width - width_accumulator;
-			var new_width = max_width - width_accumulator - 10; // -10 because of the margin
+            	foo = max_width - width_accumulator;
+		    	var new_width = max_width - width_accumulator - 10; // -10 because of the margin
 			
             /*
 			if (new_width < 1.0*threshold){
@@ -396,11 +486,12 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
             */
 			var pic_width_diff = -1*($(photo).offset() - new_width);
 			//$(photo).css({"left": pic_width_diff + "px"});
-			$(photo_div).width(new_width);
+			$(artifact).width(new_width);
 
 			} else {
 				// Else make the divs a bit smaller based on the crop size
-				newsize = $(photo_div).children(".photo").width() - crop;
+
+				newsize = $(artifact).children(".photo_container").width() - crop;
                 /*
 				if (newsize < 1.0*threshold){
 					newsize = 1.0*threshold;
@@ -408,10 +499,10 @@ function resizePhotoDivs(row_accumulator, default_width, photo) {
                 */
 				var pic_width_newsize = -1*($(photo).offset() - newsize);
 				//$(photo).css({"left": pic_width_newsize + "px"});
-				$(photo_div).width(newsize);
+				$(artifact).width(newsize);
 			}
 			
-			width_accumulator += $(photo_div).width() + 10;
+			width_accumulator += $(artifact).width() + 10;
 		}
 	}
 }
@@ -428,7 +519,7 @@ function wrapResize(adjustment) {
 		}
 	});
 	
-	$('#header_accent_bar').height($('#canvas_header').height());
+	//$('#header_accent_bar').height($('#canvas_header').height());
 }
 
 /*******

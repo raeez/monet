@@ -3,10 +3,11 @@
 from flask import Module, session, redirect, url_for, request, render_template, flash, abort
 from flaskext.uploads import UploadNotAllowed
 from memoize.model import User
-from memoize.upload.helpers import get_memory, get_photo, create_memory, upload_photo, build_memory_stream, claimed, claim_memory, rand_photo
+from memoize.upload.helpers import get_memory, get_photo, create_memory, upload_photo, build_memory_stream, claimed, claim_memory, rand_photo, getArtifactsFromMemory
 from lib.db.objectid import ObjectId
 import bcrypt
 import random
+import json
 
 from client.log import log
 
@@ -131,28 +132,30 @@ def memory(id):
   if not m:
     abort(404)
   else:
+    from client.app import client as app
     if 'email' in session:
       claim_memory(m)
 
-    from client.app import client as app
-    show_hidden = request.args.get('show_hidden', '0')
-    items = []
-    for i in m.items:
-      p = get_photo(i)
+    show_hidden = int(request.args.get('show_hidden', '0'))
 
-      if p.visible == 0:
-        if show_hidden == '1':
-          pass
-        else:
-          continue
+    artifacts = getArtifactsFromMemory(m, 0, 100, show_hidden)
 
-      item = dict()
-      item['id'] = p._id
-      item['title'] = p.title
-      item['url'] = app.photos.url(p.filename)
-      item['visible'] = int(p.visible)
-      items.append(item)
-    return render_template('memory.html', memory={'claimed' : not (not m.user), 'id' : m._id, 'name' : m.name, 'items' : items, 'visible' : show_hidden})
+    return render_template('memory.html', memory={'claimed' : not (not m.user), 'id' : m._id, 'name' : m.name, 'artifacts' : artifacts, 'visible' : show_hidden})
+
+@main_module.route('/get_artifacts/<id>', methods=['GET', 'POST'])
+def get_artifact_containers(id):
+  m = get_memory(id)
+
+  offset = int(request.args.get('offset', '0'))
+  numArtifacts = int(request.args.get('numArtifacts', '100'))
+  showHidden = int(request.args.get('show_hidden', '0'))
+
+  if not m:
+    abort(404)
+  else:
+    artifacts = getArtifactsFromMemory(m, offset, numArtifacts, showHidden)
+
+  return json.dumps(artifacts)
 
 @main_module.route('/toggle_visibility', methods=['POST'])
 def toggle_visibility():

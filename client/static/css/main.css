@@ -91,11 +91,12 @@ a img {
 } 
 
 html {
+    height:100%;
 }
 	 
 body {
     height:100%;
-	background: #222222;
+	background: #222;
 	font-family: "Trebuchet", "Trebuchet MS", Trebuchet, Trebuchet MS, sans-serif;
 	letter-spacing:.07em;
 	line-height:1.6em;
@@ -442,16 +443,18 @@ input:focus {
  *****************************************/
 
 #canvas_header {
-    position: relative;
+    position: fixed;
     z-index:2;
-	background:#222222 url(../images/dark_glow_top.png) repeat-x bottom left;
+	background:transparent url(../images/top_bar_bg.png) repeat-x bottom left;
+    height:70px;
+    width:100%;
 }
 
 #header_accent_bar {
-	background:#189792 url(../images/teal_accent_top.jpg) no-repeat bottom left;
-	width:38px;
-	min-height:57px;
-	margin-left:1px;
+	background:transparent url(../images/top_accent.png) no-repeat top left;
+	width:60px;
+    height:110px;
+    position:relative;
 }
 
 #canvas_header #title {
@@ -557,7 +560,7 @@ input:focus {
 	position:relative;
 }
 .canvas_left_of_wrapper {
-	width:50px;
+	width:60px;
 	float:left;
 	height:100%;
 }
@@ -574,6 +577,12 @@ input:focus {
 	position:absolute;
 	bottom:0;
 	right:0;
+}
+
+#share_area {
+    position:absolute;
+    bottom:10px;
+    left:10px;
 }
 
 #share_bar {
@@ -618,7 +627,7 @@ input:focus {
 }
 
 #bottom_accent_bar {
-	background:#189792 url(../images/teal_accent_bottom_inner.jpg) no-repeat bottom left;
+	background:#189792 url(../images/accent_bottom_inner.jpg) no-repeat bottom left;
 	width:20px;
 	min-height:17px;
 }
@@ -630,7 +639,6 @@ input:focus {
 .photo {
 	/*left:-10%;
 	position:relative;*/
-	
 }
 
 .photo:hover {
@@ -642,10 +650,14 @@ input:focus {
     background:transparent;
 }
 
+#header_block {
+    height:60px;
+    width:100%;
+}
 #photo_wrapper {
 }
 
-.photo_div{
+.artifact{
 	display:block;
 	float:left;
 	-moz-box-shadow: 2px 2px 7px #111;
@@ -656,6 +668,11 @@ input:focus {
     position:relative;
 }
 
+.photo_container {
+    position:relative;
+    z-index:1;
+    overflow:hidden;
+}
 
 .artifact_hidden {
     opacity: .50;
@@ -673,6 +690,7 @@ input:focus {
     background:#222;
     padding:0px 5px;
     position:absolute;
+    z-index:2;
     right:0;
     top:0;
     text-align:right;
@@ -692,7 +710,7 @@ input:focus {
 
 
 /*
-.photo_div:hover {
+.artifact:hover {
 	cursor:pointer;
 	-moz-box-shadow: 2px 2px 7px #1e5957;
 	-webkit-box-shadow: 2px 2px 7px #1e5957;
@@ -707,7 +725,18 @@ input:focus {
  *****************************************/
 
  #canvas_footer {
-	 background:#222222 url(../images/dark_glow_bottom.png) repeat-x top left;
+     position:fixed;
+     z-index:2;
+     bottom:0;
+     z-index:2;
+     height:70px;
+     width:100%;
+	 background:transparent url(../images/bottom_bar_bg.png) repeat-x top left;
+ }
+
+ #footer_block {
+    height:60px;
+    width:100px;
  }
  
  #canvas_footer .canvas_center {
@@ -715,15 +744,15 @@ input:focus {
  }
  
  #footer_accent_bar {
-	background:#189792 url(../images/teal_accent_bottom.jpg) no-repeat bottom left;
-	width:20px;
-	min-height:55px;
-	margin-left:1px;
+     background:transparent url(../images/bottom_accent.png) no-repeat bottom left;
+	 width:40px;
+     height:90px;
+     margin-top:-20px;
  }
  
  #company_info {
 	line-height:1.2em;
-	margin-top:9px;
+	margin-top:20px;
 	height:37px;
 	float:right;
 	width:270px;
