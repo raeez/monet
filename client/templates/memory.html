@@ -252,14 +252,14 @@ $(document).ready(function() {
 
                     {% for artifact in memory['artifacts'] %}
                         {% if artifact['visible'] == 1 or artifact['visible'] == None %}
-                            <div id="artifact_{{artifact['id']}}" class="artifact">
+                            <div id="artifact_{{artifact['id']}}" class="artifact photo">
                                 <div class="hide_photo"><a href="#">hide</a></div>
                                 <div class="photo_container" style="width:{{artifact['width']}}px; height:{{artifact['height']}}px"></div>
                             </div>
                         {% endif %}
 
                         {% if artifact['visible'] == 0 %}
-                            <div id="artifact_{{artifact['id']}}" class="artifact artifact_hidden">
+                            <div id="artifact_{{artifact['id']}}" class="artifact artifact_hidden photo">
                                 <div class="hide_photo">hidden photo<br/><a href='#'>show</a></div>
                                 <div class="photo_container" style="width:{{artifact['width']}}px; height:{{artifact['height']}}px"></div>
                             </div>

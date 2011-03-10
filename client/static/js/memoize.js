@@ -2,6 +2,7 @@
 var maxPhotoSize = 0;
 var originalCanvasWidth;
 window.artifacts = []
+windwo.artifactDivs = new Object();
 
 /*============================================================ 
  * On Startup
@@ -391,13 +392,57 @@ function updateHoverQueue(in_queue, out_queue) {
  * Then detect the elements that need to be moved
  * Move the elements to the correct locations.
  */
-/*
-$(".artifact")
 
-artifact_position = new Object()
-calculateWidth
-calculateRow
-*/
+
+/**
+ * artifactDivs - list of artifactDiv objects
+ * an artifactDiv object has the properties:
+ *  - id
+ *  - noCrop
+ *  - realWidth
+ *  - croppedWidth
+ *  - row
+ *  - posInRow
+ *  - divArea
+ *
+ * This function should expect that the artifactDiv list
+ * has nocrop, id, and realWidth filled in for each element
+ *
+ * This function calculates and fills in the croppedWidth
+ * row, and div_area for each object in the list.
+ *
+ * It modifies the list objects in place
+ *
+ * return void
+ */
+function calculateCrop(artifactDivs) {
+    
+}
+
+
+/** getRealWidth(artifactDiv)
+ *  Determines the width of the artifact by detecting its type.
+ *  Photos you calculate differently than videos or tweets
+ *
+ *  returns the width in pixels
+ */
+function getRealWidth(artifactDiv) {
+    var width = 175;
+    if ($(artifactDiv).hasClass("photo")) {
+        // The artifact is a photo
+        width = $(artifactDiv).children("photo_container").width();
+    }
+    else if ($(artifactDiv).hasClass("add_artifact")) {
+        // The artifact is the "add artifact" button
+        width = $(artifactDiv).width();
+        
+    } else if ($(artifactDiv).hasClass("upload_file_canvas_div")) {
+        // The artifact is a file upload progress box
+       width = $(artifactDiv).children("photo_container").width(); 
+    }
+
+    return width;
+}
 
 /** photoHFit
  * Loops through every photo, builds a list of them that should be in
