@@ -216,6 +216,7 @@ $(document).ready(function() {
                 <div id="header_block"></div>
                 <div id="artifact_wrapper">
 
+                    <div class="artifact_row" id="row_0">
                     <div id="add_artifact" class="artifact no_crop">
                         <div class="photo_container">
                         <form id="canvas_file_upload" action="{{url_for('create')}}" method="POST" enctype="multipart/form-data">
@@ -249,8 +250,11 @@ $(document).ready(function() {
                         -->
                         
                     </div>
+                    </div>
 
-                    {% for artifact in memory['artifacts'] %}
+                    {% for row in memory['rows'] %}
+                    <div class="artifact_row" id="row_{{loop.index}}">
+                    {% for artifact in row %}
                         {% if artifact['visible'] == 1 or artifact['visible'] == None %}
                             <div id="artifact_{{artifact['id']}}" class="artifact photo">
                                 <div class="hide_photo"><a href="#">hide</a></div>
@@ -265,16 +269,11 @@ $(document).ready(function() {
                             </div>
                         {% endif %}
                     {% endfor %}
+                    </div>
+                    {% endfor %}
 
                 <script type="text/javascript" src="{{url_for('static', filename='js/upload_init.js')}}"></script> 
 
-                <div class="clear"></div>
-                {% if memory['visible'] == 1 %}
-                <div id="hidden_prompt" class="showing_hidden"><a href="/memory/{{memory['id']}}?show_hidden=0">Do not show</a> hidden photos</div>
-                {% endif %}
-                {% if memory['visible'] == 0 %}
-                <div id="hidden_prompt" class="not_showing_hidden"><a href="/memory/{{memory['id']}}?show_hidden=1">Show</a> hidden photos</div>
-                {% endif %}
 
                 </div>
                 <div id="footer_block"></div>
@@ -289,6 +288,12 @@ $(document).ready(function() {
     	<div class="canvas_outer_wrapper">
             <div class="canvas_left_of_wrapper">&nbsp;</div>
             <div class="canvas_center">
+                {% if memory['visible'] == 1 %}
+                <div id="hidden_prompt" class="showing_hidden"><a href="/memory/{{memory['id']}}?show_hidden=0">Do not show</a> hidden photos</div>
+                {% endif %}
+                {% if memory['visible'] == 0 %}
+                <div id="hidden_prompt" class="not_showing_hidden"><a href="/memory/{{memory['id']}}?show_hidden=1">Show</a> hidden photos</div>
+                {% endif %}
 
 
             	<div id="company_info">

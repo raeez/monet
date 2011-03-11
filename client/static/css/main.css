@@ -621,6 +621,8 @@ input:focus {
 }
 
 #hidden_prompt {
+    float:left;
+    margin-top:15px;
     font-size:0.8em;
     color:#aaa;
     padding-left:5px;
@@ -672,6 +674,18 @@ input:focus {
     position:relative;
     z-index:1;
     overflow:hidden;
+}
+
+.artifact_row {
+    width:1200px;
+    overflow:hidden;
+}
+.artifact_row:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
 }
 
 .artifact_hidden {

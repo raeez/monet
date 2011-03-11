@@ -17,7 +17,6 @@ $(document).ready(function(){
 
 	originalCanvasWidth = $('#photo_canvas_center').width();
 	
-
     $("#multi_session").val(randomString());
 	
     /* ************************************************* *
@@ -206,8 +205,12 @@ $(document).ready(function(){
 
     $(".artifact").hover(function() {
         $(this).children(".hide_photo").show();
+        var artifact = getArtifactDivByID($(this).attr("id"));
+        $(this).animate({width:artifact.realWidth},'fast');
     }, function() {
         $(this).children(".hide_photo").hide();
+        var artifact = getArtifactDivByID($(this).attr("id"));
+        $(this).animate({width:artifact.croppedWidth},'fast');
     });
 
 //	hover_in_queue = [];
@@ -393,15 +396,6 @@ function updateHoverQueue(in_queue, out_queue) {
 
 
 
-
-
-
-
-
-
-
-
-
 /* STRATEGY:
  * First compute the row, div area, and width of each element on the page
  * Then detect the elements that need to be moved
@@ -419,6 +413,16 @@ function ArtifactDiv() {
     this.display = undefined;
 }
 
+function getArtifactDivByID(id) {
+    var adiv_length = window.artifactDivs.length;
+    for (var i = 0; i < adiv_length; i++) {
+        var artifactDiv = window.artifactDivs[i];
+        if (artifactDiv.id == id) {
+            return artifactDiv;
+        }
+    }
+    return false;
+}
 /**
  * Creates a data structure that calcaultes the state the artifact divs should be in
  * Then calls the methods to rearrange the page accordingly
@@ -433,6 +437,8 @@ function updateArtifactDivs() {
     calculateCrop(_artifactDivs);
 
     moveArtifactDivs(_artifactDivs);
+
+    window.artifactDivs = _artifactDivs;
 }
 
 /**
@@ -607,6 +613,25 @@ function moveArtifactDivs(artifactDivs) {
 
         if (artifactDiv.croppedWidth && $("#"+artifactDiv.id).width() != artifactDiv.croppedWidth) {
             $("#"+artifactDiv.id).width(artifactDiv.croppedWidth);
+        }
+        
+        row_num = $("#"+artifactDiv.id).parents(".artifact_row").attr("id");
+        row_num = row_num.slice(4,row_num.length); // Take off the "row_" prefix
+        row_num = Number(row_num);
+
+        if (artifactDiv.row > row_num) {
+            if ($("row_"+artifactDiv.row).length) {
+                $("#row_"+artifactDiv.row).prepend($("#"+artifactDiv.id));
+            } else {
+                // We need to make a new row first
+                new_row = "<div class='artifact_row' id='row_"+artifactDiv.row+"'></div>"
+                $("#artifact_wrapper").append(new_row);
+                $("#row_"+artifactDiv.row).prepend($("#"+artifactDiv.id));
+            }
+        } else if (artifactDiv.row < row_num) {
+            $("#row_"+artifactDiv.row).append($("#"+artifactDiv.id));
+        } else {
+            // Do nothing. leave it where it is.
         }
     }
 }

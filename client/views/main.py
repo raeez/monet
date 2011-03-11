@@ -140,7 +140,21 @@ def memory(id):
 
     artifacts = getArtifactsFromMemory(m, 0, 100, show_hidden)
 
-    return render_template('memory.html', memory={'claimed' : not (not m.user), 'id' : m._id, 'name' : m.name, 'artifacts' : artifacts, 'visible' : show_hidden})
+    # Split things into rows:
+    rows = []
+    current_row = []
+    row_accumulator = 0
+    for artifact in artifacts:
+      current_row.append(artifact)
+      row_accumulator += artifact['width']
+      if row_accumulator >= 955:
+        rows.append(current_row)
+        current_row = []
+        row_accumulator = 0
+    if len(current_row) > 0:
+        rows.append(current_row)
+
+    return render_template('memory.html', memory={'claimed' : not (not m.user), 'id' : m._id, 'name' : m.name, 'rows' : rows, 'visible' : show_hidden})
 
 @main_module.route('/get_artifacts/<id>', methods=['GET', 'POST'])
 def get_artifact_containers(id):
