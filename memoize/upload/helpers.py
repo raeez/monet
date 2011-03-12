@@ -17,7 +17,7 @@ def create_memory():
   else:
     m.user = None
   m.name = mem_name
-  m.items = []
+  m.artifacts = []
   m.save()
   return m
 
@@ -63,49 +63,90 @@ def upload_photo(mem_id=None, multi_session=None):
       p.multi_session = multi_session
       p.memory = m._id
       p.save()
-      m.items = [p._id] + m.items
+      m.artifacts = [p._id] + m.artifacts
       m.save()
+
+      #TODO FIX the fact that we're returning random shit
+      width = random.randint(100, 300)
+      height = 175
+
       return succeed({'id' : str(p._id),
                       'memory' : str(m._id),
                       'memory_url' : url_for('memory', id=m._id),
                       'thumb_url' : app.photos.url(p.filename), # TODO start building these
                       'image_url' : app.photos.url(p.filename),
+                      'width': width,
+                      'height' : height,
                       'title' : p.title,
                       'caption' : p.caption,
                       'visible' : p.visible,
                       'multi_session' : multi_session,
                       'type' : 'image/jpeg'})
 
-def getVisiblePhotos(items):
+def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden=0):
+  ''' Returns a list of artifacts from a given memory object
+  offset and numArtifacts specify a selection of artifacts to return.
+  If get_hidden is 1, we will also return hidden photos
+  '''
+  from client.app import client as app
+  artifacts = []
+  index = 0
+  count = 0
+  for i in memory_object.artifacts:
+    if index >= offset and count < numArtifacts:
+      p = get_photo(i)
+      if p.visible == 0:
+        if get_hidden == 1:
+          pass
+        else:
+          continue
+
+      artifact = dict()
+      artifact['id'] = str(p._id)
+      artifact['image_url'] = app.photos.url(p.filename)
+      artifact['thumb_url'] = app.photos.url(p.filename)
+      artifact['visible'] = p.visible
+      #TODO FIX the fact that we're returning random shit
+      artifact['width'] = random.randint(100, 300)
+      artifact['height'] = 175
+      artifacts.append(artifact)
+      count += 1
+    index += 1
+
+  return artifacts
+
+def getVisibleArtifacts(artifacts):
+    ''' Given a list of artifacts, returns a list of only the visible ones
+    '''
     from client.app import client as app
-    visible_items = []
-    for item_id in items:
-        p = get_photo(item_id)
+    visible_artifacts = []
+    for artifact_id in artifacts:
+        p = get_photo(artifact_id)
         photo = dict()
         photo['id'] = p._id
         photo['thumb_url'] = app.photos.url(p.filename)
 
         if p.visible == 1:
-          visible_items.append(photo)
-    return visible_items
+          visible_artifacts.append(photo)
+    return visible_artifacts
 
 def build_memory_stream():
   m = Memory.find({'user' : session['id']})
   s = []
   for memory in m:
-    visible_items = getVisiblePhotos(memory.items)
-    rand_items = []
+    visible_artifacts = getVisibleArtifacts(memory.artifacts)
+    rand_artifacts = []
 
-    if len(visible_items) > 4:
-      rand_items = random.sample(visible_items, 4)
+    if len(visible_artifacts) > 4:
+      rand_artifacts = random.sample(visible_artifacts, 4)
       more_photos = 1
     else:
-      rand_items = visible_items
+      rand_artifacts = visible_artifacts
       more_photos = 0
 
     mem = { 'id' : memory._id,
             'name' : memory.name,
-            'rand_items':rand_items,
+            'rand_artifacts':rand_artifacts,
             'more_photos':more_photos}
     s.insert(0,mem)
   return s
@@ -113,9 +154,9 @@ def build_memory_stream():
 
 def rand_photo(m):
     if m:
-        visible_items = getVisiblePhotos(m.items)
-        rand_item = random.sample(visible_items,1)
-        photo = rand_item[0]
+        visible_artifacts = getVisibleArtifacts(m.artifacts)
+        rand_artifact = random.sample(visible_artifacts,1)
+        photo = rand_artifact[0]
 
         return json.dumps({"id":str(photo['id']), "thumb_url":photo['thumb_url']})
     else:

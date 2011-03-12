@@ -49,9 +49,9 @@
 
             <div class="center">
                 <div class="artifact_previews">
-                    {% for item in memory['rand_items'] %}
-                    <div class="artifact_item">
-                        <img src="{{item['thumb_url']}}" height="200px"/>
+                    {% for artifact in memory['rand_artifacts'] %}
+                    <div class="artifact_artifact">
+                        <img src="{{artifact['thumb_url']}}" height="200px"/>
                     </div>
                     {% endfor %}
                 </div>

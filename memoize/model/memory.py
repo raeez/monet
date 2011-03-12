@@ -10,9 +10,9 @@ class Memory(Container):
   def val_filename(self):
     assert len(self.name) < 255, "name must be less than 255 characters long"
 
-  @mandatory(list, items=[])
-  def val_items(self):
-    assert isinstance(self.items, list)
+  @mandatory(list, artifacts=[])
+  def val_artifacts(self):
+    assert isinstance(self.artifacts, list)
 
   @pointer(User, user=None)
   def val_user(self):

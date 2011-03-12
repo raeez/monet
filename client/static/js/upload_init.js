@@ -41,22 +41,24 @@ $("#canvas_file_upload").fileUploadUI({
         },
         buildUploadRow: function (files, index) {
             return $(
-            '       <div class="upload_file_canvas_div photo_div no_crop">'+
+            '       <div class="upload_file_canvas_div artifact no_crop">'+
             '           <div class="file_upload_canvas_content">'+
                             files[index].name +
             '               <div class="file_upload_progress"><\/div>'+
             '               <div class="file_upload_cancel"><\/div>'+
             '           <\/div>'+
             '           <div class="file_upload_canvas_preview"><\/div>'+
-            '           <div class="photo"><div class="mock_photo><\/div><\/div>"'+
+            '           <div class="photo_container"><div class="mock_photo><\/div><\/div>"'+
             '       <\/div>'
             );
         },
         buildDownloadRow: function (file) {
             return $(
-            '       <div id="'+file.id+'" class="photo_div">'+
+            '       <div id="artifact_'+file.id+'" class="artifact">'+
             '           <div class="hide_photo">hide</div>'+
-            '           <img class="photo" src="'+file.thumb_url+'" height="175"\/>'+
+            '           <div class="photo_container" style="width:'+file.width+'px; height:'+file.height+'px;">' + 
+            '               <img class="photo" src="'+file.thumb_url+'" height="175"\/>'+
+            '           </div>' + 
             '       <\/div>'
             );
         }
