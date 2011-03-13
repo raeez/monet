@@ -3,6 +3,17 @@ var maxPhotoSize = 0;
 var originalCanvasWidth;
 window.artifacts = []
 
+/*artifactsDivs=[{
+	nocrop:
+	id:
+	realWidth:
+	croppedWidth:
+	row:
+	div_area:
+	rowPos:
+}]
+*/
+
 /*============================================================ 
  * On Startup
  *==========================================================*/
@@ -409,6 +420,7 @@ function photoHFit() {
 	var max_width = $("#artifact_wrapper").width();
 	var row_accumulator = [];
 	var width_accumulator = 0;
+	var picArray = []
 	
 	$(".photo_container").each(function(){
         if ($(this).parent().css("display") != "none") {
@@ -433,7 +445,6 @@ function photoHFit() {
             }
         }
 	});
-//	resizePhotoDivs(row_accumulator, width_accumulator);
 	resizePhotoDivs(row_accumulator, width_accumulator, this);
 }
 
