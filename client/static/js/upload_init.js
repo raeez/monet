@@ -33,15 +33,15 @@ $("#canvas_file_upload").fileUploadUI({
             $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
         },
         beforeSend:function (event, files, index, xhr, handler, callBack) {
-            photoHFit();
+            updateArtifactDivs();
             callBack();
         },
         onComplete: function (event, files, index, xhr, handler) {
-            photoHFit();
+            updateArtifactDivs();
         },
         buildUploadRow: function (files, index) {
             return $(
-            '       <div class="upload_file_canvas_div artifact no_crop">'+
+            '       <div class="upload_file_canvas_div artifact no_crop" id="upload_'+randomString()+'">'+
             '           <div class="file_upload_canvas_content">'+
                             files[index].name +
             '               <div class="file_upload_progress"><\/div>'+
@@ -54,7 +54,7 @@ $("#canvas_file_upload").fileUploadUI({
         },
         buildDownloadRow: function (file) {
             return $(
-            '       <div id="artifact_'+file.id+'" class="artifact">'+
+            '       <div id="artifact_'+file.id+'" class="artifact photo">'+
             '           <div class="hide_photo">hide</div>'+
             '           <div class="photo_container" style="width:'+file.width+'px; height:'+file.height+'px;">' + 
             '               <img class="photo" src="'+file.thumb_url+'" height="175"\/>'+

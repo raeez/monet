@@ -1,21 +1,7 @@
 // JavaScript Document
 var maxPhotoSize = 0;
 var originalCanvasWidth;
-var MARGIN_WIDTH = 10; // set a global margin
-var BORDER_WIDTH = 4; // set a global margin
-window.artifacts = [] // A global that holds json representations of all returned artifacts
-window.artifactDivs; // A global used to keep track of the position of all artifact divs
-
-/*artifactsDivs=[{
-	nocrop:
-	id:
-	realWidth:
-	croppedWidth:
-	row:
-	div_area:
-	rowPos:
-}]
-*/
+window.artifacts = []
 
 /*============================================================ 
  * On Startup
@@ -28,12 +14,13 @@ $(document).ready(function(){
 
 	originalCanvasWidth = $('#photo_canvas_center').width();
 	
+
     $("#multi_session").val(randomString());
 	
     /* ************************************************* *
      * CANVAS - Runs the initial horizontal fit on the canvas
      * **************************************************/
-	//photoHFit();
+	photoHFit();
 	
     /* ************************************************* *
      * INDEX - Vertically centers the uploader in the page
@@ -66,8 +53,7 @@ $(document).ready(function(){
             } else {
                 $(this).parent(".artifact").hide('fast', function(){
                     $(this).parent(".artifact").remove();
-                    updateArtifactDivs();
-                    //photoHFit();
+                    photoHFit();
                 });
             }
         }
@@ -216,12 +202,8 @@ $(document).ready(function(){
 
     $(".artifact").hover(function() {
         $(this).children(".hide_photo").show();
-        var artifact = getArtifactDivByID($(this).attr("id"));
-        $(this).animate({width:artifact.realWidth},'fast');
     }, function() {
         $(this).children(".hide_photo").hide();
-        var artifact = getArtifactDivByID($(this).attr("id"));
-        $(this).animate({width:artifact.croppedWidth},'fast');
     });
 
 //	hover_in_queue = [];
@@ -246,7 +228,6 @@ $(document).ready(function(){
         timers.push(t);
     });
 
-	updateArtifactDivs();
 });
 
 /** loadartifacts([offset[, end]])
@@ -405,251 +386,136 @@ function updateHoverQueue(in_queue, out_queue) {
 }
 
 
-
-
 /* STRATEGY:
  * First compute the row, div area, and width of each element on the page
  * Then detect the elements that need to be moved
  * Move the elements to the correct locations.
  */
+/*
+$(".artifact")
 
-function ArtifactDiv() {
-    this.id = undefined;
-    this.noCrop = undefined;
-    this.realWidth = undefined;
-    this.croppedWidth = undefined;
-    this.row = undefined;
-    this.posInRow = undefined;
-    this.divArea = undefined;
-    this.display = undefined;
-}
+artifact_position = new Object()
+calculateWidth
+calculateRow
+*/
 
-function getArtifactDivByID(id) {
-    var adiv_length = window.artifactDivs.length;
-    for (var i = 0; i < adiv_length; i++) {
-        var artifactDiv = window.artifactDivs[i];
-        if (artifactDiv.id == id) {
-            return artifactDiv;
-        }
-    }
-    return false;
-}
-/**
- * Creates a data structure that calcaultes the state the artifact divs should be in
- * Then calls the methods to rearrange the page accordingly
+/** photoHFit
+ * Loops through every photo, builds a list of them that should be in
+ * a given row. Calls the resizePhotoDivs method on that row
  */
-function updateArtifactDivs() {
-    // Create a local copy to perform updates on then update the global
-    //var _artifactDivs = $.extend(true, [], window.artifactDivs);
-    var _artifactDivs = [];
 
-    populateArtifacts(_artifactDivs);
+function photoHFit() {
+	var margin = 10;
+	var max_width = $("#artifact_wrapper").width();
+	var row_accumulator = [];
+	var width_accumulator = 0;
+	
+	$(".photo_container").each(function(){
+        if ($(this).parent().css("display") != "none") {
+            if ($(this).width() > maxPhotoSize) {
+                maxPhotoSize = $(this).width();
+            }
 
-    calculateCrop(_artifactDivs);
-
-    moveArtifactDivs(_artifactDivs);
-
-    window.artifactDivs = _artifactDivs;
-}
-
-/**
- * Fills a list with artifactDiv objects that contain the state of all of
- * the artifacts on the current page
- */
-function populateArtifacts(_artifactDivs) {
-    $(".artifact").each(function() {
-        var artifactDiv = new ArtifactDiv();
-        artifactDiv['id'] = $(this).attr("id");
-        $(this).hasClass("no_crop") ? artifactDiv['noCrop'] = true : artifactDiv['noCrop'] = false;
-        artifactDiv['realWidth'] = getRealWidth($(this));
-        $(this).css('display') == "none" ? artifactDiv['display'] = false : artifactDiv['display'] = true;
-        _artifactDivs.push(artifactDiv);
-    });
-}
-
-
-/** getRealWidth(artifactDiv)
- *  Determines the width of the artifact by detecting its type.
- *  Photos you calculate differently than videos or tweets
- *
- *  returns the width of the div in pixels
- */
-function getRealWidth(artifactDiv) {
-    var width = 175;
-    if ($(artifactDiv).hasClass("photo")) {
-        // The artifact is a photo
-        width = $(artifactDiv).children(".photo_container").width();
-    }
-    else if ($(artifactDiv).hasClass("add_artifact")) {
-        // The artifact is the "add artifact" button
-        width = $(artifactDiv).width();
-        
-    } else if ($(artifactDiv).hasClass("upload_file_canvas_div")) {
-        // The artifact is a file upload progress box
-       width = $(artifactDiv).children(".photo_container").width(); 
-    }
-
-    return width;
-}
-
-/**
- * artifactDivs - list of artifactDiv objects
- * an artifactDiv object has the properties:
- *  - id
- *  - noCrop
- *  - realWidth
- *  - croppedWidth
- *  - row
- *  - posInRow
- *  - divArea
- *
- * This function should expect that the artifactDiv list
- * has nocrop, id, and realWidth filled in for each element
- *
- * This function calculates and fills in the croppedWidth
- * row, and div_area for each object in the list.
- *
- * It modifies the list objects in place
- *
- * Returns a copy of the artifactDivs
- */
-function calculateCrop(artifactDivs) {
-    var max_width = $("#artifact_wrapper").width();
-    var row_accumulator = [];
-    var width_accumulator = 0;
-
-    var rownum = 0;
-
-
-    var artifactDivs_length = artifactDivs.length;
-    for (var i = 0; i < artifactDivs_length; i ++) {
-        var artifactDiv = artifactDivs[i];
-        if (artifactDiv.display) {
             if (width_accumulator < max_width) {
-                width_accumulator += artifactDiv.realWidth + MARGIN_WIDTH;
-                row_accumulator.push(i);
-                artifactDivs[i].row = rownum;
+                width_accumulator += $(this).width() + margin;
+                row_accumulator.push($(this).parent('.artifact'));
             } else {
+                /*
+                 * add one more photo, call the resizePhotoDivs method, then
+                 * reset the row
+                 */
+//              resizePhotoDivs(row_accumulator, width_accumulator);
+                resizePhotoDivs(row_accumulator, width_accumulator, this);
 
-                processRow(row_accumulator, width_accumulator, artifactDivs);
-
-                width_accumulator = 0 + artifactDiv.realWidth + MARGIN_WIDTH;
+                width_accumulator = 0 + $(this).width() + margin;
                 row_accumulator = [];
-                rownum ++;
-                row_accumulator.push(i);
-                artifactDivs[i].row = rownum;
+                row_accumulator.push($(this).parent('.artifact'));
             }
         }
-
-    }
-
-    processRow(row_accumulator, width_accumulator, artifactDivs);
+	});
+//	resizePhotoDivs(row_accumulator, width_accumulator);
+	resizePhotoDivs(row_accumulator, width_accumulator, this);
 }
 
-/**
- * Determines crop amount for a given row and updates the div object
- * Called an used exclusively from calculateCrop
+/** resizePhotoDivs
+ * crops the photos on a row to be of the appropriate size
  */
-function processRow(row_accumulator, width_accumulator, artifactDivs) {
-    
+function resizePhotoDivs(row_accumulator, default_width, photo) {
+	var i;
+	var overspill;
+	var length = row_accumulator.length;
     var max_width = 955;
-    var overspill;
-    var crop;
+	var threshold;
+    
+    var row_id = randomString();
 
-    /*
-     * We first need to remove all objects that we don't want to crop
-     */
-    var rowacc_length = row_accumulator.length
-    for (var j = 0; j < row_accumulator.length; j++) {
-        // we need to recalculate row_accumulator.length each time since we
-        // modify the data structure in place with this loop
-        if (artifactDivs[row_accumulator[j]].noCrop) {
-            rowacc_length -= 1;
-            max_width = max_width - artifactDivs[row_accumulator[j]].realWidth - MARGIN_WIDTH - BORDER_WIDTH;
-            width_accumulator = width_accumulator - artifactDivs[row_accumulator[j]].realWidth;
-            artifactDivs[row_accumulator[j]].croppedWidth = artifactDivs[row_accumulator[j]].realWidth;
-            row_accumulator.splice(j,1);
-            j -= 1; // Need to decrement the index we because we're removing the artifacts in place
+    // Add all of the divs in the row to a new html row inside of #artifact_wrapper
+    //$("#artifact_wrapper").append("<div id='"+row_id+"' class='artifact_row'></div>");
+
+    for (i=0; i<row_accumulator.length; i++) {
+
+        //$("#"+row_id).append($(row_accumulator[i]));
+
+        if ($(row_accumulator[i]).hasClass("no_crop")) {
+            length -= 1;
+            max_width = max_width - $(row_accumulator[i]).width() - 14; //dont forget margin and border!
+            default_width = default_width - $(row_accumulator[i]).width();
+            row_accumulator.splice(i,1);
+            i -= 1; // Need to dcrement the index because we just removed the artifact for the next index!
         }
     }
 
-    /*
-     * Now we calcaulte and crop the rest
-     */
-    if (width_accumulator >= max_width && width_accumulator > 0 && max_width > 0) {
-        overspill = width_accumulator - max_width;
-        crop = Math.floor(overspill / rowacc_length);
+	if (default_width >= max_width && default_width > 0 && max_width > 0 ) {
+		overspill = default_width - max_width;
+		crop = Math.floor(overspill / length);
+		threshold = Math.floor(max_width/length);
+		
+		var width_accumulator = 0; 
+		for (i=0; i<length; i++) {
+			artifact = row_accumulator.pop();
+			
+			if (i == length - 1) {
+				// This means we're on the last photo. The last photo should take up the remaining slack.
+            	foo = max_width - width_accumulator;
+		    	var new_width = max_width - width_accumulator - 10; // -10 because of the margin
+			
+/*			if (new_width < 1.0*threshold){
+				new_width = 1.0*threshold;	
+			}*/
+//			var pic_width_diff = -1*($(photo).offset() - new_width);			
+			
 
-        var row_width_accumulator = 0;
-        for (var k = 0; k < rowacc_length; k ++) {
-            var artifact_id = row_accumulator.pop();
-            artifactDivs[artifact_id].posInRow = k;
-            if (k == rowacc_length - 1) {
-                // This means we're on the last photo. It should take up the remaining slack
-                var new_width = max_width - row_width_accumulator - MARGIN_WIDTH;
-                artifactDivs[artifact_id].croppedWidth = new_width;
-            } else {
-                var new_width = artifactDivs[artifact_id].realWidth - crop;
-                artifactDivs[artifact_id].croppedWidth = new_width;
-            }
+            /*
+			if (new_width < 1.0*threshold){
+				new_width = 1.0*threshold;	
+			}
+            */
+			var pic_width_diff = -1*($(photo).offset() - new_width);
 
-            row_width_accumulator += artifactDivs[artifact_id].croppedWidth + MARGIN_WIDTH;
-        }
-    } else {
-        // This means that the photos don't need to be cropped. Let's just copy in the
-        // appropriate width then
-        for (var k = 0; k < rowacc_length; k ++) {
-            var artifact_id = row_accumulator.pop();
-            artifactDivs[artifact_id].posInRow = k;
-            var real_width = artifactDivs[artifact_id].realWidth;
-            artifactDivs[artifact_id].croppedWidth = real_width;
+			//$(photo).css({"left": pic_width_diff + "px"});
 
-        }
-    }
+			$(artifact).width(new_width);
+
+
+			} else {
+				// Else make the divs a bit smaller based on the crop size
+
+
+				newsize = $(artifact).children(".photo_container").width() - crop;
+                /*
+				if (newsize < 1.0*threshold){
+					newsize = 1.0*threshold;
+				}
+                */
+				var pic_width_newsize = -1*($(photo).offset() - newsize);
+				//$(photo).css({"left": pic_width_newsize + "px"});
+				$(artifact).width(newsize);
+			}
+			
+			width_accumulator += $(artifact).width() + 10;
+		}
+	}
 }
-
-
-/**
- * Given a fully populated list of artifactDivs, this method moves the divs to the appropriate
- * location on the page. It, however first checks to see if the div is already in the
- * correct location. If it is, it does not move it
- */
-function moveArtifactDivs(artifactDivs) {
-    var adivs_length = artifactDivs.length;
-    for (var i=0; i < adivs_length; i++) {
-        var artifactDiv = artifactDivs[i];
-
-        if (!artifactDiv.id || !artifactDiv.croppedWidth) {
-            console.log("ERROR: artifactDiv has undefined terms");
-            console.log(artifactDiv);
-        }
-
-        if (artifactDiv.croppedWidth && $("#"+artifactDiv.id).width() != artifactDiv.croppedWidth) {
-            $("#"+artifactDiv.id).width(artifactDiv.croppedWidth);
-        }
-        
-        row_num = $("#"+artifactDiv.id).parents(".artifact_row").attr("id");
-        row_num = row_num.slice(4,row_num.length); // Take off the "row_" prefix
-        row_num = Number(row_num);
-
-        if (artifactDiv.row > row_num) {
-            if ($("row_"+artifactDiv.row).length) {
-                $("#row_"+artifactDiv.row).prepend($("#"+artifactDiv.id));
-            } else {
-                // We need to make a new row first
-                new_row = "<div class='artifact_row' id='row_"+artifactDiv.row+"'></div>"
-                $("#artifact_wrapper").append(new_row);
-                $("#row_"+artifactDiv.row).prepend($("#"+artifactDiv.id));
-            }
-        } else if (artifactDiv.row < row_num) {
-            $("#row_"+artifactDiv.row).append($("#"+artifactDiv.id));
-        } else {
-            // Do nothing. leave it where it is.
-        }
-    }
-}
-
-
 
 function wrapResize(adjustment) {
     adjustment = typeof(adjustment) != 'undefined' ? adjustment : 0;
