@@ -96,7 +96,7 @@ html {
 	 
 body {
     height:100%;
-	background: #222;
+	background: #333;
 	font-family: "Trebuchet", "Trebuchet MS", Trebuchet, Trebuchet MS, sans-serif;
 	letter-spacing:.07em;
 	line-height:1.6em;
@@ -203,6 +203,11 @@ input:focus {
 /*****************************************
  * Landing Page
  *****************************************/
+#landing_bg {
+    height:100%;
+    background:#222;
+}
+
 #landing_wrapper {
 	position:relative;
 	width:639px;

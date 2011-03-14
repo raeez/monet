@@ -9,7 +9,9 @@
     <script type="text/javascript" src="{{url_for('static', filename='js/sylvester.js')}}"></script>
     <script type="text/javascript" src="{{url_for('static', filename='js/purecssmatrix.js')}}"></script>
     <script type="text/javascript" src="{{url_for('static', filename='js/jquery.zoomooz.js')}}"></script>
-    -->
+-->
+
+    <script src="{{url_for('static', filename='js/jquery.transform-0.9.3.min.js')}}"></script>
 
     <script src="{{url_for('static', filename='js/jquery.jeditable.mini.js')}}"></script>
 
@@ -36,50 +38,6 @@ $(document).ready(function() {
 
 
 </script>
-
-<!--
-    <script type="text/javascript">
-
-    $(document).ready(function()
-    {
-        
-        $(".photo").toggle(function(evt) {
-            console.log("clicked");
-            settings = {
-                // zoomed size relative to screen
-                // 0.0-1.0
-                targetsize: 0.9,
-                // scale content to screen based on their size
-                // "width"|"height"|"both"
-                scalemode: "both",
-                // animation duration
-                duration: 500,
-                // easing of animation, similar to css transition params
-                // "linear"|"ease"|"ease-in"|"ease-out"|
-                // "ease-in-out"|[p1,p2,p3,p4]
-                // [p1, p2, p3, p4] refer to cubic-bezier curve params
-                easing: "ease",
-                // use browser native animation in webkit
-                // true|false
-                nativeanimation: true
-            }
-          $(this).zoomTo(settings);
-          evt.stopPropagation();
-        },
-        function(evt) {
-            $("body").zoomTo({targetsize:1.0});
-            evt.stopPropagation();
-        });
-        
-        $("body").click(function(evt) {
-            $(this).zoomTo({targetsize:1.0});
-            evt.stopPropagation();
-        });
-
-
-    });
-    </script>
-    -->
 {% endblock %}
 
 {% block content %}
@@ -216,6 +174,8 @@ $(document).ready(function() {
                 <div id="header_block"></div>
                 <div id="artifact_wrapper">
 
+                    <div id="above_zoom_div" class="zoom_div">
+
                     <div class="artifact_row" id="row_0">
                     <div id="add_artifact" class="artifact no_crop">
                         <div class="photo_container">
@@ -271,6 +231,10 @@ $(document).ready(function() {
                     {% endfor %}
                     </div>
                     {% endfor %}
+
+                </div> <!-- End above_zoom_div -->
+                <div id="in_zoom_div" class="zoom_div"></div>
+                <div id="below_zoom_div" class="zoom_div"></div>
 
                 <script type="text/javascript" src="{{url_for('static', filename='js/upload_init.js')}}"></script> 
 
