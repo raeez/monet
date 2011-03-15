@@ -4,15 +4,20 @@ var originalCanvasWidth;
 var MARGIN_WIDTH = 10; // set a global margin
 var BORDER_WIDTH = 4; // set a global margin
 var ARTIFACT_HEIGHT = 175; // The standard height of all artifacts
+var WRAPPER_WIDTH = 955;
 window.artifacts = [] // A global that holds json representations of all returned artifacts
 window.artifactDivs; // A global used to keep track of the position of all artifact divs
 window.zoomHeight; // A global that says how tall the center area of the page is
 window.scaleFactor = 1; // The factor that artifacts scale by when zoomed. Defaults to 1
+window.zoomedIn = false;
+window.previousZoomTarget = undefined; // The last target that we were zoom focused on
 
 /*============================================================ 
  * On Startup
  *==========================================================*/
 $(document).ready(function(){
+    BrowserDetect.init(); // See http://www.quirksmode.org/js/detect.html
+
     /* ************************************************* *
      * STREAM - Scrolls the page on table of contents hover
      * **************************************************/
@@ -207,65 +212,22 @@ $(document).ready(function(){
     });
 
     $(".artifact").hover(function() {
-        $(this).children(".hide_photo").show();
-        var artifact = getArtifactDivByID($(this).attr("id"));
-        $(this).animate({width:artifact.realWidth},'fast');
+        if (window.zoomedIn == false) {
+            $(this).children(".hide_photo").show();
+            var artifact = getArtifactDivByID($(this).attr("id"));
+            $(this).animate({width:artifact.realWidth},'fast');
+        }
     }, function() {
-        $(this).children(".hide_photo").hide();
-        var artifact = getArtifactDivByID($(this).attr("id"));
-        $(this).animate({width:artifact.croppedWidth},'fast');
+        if (window.zoomedIn == false) {
+            $(this).children(".hide_photo").hide();
+            var artifact = getArtifactDivByID($(this).attr("id"));
+            $(this).animate({width:artifact.croppedWidth},'fast');
+        }
     });
 
-    /* ************************************************* *
-     * Stream page get more random photos
-     * **************************************************/
-/*
-    $.zoomMooz.setup({
-        root:$("#artifact_wrapper"),
-        // zoomed size relative to screen
-        // 0.0-1.0
-        targetsize: 0.8,
-        // scale content to screen based on their size
-        // "width"|"height"|"both"
-        scalemode: "both",
-        // animation duration
-        duration: 500,
-        // easing of animation, similar to css transition params
-        // "linear"|"ease"|"ease-in"|"ease-out"|
-        // "ease-in-out"|[p1,p2,p3,p4]
-        // [p1, p2, p3, p4] refer to cubic-bezier curve params
-        easing: "ease",
-        // use browser native animation in webkit
-        // true|false
-        nativeanimation: true
-    });
-    $(".artifact").toggle(function(evt) {
-      evt.stopPropagation();
-      $(this).zoomTo();
-    },
-    function(evt) {
-        evt.stopPropagation();
-        $("#artifact_wrapper").zoomTo({targetsize:1.0});
-    });
-    */
-
-    $(".artifact").toggle(function(evt) {
-        zoomToArtifact($(this));
-    },
-    function(evt) {
-        $("#in_zoom_div").animate({
-            scaleX: 1,
-            scaleY: 1,
-            translateX: 0,
-            translateY: 0
-        },'slow');
-    });
-
-/*
     $(".artifact").click(function() {
         zoomToArtifact($(this));
     })
-*/
     
     /* ************************************************* *
      * Stream page get more random photos
@@ -302,8 +264,10 @@ $(document).ready(function(){
  * It must be visible within the canvas area
  */
 function zoomToArtifact(artifact) {
-    updateContainerDivs(artifact); // Modify the artifactDivs data structure
-    updateModifiedArtifactDivs(); // Move the divs to the appropriate spots
+    if (window.zoomedIn == false) {
+        updateContainerDivs(artifact); // Modify the artifactDivs data structure
+        updateModifiedArtifactDivs(); // Move the divs to the appropriate spots
+    }
     doZoom(artifact); // Actually do the transform
 }
 
@@ -323,7 +287,7 @@ function updateContainerDivs(artifact) {
 
     if ((artifactTop - MARGIN_WIDTH - ARTIFACT_HEIGHT) <= scroll_top) {
         // This means we need to add an extra row to the zoom_top
-        zoom_top = scroll_top - MARGIN_WIDTH - ARTIFACT_HEIGHT;
+        zoom_top = artifactTop - MARGIN_WIDTH - ARTIFACT_HEIGHT;
     } else {
         zoom_top = scroll_top - (ARTIFACT_HEIGHT - 60);
     }
@@ -339,13 +303,13 @@ function updateContainerDivs(artifact) {
     for (var i = 0; i < adiv_length; i++) {
         var a_top = $("#"+_artifactDivs[i].id).offset().top;
         
-        if (a_top <= zoom_top) {
+        if (a_top < zoom_top) {
             // This should be above the zoom div
             _artifactDivs[i].divArea = "above_zoom_div";
         } else if (a_top >= zoom_top && a_top <= zoom_bottom) {
             // This should be in our zoom div
             _artifactDivs[i].divArea = "in_zoom_div";
-        } else if (a_top >= zoom_bottom) {
+        } else if (a_top > zoom_bottom) {
             // This should be below the zoom div
             _artifactDivs[i].divArea = "below_zoom_div";
         } else {
@@ -353,28 +317,255 @@ function updateContainerDivs(artifact) {
         }
     }
     
+    window.artifactDivs = _artifactDivs;
+    
+}
+
+/**
+ * This is called from doUnZoom and adds some divs to the bottom
+ * of #in_zoom_div so we don't get a wonky zoom out effect
+ */
+function addBottomContainers() {
+    var scroll_top = $(window).scrollTop() + 70;
+    var scroll_bottom = $(window).scrollTop() + $(window).height();
+
+    $("#below_zoom_div").children(".artifact_row").each(function (){
+        var a_top = $(this).offset().top;
+        if (a_top <= scroll_bottom && a_top >= scroll_top) {
+            // This should be above the zoom div
+            $("#in_zoom_div").append($(this));
+        } 
+    });
 }
 
 /**
  * Zoom in on an artifact. Assume it's already in the #in_zoom_div
  */
 function doZoom(artifact) {
+    var artifactDiv = getArtifactDivByID($(artifact).attr("id"));
+
     var offset = $(artifact).position();
-    var xorigin = offset.left / $("#in_zoom_div").width() * 100;
-    var yorigin = offset.top / $("#in_zoom_div").height() * 100;
-    console.log("xorigin: " + xorigin);
-    console.log("yorigin: " + yorigin);
+    var xOrigin = offset.left / $("#in_zoom_div").width() * 100;
+    var yOrigin = offset.top / $("#in_zoom_div").height() * 100;
 
-    var marginFix = (MARGIN_WIDTH / ARTIFACT_HEIGHT) * window.zoomHeight * .6;
+    var topOffset = 1.5*MARGIN_WIDTH * window.scaleFactor;
+    var scrollOffset = $(window).scrollTop();
+    var centeringOffset = $("#in_zoom_div").width() / 2 - (artifactDiv.realWidth / 2 * window.scaleFactor);
 
+    $("#above_zoom_div").css("visibility", "hidden");
+    $("#below_zoom_div").css("visibility", "hidden");
+
+    var aboveZoomDivHeight = $("#above_zoom_div").height();
+    if (aboveZoomDivHeight > 0) {
+        // If there's stuff above the zoomDiv
+        xTranslate = offset.left - centeringOffset;
+        yTranslate = offset.top - scrollOffset - topOffset + aboveZoomDivHeight;
+    } else {
+        // If there isn't stuff above the zoom div. This means we're near the top of the page
+        xTranslate = offset.left - centeringOffset;
+        yTranslate = offset.top - scrollOffset - topOffset;
+    }
+
+    // Be sure we're looking at an expanded photo with no cruft on it
+    $(artifact).animate({width:artifactDiv.realWidth},'fast');
+    $(artifact).children(".hide_photo").hide();
+
+    if (window.zoomedIn == false) {
+        $("#in_zoom_div").transform({origin:[xOrigin+'%', yOrigin+'%']});
+        $("#in_zoom_div").animate({
+            scaleX: window.scaleFactor,
+            scaleY: window.scaleFactor,
+            left: - xTranslate + 'px',
+            top: - yTranslate + 'px'
+        },'slow');
+
+        $("#canvas_footer").animate({
+            bottom:'-60px'
+        }, 'slow');
+
+        window.zoomedIn = true;
+    } else if (window.zoomedIn == true) {
+
+        // This means we're already zoomed in
+        var previousArtifactDiv = getArtifactDivByID($(window.previousZoomTarget).attr("id"));
+        
+        if (window.previousZoomTarget) {
+            if ($(window.previousZoomTarget).attr("id") == $(artifact).attr("id")) {
+                // This means we've clicked on the same thing
+                doUnZoom(artifact);
+                return
+            }
+
+            // Return the previous photo to its normal cropped state
+            var previousArtifactDiv = getArtifactDivByID($(window.previousZoomTarget).attr("id"));
+            $(window.previousZoomTarget).animate({width:previousArtifactDiv.croppedWidth},'fast');
+        }
+
+//FIXME
+//FIXME AHHHHHH Goddamn browser bugs. Haven't even gotten to IE yet :(
+//FIXME
+        if (BrowserDetect.browser == "Firefox") {
+            xTranslate = (offset.left);
+        }
+
+
+        $("#in_zoom_div").animate({
+            scaleX: window.scaleFactor,
+            scaleY: window.scaleFactor,
+            left: - xTranslate + 'px',
+            top: - yTranslate + 'px',
+        },'slow', function() {
+            // As soon as we're done panning, we need to see if we
+            // need to update #in_zoom_div. This will happen any time
+            // we pan up or down since we need to add or pop rows
+            // accordingly
+
+            updateInZoomDivPan(artifactDiv, previousArtifactDiv);
+        });
+    }
+    window.previousZoomTarget = artifact;
+}
+
+/**
+ * After a pan has been completed when looking at zoomed-in photos, we may have to update
+ * the #in_zoom_div to add or remove rows. This detects whether or not this has
+ * to happen and then moves the rows in place without changing the relative viewport
+ * 
+ * artifactDiv and previousArtifactDiv are ArtifactDiv objects
+ */
+function updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
+    // Now we need to see if we're navigating up or down. If so, we need to try and grab another row to add to the #in_zoom_div
+    var previousRow = previousArtifactDiv.row;
+    var currentRow = artifactDiv.row;
+
+    if (previousRow != currentRow) {
+        // First see what the first and last rows of #in_zoom_div are so we can grab the correct row
+        
+        var initialAboveHeight = $("#above_zoom_div").height();
+        var initialPosition = $("#in_zoom_div").position();
+        var initialScrollTop = $(window).scrollTop();
+
+        var first_num = $("#in_zoom_div").children(".artifact_row:first").attr("id");
+        if (first_num) {
+            first_num = first_num.slice(4,first_num.length); // Take off the "row_" prefix
+            first_num = Number(first_num);
+        }
+        var last_num = $("#in_zoom_div").children(".artifact_row:last").attr("id");
+        if (last_num) {
+            last_num = last_num.slice(4,last_num.length); // Take off the "row_" prefix
+            last_num = Number(last_num);
+        }
+
+        if (previousRow > currentRow) {
+            // PAN UP ------------------
+            // This means we've clicked a photo above the last one we were just at.
+            // I want to pop off everything plus 2 rows (inclusive) below me
+            // I want to make sure the row above me and two rows above me exists
+            var cutOffRow = currentRow + 2;
+            var includeUpToRow = currentRow - 2;
+            
+            $("#in_zoom_div").children(".artifact_row").each(function() {
+                thisRow = parsePrefix($(this).attr("id"), "row_");
+                if (thisRow === null) {
+                    return;
+                }
+                if (thisRow > cutOffRow ) {
+                    // Any row too far below gets moved into #below_zoom_div
+                    $("#below_zoom_div").prepend($(this));
+                }
+                if (thisRow < includeUpToRow) {
+                    // Any row too far above gets moved into #above_zoom_div
+                    $("#above_zoom_div").append($(this));
+                }
+            });
+
+            $("#above_zoom_div").children(".artifact_row").each(function() {
+                thisRow = parsePrefix($(this).attr("id"), "row_");
+                if (thisRow === null) {
+                    return;
+                }
+                if (thisRow >= includeUpToRow ) {
+                    // Any row that's above me that's supposed to be in #in_zoom_div gets moved in
+                    $("#in_zoom_div").prepend($(this));
+                }
+            });
+
+        } else if (previousRow < currentRow) {
+            // PAN DOWN -----------
+            // This means we've clicked an artifact below the last one we were just at.
+            // I want to pop off everything minus 2 rows (inclusive) and above of me.
+            // I want to try and make sure that the row below me and two rows below
+            // me exist
+            var cutOffRow = currentRow - 2;
+            var includeUpToRow = currentRow + 2;
+
+            $("#in_zoom_div").children(".artifact_row").each(function() {
+                thisRow = parsePrefix($(this).attr("id"), "row_");
+                if (thisRow === null) {
+                    return;
+                }
+                if (thisRow < cutOffRow ) {
+                    // Any row too far above gets moved into #above_zoom_div
+                    $("#above_zoom_div").append($(this));
+                }
+                if (thisRow > includeUpToRow) {
+                    // Any row too far below gets moved into #below_zoom_div
+                    $("#below_zoom_div").prepend($(this));
+                }
+            });
+
+            $("#below_zoom_div").children(".artifact_row").each(function() {
+                thisRow = parsePrefix($(this).attr("id"), "row_");
+                if (thisRow === null) {
+                    return;
+                }
+                if (thisRow <= includeUpToRow ) {
+                    // Any row that's below me that's supposed to be in #in_zoom_div gets moved in
+                    $("#in_zoom_div").append($(this));
+                }
+            });
+        }
+        
+        var postAboveHeight = $("#above_zoom_div").height();
+        var postPosition = $("#in_zoom_div").position();
+
+        // Now that the rows have been moved, we need to reposition the div and scroll accordingly
+        var aboveHeightDiff = postAboveHeight - initialAboveHeight;
+        var positionDiff = postPosition.top - initialPosition.top ;
+        positionDiff = positionDiff * window.scaleFactor;
+
+        $(window).scrollTop(initialScrollTop + aboveHeightDiff);
+        //var newTop = parseCssPx($("#in_zoom_div").css("top")) + positionDiff + aboveHeightDiff;
+
+        var newTop = parseCssPx($("#in_zoom_div").css("top")) + positionDiff;
+
+        $("#in_zoom_div").css("top",newTop);
+
+    }
+
+}
+
+
+/**
+ * Undoes the zoom. Updates the globals and resets the zoom parameters
+ */
+function doUnZoom(artifact) {
+    window.zoomedIn = false;
+
+    // Need to add some from #below_zoom_div to #in_zoom_div before we zoom out
+    
+    addBottomContainers(); // Modify the artifactDivs data structure
+
+    $("#above_zoom_div").css("visibility", "visible");
+    $("#below_zoom_div").css("visibility", "visible");
+    $("#canvas_footer").animate({
+        bottom:'0px'
+    }, 'slow');
     $("#in_zoom_div").animate({
-        scaleX: window.scaleFactor,
-        scaleY: window.scaleFactor,
-        //origin: [xorigin+'%', yorigin+'%']
-        //origin:['100%', '100%']
-        origin:['0%', '0%'],
-        translateX:-offset.left,
-        translateY:-offset.top + 60 + marginFix
+        scaleX: 1,
+        scaleY: 1,
+        left: 0,
+        top: 0
     },'slow');
 }
 
@@ -602,7 +793,6 @@ function calculateCrop(artifactDivs) {
 
     var rownum = 0;
 
-
     var artifactDivs_length = artifactDivs.length;
     for (var i = 0; i < artifactDivs_length; i ++) {
         var artifactDiv = artifactDivs[i];
@@ -790,7 +980,9 @@ function wrapResize(adjustment) {
     adjustment = typeof(adjustment) != 'undefined' ? adjustment : 0;
     var standard_offset = 205;
 
-    window.zoomHeight = $(window).height() - 230;
+    // The zoomHeight is how big we want to scale images relative to the height
+    // of the page 60 is the height of the top bar
+    window.zoomHeight = ($(window).height() - 60) * (1 - (3.5 * MARGIN_WIDTH / ARTIFACT_HEIGHT));
     if (window.zoomHeight > 175) {
         window.scaleFactor = window.zoomHeight / ARTIFACT_HEIGHT;
     } else {
@@ -807,6 +999,141 @@ function wrapResize(adjustment) {
 	
 	//$('#header_accent_bar').height($('#canvas_header').height());
 }
+
+
+function parseCssPx(css_string) {
+    out = Number(css_string.slice(0,css_string.length - 2));
+    if (!isNaN(out)) {
+        return out;
+    } else {
+        return null;
+    }
+}
+
+function parsePrefix(fullString, prefixString) {
+    out = Number(fullString.slice(prefixString.length,fullString.length));
+    if (!isNaN(out)) {
+        return out;
+    } else {
+        return null;
+    }
+}
+
+var BrowserDetect = {
+	init: function () {
+		this.browser = this.searchString(this.dataBrowser) || "An unknown browser";
+		this.version = this.searchVersion(navigator.userAgent)
+			|| this.searchVersion(navigator.appVersion)
+			|| "an unknown version";
+		this.OS = this.searchString(this.dataOS) || "an unknown OS";
+	},
+	searchString: function (data) {
+		for (var i=0;i<data.length;i++)	{
+			var dataString = data[i].string;
+			var dataProp = data[i].prop;
+			this.versionSearchString = data[i].versionSearch || data[i].identity;
+			if (dataString) {
+				if (dataString.indexOf(data[i].subString) != -1)
+					return data[i].identity;
+			}
+			else if (dataProp)
+				return data[i].identity;
+		}
+	},
+	searchVersion: function (dataString) {
+		var index = dataString.indexOf(this.versionSearchString);
+		if (index == -1) return;
+		return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
+	},
+	dataBrowser: [
+		{
+			string: navigator.userAgent,
+			subString: "Chrome",
+			identity: "Chrome"
+		},
+		{ 	string: navigator.userAgent,
+			subString: "OmniWeb",
+			versionSearch: "OmniWeb/",
+			identity: "OmniWeb"
+		},
+		{
+			string: navigator.vendor,
+			subString: "Apple",
+			identity: "Safari",
+			versionSearch: "Version"
+		},
+		{
+			prop: window.opera,
+			identity: "Opera"
+		},
+		{
+			string: navigator.vendor,
+			subString: "iCab",
+			identity: "iCab"
+		},
+		{
+			string: navigator.vendor,
+			subString: "KDE",
+			identity: "Konqueror"
+		},
+		{
+			string: navigator.userAgent,
+			subString: "Firefox",
+			identity: "Firefox"
+		},
+		{
+			string: navigator.vendor,
+			subString: "Camino",
+			identity: "Camino"
+		},
+		{		// for newer Netscapes (6+)
+			string: navigator.userAgent,
+			subString: "Netscape",
+			identity: "Netscape"
+		},
+		{
+			string: navigator.userAgent,
+			subString: "MSIE",
+			identity: "Explorer",
+			versionSearch: "MSIE"
+		},
+		{
+			string: navigator.userAgent,
+			subString: "Gecko",
+			identity: "Mozilla",
+			versionSearch: "rv"
+		},
+		{ 		// for older Netscapes (4-)
+			string: navigator.userAgent,
+			subString: "Mozilla",
+			identity: "Netscape",
+			versionSearch: "Mozilla"
+		}
+	],
+	dataOS : [
+		{
+			string: navigator.platform,
+			subString: "Win",
+			identity: "Windows"
+		},
+		{
+			string: navigator.platform,
+			subString: "Mac",
+			identity: "Mac"
+		},
+		{
+			   string: navigator.userAgent,
+			   subString: "iPhone",
+			   identity: "iPhone/iPod"
+	    },
+		{
+			string: navigator.platform,
+			subString: "Linux",
+			identity: "Linux"
+		}
+	]
+
+};
 
 /*******
 

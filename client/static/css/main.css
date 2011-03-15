@@ -549,6 +549,9 @@ input:focus {
 	padding:0px 0px 0px 3px;
 	font-family:inherit;
 }
+
+
+
 /*****************************************
  * Canvas Page
  *****************************************/
@@ -582,6 +585,10 @@ input:focus {
 	position:absolute;
 	bottom:0;
 	right:0;
+}
+
+#in_zoom_div {
+    position:relative;
 }
 
 #share_area {
@@ -675,6 +682,10 @@ input:focus {
     position:relative;
 }
 
+.artifact_wrapper {
+    position:relative;
+}
+
 .photo_container {
     position:relative;
     z-index:1;
@@ -682,7 +693,7 @@ input:focus {
 }
 
 .artifact_row {
-    width:1200px;
+    width:1100px;
     overflow:hidden;
 }
 .artifact_row:after {
