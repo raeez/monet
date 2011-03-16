@@ -560,6 +560,7 @@ input:focus {
     position:relative;
     z-index:1;
 	background:#333333;
+    overflow:hidden;
 }
 
 .canvas_outer_wrapper {

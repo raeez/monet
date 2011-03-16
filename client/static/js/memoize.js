@@ -7,6 +7,7 @@ var ARTIFACT_HEIGHT = 175; // The standard height of all artifacts
 var WRAPPER_WIDTH = 955;
 window.artifacts = [] // A global that holds json representations of all returned artifacts
 window.artifactDivs; // A global used to keep track of the position of all artifact divs
+window.numRows = 0; // The total number of rows on the page
 window.zoomHeight; // A global that says how tall the center area of the page is
 window.scaleFactor = 1; // The factor that artifacts scale by when zoomed. Defaults to 1
 window.zoomedIn = false;
@@ -302,7 +303,6 @@ function updateContainerDivs(artifact) {
     var adiv_length = _artifactDivs.length;
     for (var i = 0; i < adiv_length; i++) {
         var a_top = $("#"+_artifactDivs[i].id).offset().top;
-        
         if (a_top < zoom_top) {
             // This should be above the zoom div
             _artifactDivs[i].divArea = "above_zoom_div";
@@ -554,31 +554,36 @@ function updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
             var cutOffRow = currentRow - 2;
             var includeUpToRow = currentRow + 2;
 
-            $("#in_zoom_div").children(".artifact_row").each(function() {
-                thisRow = parsePrefix($(this).attr("id"), "row_");
-                if (thisRow === null) {
-                    return;
-                }
-                if (thisRow < cutOffRow ) {
-                    // Any row too far above gets moved into #above_zoom_div
-                    $("#above_zoom_div").append($(this));
-                }
-                if (thisRow > includeUpToRow) {
-                    // Any row too far below gets moved into #below_zoom_div
-                    $("#below_zoom_div").prepend($(this));
-                }
-            });
+            if (currentRow < window.numRows) {
+                // Don't change stuff if we've reached the last row
+                // This prevents a visual glitch related to the fact that scroll
+                // can't scroll beyond the bottom of the page
+                $("#in_zoom_div").children(".artifact_row").each(function() {
+                    thisRow = parsePrefix($(this).attr("id"), "row_");
+                    if (thisRow === null) {
+                        return;
+                    }
+                    if (thisRow < cutOffRow ) {
+                        // Any row too far above gets moved into #above_zoom_div
+                        $("#above_zoom_div").append($(this));
+                    }
+                    if (thisRow > includeUpToRow) {
+                        // Any row too far below gets moved into #below_zoom_div
+                        $("#below_zoom_div").prepend($(this));
+                    }
+                });
 
-            $("#below_zoom_div").children(".artifact_row").each(function() {
-                thisRow = parsePrefix($(this).attr("id"), "row_");
-                if (thisRow === null) {
-                    return;
-                }
-                if (thisRow <= includeUpToRow ) {
-                    // Any row that's below me that's supposed to be in #in_zoom_div gets moved in
-                    $("#in_zoom_div").append($(this));
-                }
-            });
+                $("#below_zoom_div").children(".artifact_row").each(function() {
+                    thisRow = parsePrefix($(this).attr("id"), "row_");
+                    if (thisRow === null) {
+                        return;
+                    }
+                    if (thisRow <= includeUpToRow ) {
+                        // Any row that's below me that's supposed to be in #in_zoom_div gets moved in
+                        $("#in_zoom_div").append($(this));
+                    }
+                });
+            }
         }
         
         var postAboveHeight = $("#above_zoom_div").height();
@@ -589,12 +594,12 @@ function updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
         var positionDiff = postPosition.top - initialPosition.top ;
         positionDiff = positionDiff * window.scaleFactor;
 
-        $(window).scrollTop(initialScrollTop + aboveHeightDiff);
-        //var newTop = parseCssPx($("#in_zoom_div").css("top")) + positionDiff + aboveHeightDiff;
-
         var newTop = parseCssPx($("#in_zoom_div").css("top")) + positionDiff;
 
         $("#in_zoom_div").css("top",newTop);
+
+        $(window).scrollTop(initialScrollTop + aboveHeightDiff);
+        //var newTop = parseCssPx($("#in_zoom_div").css("top")) + positionDiff + aboveHeightDiff;
 
     }
 
@@ -943,6 +948,10 @@ function moveArtifactDivs(artifactDivs) {
     var adivs_length = artifactDivs.length;
     for (var i=0; i < adivs_length; i++) {
         var artifactDiv = artifactDivs[i];
+
+        if (artifactDiv.row > window.numRows) {
+            window.numRows = artifactDiv.row;
+        }
 
         if (!artifactDiv.id || !artifactDiv.croppedWidth || !artifactDiv.divArea) {
             console.log("ERROR: artifactDiv has undefined terms");
