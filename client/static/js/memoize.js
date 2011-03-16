@@ -12,7 +12,6 @@ window.zoomHeight; // A global that says how tall the center area of the page is
 window.scaleFactor = 1; // The factor that artifacts scale by when zoomed. Defaults to 1
 window.zoomedIn = false;
 window.previousZoomTarget = undefined; // The last target that we were zoom focused on
-window.previousHoverTarget = undefined;
 
 /*============================================================ 
  * On Startup
@@ -217,7 +216,6 @@ $(document).ready(function(){
         if (window.zoomedIn == false) {
             $(this).children(".hide_photo").show();
             artifactExpand($(this));
-            window.previousHoverTarget = this;
         }
     }, function() {
         if (window.zoomedIn == false) {
@@ -226,9 +224,70 @@ $(document).ready(function(){
         }
     });
 
-    $(".artifact").click(function() {
-        zoomToArtifact($(this));
-    })
+    $(".photo_container").click(function() {
+        zoomToArtifact($(this).parent(".artifact"));
+    });
+    
+    /* ************************************************* *
+     * Detect Arrow Keys
+     * **************************************************/
+    $(window).keydown(function(key) {
+        if (key.keyCode == 37) {
+            // LEFT
+            if (window.zoomedIn == true) {
+                key.preventDefault();
+                var artifactDiv = getArtifactDivByID($(window.previousZoomTarget).attr("id"));
+                leftArtifact = getArtifactDivByRowPos(artifactDiv.row, artifactDiv.posInRow + 1);
+                if (leftArtifact !== false) {
+                    doZoom("#"+leftArtifact.id);
+                }
+            }
+        } else if (key.keyCode == 38) {
+            // UP
+            if (window.zoomedIn == true) {
+                key.preventDefault();
+                var artifactDiv = getArtifactDivByID($(window.previousZoomTarget).attr("id"));
+                aboveArtifact = getArtifactDivByRowPos(artifactDiv.row - 1, artifactDiv.posInRow);
+                if (aboveArtifact !== false) {
+                    doZoom("#"+aboveArtifact.id);
+                }
+            }
+        } else if (key.keyCode == 39) {
+            // RIGHT
+            if (window.zoomedIn == true) {
+                key.preventDefault();
+                var artifactDiv = getArtifactDivByID($(window.previousZoomTarget).attr("id"));
+                rightArtifact = getArtifactDivByRowPos(artifactDiv.row, artifactDiv.posInRow - 1);
+                if (rightArtifact !== false) {
+                    doZoom("#"+rightArtifact.id);
+                }
+            }
+        } else if (key.keyCode == 40) {
+            // DOWN
+            if (window.zoomedIn == true) {
+                key.preventDefault();
+                var artifactDiv = getArtifactDivByID($(window.previousZoomTarget).attr("id"));
+                belowArtifact = getArtifactDivByRowPos(artifactDiv.row + 1, artifactDiv.posInRow);
+                if (belowArtifact !== false) {
+                    doZoom("#"+belowArtifact.id);
+                }
+            }
+        } else if (key.keyCode == 8) {
+            // BACKSPACE
+            if (window.zoomedIn == true) {
+                key.preventDefault();
+                doUnZoom();
+            }
+        } else if (key.keyCode == 13) {
+            // ENTER
+        } else if (key.keyCode == 27) {
+            // ESCAPE
+            if (window.zoomedIn == true) {
+                key.preventDefault();
+                doUnZoom();
+            }
+        }
+    });
     
     /* ************************************************* *
      * Stream page get more random photos
@@ -287,7 +346,6 @@ function artifactExpand(artifact) {
 function artifactUnExpand(artifact) {
     
     var a_div = getArtifactDivByID($(artifact).attr("id"));
-    var prev_div = getArtifactDivByID($(window.previousHoverTarget).attr("id"));
     var left_ofDiv = getArtifactDivByRowPos(a_div.row, a_div.posInRow - 1);
     var right_ofDiv = getArtifactDivByRowPos(a_div.row, a_div.posInRow + 1);
 
@@ -446,13 +504,14 @@ function doZoom(artifact) {
     var topOffset = 1.5*MARGIN_WIDTH * window.scaleFactor;
     var scrollOffset = $(window).scrollTop();
     var centeringOffset = $("#in_zoom_div").width() / 2 - (artifactDiv.realWidth / 2 * window.scaleFactor);
+    var expansionOffset = (artifactDiv.realWidth - artifactDiv.croppedWidth) * window.scaleFactor;
 
     $("#above_zoom_div").css("visibility", "hidden");
     $("#below_zoom_div").css("visibility", "hidden");
 
     var aboveZoomDivHeight = $("#above_zoom_div").height();
 
-    var newPosX = artifactPos.left - centeringOffset;
+    var newPosX = artifactPos.left - centeringOffset - expansionOffset;
     var newPosY = artifactPos.top - scrollOffset - topOffset + aboveZoomDivHeight;
 
     //var xTranslate = posXToLeft(newPosX, zoomDivWidth, window.scaleFactor, xOrigin);
@@ -484,7 +543,7 @@ function doZoom(artifact) {
         if (window.previousZoomTarget) {
             if ($(window.previousZoomTarget).attr("id") == $(artifact).attr("id")) {
                 // This means we've clicked on the same thing
-                doUnZoom(artifact);
+                doUnZoom();
                 return
             }
 
@@ -668,7 +727,7 @@ function updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
 /**
  * Undoes the zoom. Updates the globals and resets the zoom parameters
  */
-function doUnZoom(artifact) {
+function doUnZoom() {
     window.zoomedIn = false;
 
     // Need to add some from #below_zoom_div to #in_zoom_div before we zoom out
