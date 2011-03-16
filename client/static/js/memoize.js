@@ -229,6 +229,15 @@ $(document).ready(function(){
     });
     
     /* ************************************************* *
+     * Detect Scroll
+     * **************************************************/
+    $(window).mousewheel(function(e){
+        if (window.zoomedIn == true) {
+            e.preventDefault();
+        }
+    });
+
+    /* ************************************************* *
      * Detect Arrow Keys
      * **************************************************/
     $(window).keydown(function(key) {
@@ -240,6 +249,12 @@ $(document).ready(function(){
                 leftArtifact = getArtifactDivByRowPos(artifactDiv.row, artifactDiv.posInRow + 1);
                 if (leftArtifact !== false) {
                     doZoom("#"+leftArtifact.id);
+                } else {
+                    // Look at the next row up on the other end
+                    rowChange = getArtifactDivByRowPos(artifactDiv.row - 1, 0);
+                    if (rowChange !== false) {
+                        doZoom("#"+rowChange.id);
+                    }
                 }
             }
         } else if (key.keyCode == 38) {
@@ -250,6 +265,12 @@ $(document).ready(function(){
                 aboveArtifact = getArtifactDivByRowPos(artifactDiv.row - 1, artifactDiv.posInRow);
                 if (aboveArtifact !== false) {
                     doZoom("#"+aboveArtifact.id);
+                } else {
+                    // There's probably one, but we're too far out.
+                    rowChange = getArtifactDivByRowPos(artifactDiv.row - 1, getArtifactDivRowLength(artifactDiv.row-1) - 1);
+                    if (rowChange !== false) {
+                        doZoom("#"+rowChange.id);
+                    }
                 }
             }
         } else if (key.keyCode == 39) {
@@ -260,6 +281,12 @@ $(document).ready(function(){
                 rightArtifact = getArtifactDivByRowPos(artifactDiv.row, artifactDiv.posInRow - 1);
                 if (rightArtifact !== false) {
                     doZoom("#"+rightArtifact.id);
+                } else {
+                    // Look at the next row down on the other end
+                    rowChange = getArtifactDivByRowPos(artifactDiv.row + 1, getArtifactDivRowLength(artifactDiv.row+1) - 1);
+                    if (rowChange !== false) {
+                        doZoom("#"+rowChange.id);
+                    }
                 }
             }
         } else if (key.keyCode == 40) {
@@ -270,6 +297,12 @@ $(document).ready(function(){
                 belowArtifact = getArtifactDivByRowPos(artifactDiv.row + 1, artifactDiv.posInRow);
                 if (belowArtifact !== false) {
                     doZoom("#"+belowArtifact.id);
+                } else {
+                    // There's probably one, but we're too far out.
+                    rowChange = getArtifactDivByRowPos(artifactDiv.row + 1, getArtifactDivRowLength(artifactDiv.row+1) - 1);
+                    if (rowChange !== false) {
+                        doZoom("#"+rowChange.id);
+                    }
                 }
             }
         } else if (key.keyCode == 8) {
@@ -280,6 +313,10 @@ $(document).ready(function(){
             }
         } else if (key.keyCode == 13) {
             // ENTER
+            if (window.zoomedIn == true) {
+                key.preventDefault();
+                doUnZoom();
+            }
         } else if (key.keyCode == 27) {
             // ESCAPE
             if (window.zoomedIn == true) {
@@ -558,7 +595,7 @@ function doZoom(artifact) {
             scaleY: window.scaleFactor,
             left: - xTranslate + 'px',
             top: - yTranslate + 'px',
-        },'slow', function() {
+        },'fast', function() {
             // As soon as we're done panning, we need to see if we
             // need to update #in_zoom_div. This will happen any time
             // we pan up or down since we need to add or pop rows
@@ -877,6 +914,17 @@ function getArtifactDivByRowPos(row, posInRow) {
         }
     }
     return false;
+}
+function getArtifactDivRowLength(row) {
+    var adiv_length = window.artifactDivs.length;
+    var row_length = 0;
+    for (var i = 0; i < adiv_length; i++) {
+        var artifactDiv = window.artifactDivs[i];
+        if (artifactDiv.row == row) {
+            row_length ++;
+        }
+    }
+    return row_length;
 }
 
 /**
