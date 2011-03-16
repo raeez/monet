@@ -1,0 +1,96 @@
+<html>
+<head>
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.transform-0.9.3.min.js"></script>
+<style type="text/css">
+body {
+    background:#fff;
+    border:0;
+    padding:0;
+    margin:0;
+    font-size:12px;
+    font-family:Arial;
+}
+
+#wrap {
+    width:200px;
+    margin:0 auto;
+    position:relative;
+}
+
+#top {
+    height:200px;
+    background:red;
+}
+#middle {
+    position:relative;
+    height:200px;
+    background:green;
+}
+.artifact {
+    width:100px;
+    height:100px;
+    position:relative;
+    background:black;
+    color:white;
+    float:left
+}
+#bottom {
+    height:200px;
+    background:blue;
+}
+</style>
+</head>
+<body>
+
+    <div id="wrap">
+        <div id="top" class="debug"></div>
+        <div id="middle" class="debug"><div class="artifact_row"><div class="artifact"></div><div class="artifact" id="a1"></div><div class="artifact" id="a2"></div></div></div>
+        <div id="bottom" class="debug"></div>
+    </div>
+
+</body>
+
+<script type="text/javascript">
+    window.scaleFactor = 2;
+    xOrigin = 0;
+    yOrigin = 0;
+    xTranslate = 200;
+    yTranslate = 0;
+
+    $(".debug").each(function(){
+        var offset = $("#a1").offset();
+        var position = $("#a1").position();
+        var div_top = $("#a1").css("top");
+        var div_left = $("#a1").css("left");
+        var height = $("#a1").height();
+        var width = $("#a1").width();
+        var outString = "offset: ["+offset.left+","+offset.top+"]<br/>position: ["+position.left+","+position.top+"]<br/>left: "+div_left+"<br/>top: "+div_top+"<br/>height: "+height+"<br/>width: "+width+"<br/>";
+        $("#a1").html(outString);
+    });
+
+    $("#middle").transform({origin:[xOrigin+'%', yOrigin+'%']});
+    $("#middle").animate({
+        scaleX: window.scaleFactor,
+        scaleY: window.scaleFactor,
+        left: xTranslate + 'px',
+        top: yTranslate + 'px'
+        },'slow', function() {
+
+        $(".debug").each(function(){
+        var offset = $("#a2").offset();
+        var position = $("#a2").position();
+        var div_top = $("#a2").css("top");
+        var div_left = $("#a2").css("left");
+        var height = $("#a2").height();
+        var width = $("#a2").width();
+        var outString = "offset: ["+offset.left+","+offset.top+"]<br/>position: ["+position.left+","+position.top+"]<br/>left: "+div_left+"<br/>top: "+div_top+"<br/>height: "+height+"<br/>width: "+width+"<br/>";
+        $("#a2").html(outString);
+    });
+    //$("#middle").transform({origin:['0%', '0%']});
+        
+        });
+
+</script>
+
+</html>

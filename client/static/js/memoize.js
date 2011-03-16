@@ -338,15 +338,52 @@ function addBottomContainers() {
     });
 }
 
+
+/**
+ * ====================== NOTES ON ZOOMING BROWSER DETAILS ==========
+ * We adjust the left and top css position properties because they
+ * reliably work across all browsers.
+ *
+ * !!! Left and Top are NOT affected by the scale. They are applied BEFORE
+ * the zoom. This is true in both Chrome and Firefox. This represents the
+ * position without any transform business
+ *
+ * !!! Offset and Position ARE affectd by the scale. They are calculated
+ * by jquery after the scale happens. This represents the TRUE top and left
+ * of a div after the scale is applied. This is true in both Chrome and FF
+ *
+ * !!! For elements INSIDE a scaled div, for example, the .artifacts inside
+ * of #in_zoom_div, the behavior is DIFFERENT between browsers
+ *     In CHROME, the position is calculated AFTER the scale
+ *     In FIREFOX, the position is calculated BEFORE the scale
+ *     The two numbers will be different by a the scale factor
+ *
+ * !!! The width and height for elements inside of a scaled div
+ * (like .artifacts inside of #in_zoom_div) do NOT change depending
+ * on the scale. This means if you want to translate by one of these
+ * dimensions for a scaled div, you must multiply the dimension by the
+ * scale factor
+ *
+ */
+
+
 /**
  * Zoom in on an artifact. Assume it's already in the #in_zoom_div
  */
 function doZoom(artifact) {
     var artifactDiv = getArtifactDivByID($(artifact).attr("id"));
+    var zoomDivWidth = $("#in_zoom_div").width();
+    var zoomDivHeight = $("#in_zoom_div").height();
 
-    var offset = $(artifact).position();
-    var xOrigin = offset.left / $("#in_zoom_div").width() * 100;
-    var yOrigin = offset.top / $("#in_zoom_div").height() * 100;
+    var artifactPos = $(artifact).position();
+    if (BrowserDetect.browser == "Firefox" && window.zoomedIn == true) {
+        // See zoom notes above as to why we have to do this
+        artifactPos.left = artifactPos.left * window.scaleFactor;
+        artifactPos.top = artifactPos.top * window.scaleFactor;
+    }
+
+    var xOrigin = artifactPos.left / $("#in_zoom_div").width() * 100;
+    var yOrigin = artifactPos.top / $("#in_zoom_div").height() * 100;
 
     var topOffset = 1.5*MARGIN_WIDTH * window.scaleFactor;
     var scrollOffset = $(window).scrollTop();
@@ -356,15 +393,14 @@ function doZoom(artifact) {
     $("#below_zoom_div").css("visibility", "hidden");
 
     var aboveZoomDivHeight = $("#above_zoom_div").height();
-    if (aboveZoomDivHeight > 0) {
-        // If there's stuff above the zoomDiv
-        xTranslate = offset.left - centeringOffset;
-        yTranslate = offset.top - scrollOffset - topOffset + aboveZoomDivHeight;
-    } else {
-        // If there isn't stuff above the zoom div. This means we're near the top of the page
-        xTranslate = offset.left - centeringOffset;
-        yTranslate = offset.top - scrollOffset - topOffset;
-    }
+
+    var newPosX = artifactPos.left - centeringOffset;
+    var newPosY = artifactPos.top - scrollOffset - topOffset + aboveZoomDivHeight;
+
+    //var xTranslate = posXToLeft(newPosX, zoomDivWidth, window.scaleFactor, xOrigin);
+    //var yTranslate = posYToTop(newPosY, zoomDivHeight, window.scaleFactor, yOrigin, aboveZoomDivHeight);
+    var xTranslate = newPosX;
+    var yTranslate = newPosY;
 
     // Be sure we're looking at an expanded photo with no cruft on it
     $(artifact).animate({width:artifactDiv.realWidth},'fast');
@@ -401,15 +437,8 @@ function doZoom(artifact) {
             $(window.previousZoomTarget).animate({width:previousArtifactDiv.croppedWidth},'fast');
         }
 
-//FIXME
-//FIXME AHHHHHH Goddamn browser bugs. Haven't even gotten to IE yet :(
-//FIXME
-        if (BrowserDetect.browser == "Firefox") {
-            xTranslate = (offset.left);
-        }
-
-
         $("#in_zoom_div").animate({
+            origin: ['0%', '0%'],
             scaleX: window.scaleFactor,
             scaleY: window.scaleFactor,
             left: - xTranslate + 'px',
@@ -424,6 +453,32 @@ function doZoom(artifact) {
         });
     }
     window.previousZoomTarget = artifact;
+}
+
+
+/**
+ * Zoom Transforms ================================
+ * We need transform functions to interchange between the CSS top and left
+ * values we get out of our divs and the position properties that is returned
+ * by jQuery. Position is relative to the enclosing container. Top and Left are
+ * the relative offset positions of the divs before the transform is applied.
+ *
+ * The transform needs to take into account the scale origins as well since that
+ * affects the positioning of the elements.
+ *
+ * This has been tested to be true in Chrome and Firefox
+ */
+function posYToTop(posY, height, scale, yOrigin, aboveHeight) {
+    return posY + (height * scale * yOrigin)/200 - aboveHeight;
+}
+function topToPosY(div_top, height, scale, yOrigin, aboveHeight) {
+    return (div_top + aboveHeight) - (height * scale * yOrigin)/200;
+}
+function posXToLeft(posX, width, scale, xOrigin) {
+    return posX + (width * scale * xOrigin)/200;
+}
+function leftToPosX(div_left, width, scale, xOrigin) {
+    return div_left - (width * scale * xOrigin)/200;
 }
 
 /**
