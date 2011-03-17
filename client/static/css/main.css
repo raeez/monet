@@ -588,8 +588,14 @@ input:focus {
 	right:0;
 }
 
+#above_zoom_div {
+
+}
 #in_zoom_div {
     position:relative;
+}
+#below_zoom_div {
+
 }
 
 #share_area {
@@ -855,9 +861,10 @@ input:focus {
     position:relative;
     z-index:2;
     background:#222 url(../images/memory_lane_bg.png) repeat-y top center;
-    height:100%;
     width:460px;
+    min-height:100%;
     margin:0 auto;
+    padding-bottom:1px;
 }
 
 #lane_wrap #title {

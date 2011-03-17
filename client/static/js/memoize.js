@@ -12,6 +12,7 @@ window.zoomHeight; // A global that says how tall the center area of the page is
 window.scaleFactor = 1; // The factor that artifacts scale by when zoomed. Defaults to 1
 window.zoomedIn = false;
 window.previousZoomTarget = undefined; // The last target that we were zoom focused on
+window.timers = {}; // Dictionary of timers for the stream page
 
 /*============================================================ 
  * On Startup
@@ -211,20 +212,28 @@ $(document).ready(function(){
     }, function(){
         $(".blue_hover").css("color", "#189792");
     });
+    $("#add_artifact").click(function() {
+        if (window.zoomedIn == true) {
+            doUnZoom();
+        }
+    })
 
-    $(".artifact").hover(function() {
+    $(".artifact").live("mouseenter", function() {
         if (window.zoomedIn == false) {
             $(this).children(".hide_photo").show();
             artifactExpand($(this));
         }
-    }, function() {
+    }).live("mouseleave", function() {
         if (window.zoomedIn == false) {
             $(this).children(".hide_photo").hide();
             artifactUnExpand($(this));
         }
     });
 
-    $(".photo_container").click(function() {
+    $(".photo_container").live("click",function() {
+        if ($(this).parents(".artifact").hasClass("no_crop")) {
+            return;
+        }
         zoomToArtifact($(this).parent(".artifact"));
     });
     
@@ -329,17 +338,88 @@ $(document).ready(function(){
     /* ************************************************* *
      * Stream page get more random photos
      * **************************************************/
-    timers = [];
-    $(".more_photos").each(function() {
-        randomnumber=Math.floor(Math.random()*3000) + 4000;
-        id = $(this).attr('id');
-        t = setInterval("randPhoto('"+id+"')", randomnumber);
-        timers.push(t);
+    updateStreamGrab();
+    $(window).scroll(function() {
+       updateStreamGrab(); 
     });
+
 
 	updateArtifactDivs();
 });
 
+/**
+ * Checks to see if any canvases on the stream page should be scrolling photos.
+ * We only activate timers for those that are visible at any given time.
+ * We remove times for those that are unvisible.
+ * Since the timers make server calls every 3 or 4 seconds (randomly), it's important
+ * to have a few going as possible at any given time
+ */
+function updateStreamGrab() {
+    var scroll_top = $(window).scrollTop() - 250;
+    var scroll_bottom = $(window).scrollTop() + $(window).height();
+
+    $(".more_photos").each(function() {
+        var id = $(this).attr('id');
+        if ($(this).offset().top > scroll_top && $(this).offset().top < scroll_bottom) {
+            // It's in the viewport, make sure there's a timer for it
+            randomnumber=Math.floor(Math.random()*3000) + 4000;
+            if (!window.timers[id]) {
+                var t = setInterval("randPhoto('"+id+"')", randomnumber);
+                window.timers[id] = t;
+            }
+        } else {
+            // It's not in the viewport, remove the timer if any
+            if (window.timers[id]) {
+                clearInterval(window.timers[id]);
+                delete window.timers[id];
+            }
+        }
+    });
+
+}
+
+/** Fills in images based on viewport
+ */
+
+function randPhoto(mem_id,numTries) {
+    var cropped_mem_id = mem_id.slice(7,mem_id.length);
+    var previews = $("#memdiv_" + cropped_mem_id).find(".artifact_previews");
+    var noContent = false;
+    $.getJSON("/get_rand_photo", {"mem_id":cropped_mem_id}, function(json){
+        var content = "<div class='artifact_item'><img src='"+json.thumb_url+"' height='200px'/></div>";
+        $(previews).find("img").each(function () {
+            if ($(this).attr("src") == json.thumb_url || !content) {
+                // Bail and try again if we're just going to load an image that's already in the queue.
+                noContent = true;
+            }
+        });
+
+        if (noContent == true) {
+            if (numTries) {
+                if (numTries > 5) {
+                    return;
+                } else {
+                    numTries ++;
+                }
+            } else {
+                numTries = 1;
+            }
+            randPhoto(mem_id,numTries);
+            return;
+        }
+
+        $(previews).append(content);
+        var moveAmount = $(previews).children(".artifact_item:first").width() + 10;
+        $(previews).animate({
+            left:-moveAmount
+        }, 'slow', function(){
+            if (noContent == false) {
+                $(previews).children(".artifact_item:first").remove();
+                $(previews).css("left", "0");
+            }
+        });
+    });
+}
 
 
 /**
@@ -524,6 +604,8 @@ function addBottomContainers() {
  * Zoom in on an artifact. Assume it's already in the #in_zoom_div
  */
 function doZoom(artifact) {
+    $("#artifact_wrapper").height($("#in_zoom_div").height()*window.scaleFactor);
+
     var artifactDiv = getArtifactDivByID($(artifact).attr("id"));
     var zoomDivWidth = $("#in_zoom_div").width();
     var zoomDivHeight = $("#in_zoom_div").height();
@@ -781,7 +863,9 @@ function doUnZoom() {
         scaleY: 1,
         left: 0,
         top: 0
-    },'slow');
+    },'slow', function() {
+        $("#artifact_wrapper").height('auto');
+    });
 }
 
 
@@ -835,24 +919,6 @@ function loadViewportPhotos() {
     }
 }
 
-/** Fills in images based on viewport
- */
-
-function randPhoto(mem_id) {
-    mem_id = mem_id.slice(7,mem_id.length);
-    div = $("#memdiv_" + mem_id);
-    $.getJSON("/get_rand_photo", {"mem_id":mem_id}, function(json){
-        content = "<div class='artifact_artifact'><img src='"+json.thumb_url+"' height='200px'/></div>";
-        $(div).find(".artifact_previews").append(content);
-        moveAmount = $(div).find(".artifact_artifact:first").width() + 10;
-        $(div).find(".artifact_previews").animate({
-            left:-moveAmount
-        }, 'slow', function(){
-            $(div).find(".artifact_artifact:first").remove();
-            $(div).find(".artifact_previews").css("left", "0");
-        });
-    });
-}
 
 function randomString() {
 	var chars = "ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";

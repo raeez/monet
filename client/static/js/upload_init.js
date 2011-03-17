@@ -55,7 +55,7 @@ $("#canvas_file_upload").fileUploadUI({
         buildDownloadRow: function (file) {
             return $(
             '       <div id="artifact_'+file.id+'" class="artifact photo">'+
-            '           <div class="hide_photo">hide</div>'+
+            '           <div class="hide_photo"><a href="#">hide</a></div>'+
             '           <div class="photo_container" style="width:'+file.width+'px; height:'+file.height+'px;">' + 
             '               <img class="photo" src="'+file.thumb_url+'" height="175"\/>'+
             '           </div>' + 

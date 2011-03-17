@@ -13,12 +13,20 @@
 
 <div id="left_lane_positioning">
     <div id="left_lane">
-        <div id="logo"><a href="{{url_for('new')}}">Memoize</a></div>
+        <div id="logo"><a href="{{url_for('new')}}"><span class="anchorLink" id="top">Memoize</span></a></div>
         <div id="table_of_contents">
             {% for memory in stream %}
             <div class="toc_item">
                 <div class="toc_marker"></div>
-                <div class="toc_memory "><span id="{{memory['id']}}" class="anchorLink"><a href="{{url_for('memory', id=memory['id'])}}">{{memory['name']}}</a></span></div>
+                <div class="toc_memory ">
+                    {% if loop.index == 1 %}
+                    <span id="top" class="anchorLink">
+                    {% else %}
+                    <span id="{{memory['id']}}" class="anchorLink">
+                    {% endif %}
+                        <a href="{{url_for('memory', id=memory['id'])}}">{{memory['name']}}</a>
+                    </span>
+                </div>
             </div>
             {% endfor %}
         </div>
@@ -27,6 +35,7 @@
 
 <div id="lane_wrap">
     <div id="memory_lane">
+        <div id="top_anchor"></div>
         <div id="title">
             <span class="title_text">Recalling the most recent memories</span>
             <br/>
@@ -50,7 +59,7 @@
             <div class="center">
                 <div class="artifact_previews">
                     {% for artifact in memory['rand_artifacts'] %}
-                    <div class="artifact_artifact">
+                    <div class="artifact_item">
                         <img src="{{artifact['thumb_url']}}" height="200px"/>
                     </div>
                     {% endfor %}
