@@ -17,7 +17,7 @@
         <div id="table_of_contents">
             {% for memory in stream %}
             <div class="toc_item">
-                <div class="toc_marker"></div>
+                <span class="anchorLink" id="{{memory['id']}}"><div class="toc_marker" id="marker_{{memory['id']}}"></div></span>
                 <div class="toc_memory ">
                     {% if loop.index == 1 %}
                     <span id="top" class="anchorLink">

@@ -358,20 +358,29 @@ function updateStreamGrab() {
     var scroll_top = $(window).scrollTop() - 250;
     var scroll_bottom = $(window).scrollTop() + $(window).height();
 
-    $(".more_photos").each(function() {
-        var id = $(this).attr('id');
+    $(".memory_div").each(function() {
+        var parsedId = parsePrefixToString($(this).attr("id"), "memdiv_");
         if ($(this).offset().top > scroll_top && $(this).offset().top < scroll_bottom) {
-            // It's in the viewport, make sure there's a timer for it
-            randomnumber=Math.floor(Math.random()*3000) + 4000;
-            if (!window.timers[id]) {
-                var t = setInterval("randPhoto('"+id+"')", randomnumber);
-                window.timers[id] = t;
-            }
+            $("#marker_"+parsedId).css("background","#ebebeb");
         } else {
-            // It's not in the viewport, remove the timer if any
-            if (window.timers[id]) {
-                clearInterval(window.timers[id]);
-                delete window.timers[id];
+            $("#marker_"+parsedId).css("background","#666");
+        }
+        
+        if ($(this).hasClass("more_photos")){
+            var id = $(this).attr('id');
+            if ($(this).offset().top > scroll_top && $(this).offset().top < scroll_bottom) {
+                // It's in the viewport, make sure there's a timer for it
+                randomnumber=Math.floor(Math.random()*3000) + 4000;
+                if (!window.timers[id]) {
+                    var t = setInterval("randPhoto('"+id+"')", randomnumber);
+                    window.timers[id] = t;
+                }
+            } else {
+                // It's not in the viewport, remove the timer if any
+                if (window.timers[id]) {
+                    clearInterval(window.timers[id]);
+                    delete window.timers[id];
+                }
             }
         }
     });
@@ -757,7 +766,7 @@ function updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
             var includeUpToRow = currentRow - 2;
             
             $("#in_zoom_div").children(".artifact_row").each(function() {
-                thisRow = parsePrefix($(this).attr("id"), "row_");
+                thisRow = parsePrefixToNum($(this).attr("id"), "row_");
                 if (thisRow === null) {
                     return;
                 }
@@ -772,7 +781,7 @@ function updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
             });
 
             $("#above_zoom_div").children(".artifact_row").each(function() {
-                thisRow = parsePrefix($(this).attr("id"), "row_");
+                thisRow = parsePrefixToNum($(this).attr("id"), "row_");
                 if (thisRow === null) {
                     return;
                 }
@@ -796,7 +805,7 @@ function updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
                 // This prevents a visual glitch related to the fact that scroll
                 // can't scroll beyond the bottom of the page
                 $("#in_zoom_div").children(".artifact_row").each(function() {
-                    thisRow = parsePrefix($(this).attr("id"), "row_");
+                    thisRow = parsePrefixToNum($(this).attr("id"), "row_");
                     if (thisRow === null) {
                         return;
                     }
@@ -811,7 +820,7 @@ function updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
                 });
 
                 $("#below_zoom_div").children(".artifact_row").each(function() {
-                    thisRow = parsePrefix($(this).attr("id"), "row_");
+                    thisRow = parsePrefixToNum($(this).attr("id"), "row_");
                     if (thisRow === null) {
                         return;
                     }
@@ -1309,7 +1318,7 @@ function wrapResize(adjustment) {
 
 
 function parseCssPx(css_string) {
-    out = Number(css_string.slice(0,css_string.length - 2));
+    var out = Number(css_string.slice(0,css_string.length - 2));
     if (!isNaN(out)) {
         return out;
     } else {
@@ -1317,9 +1326,17 @@ function parseCssPx(css_string) {
     }
 }
 
-function parsePrefix(fullString, prefixString) {
-    out = Number(fullString.slice(prefixString.length,fullString.length));
+function parsePrefixToNum(fullString, prefixString) {
+    var out = Number(fullString.slice(prefixString.length,fullString.length));
     if (!isNaN(out)) {
+        return out;
+    } else {
+        return null;
+    }
+}
+function parsePrefixToString(fullString, prefixString) {
+    var out = fullString.slice(prefixString.length,fullString.length);
+    if (out.length > 0) {
         return out;
     } else {
         return null;
