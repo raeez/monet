@@ -111,7 +111,8 @@ def bootstrap():
 def deploy():
 
   ARCHIVE = 'memoize.tar.gz'
-  DIST = local ('python setup.py --fullname').strip() # release name and version
+  DIST = local ('python setup.py --fullname', True).strip() # release name and version
+  local("echo %s" % DIST)
 
   header = "Deploying %s" % DIST
   print "*" * len(header)
