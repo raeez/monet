@@ -536,6 +536,8 @@ function artifactExpand(artifact) {
     }
 
     $("#"+a_div.id).animate({width:a_div.realWidth}, 'fast');
+    
+    $("#"+a_div.id).children(".photo_container").animate({left:0}, 'fast');
 
     if (left_ofDiv !== false && right_ofDiv !== false) {
         // This means there are items to both the left AND right
@@ -560,6 +562,9 @@ function artifactUnExpand(artifact) {
     var a_div = getArtifactDivByID($(artifact).attr("id"));
     var left_ofDiv = getArtifactDivByRowPos(a_div.row, a_div.posInRow - 1);
     var right_ofDiv = getArtifactDivByRowPos(a_div.row, a_div.posInRow + 1);
+
+    var centering = (a_div.realWidth - a_div.croppedWidth) / -2;
+    $("#"+a_div.id).children(".photo_container").animate({left:centering}, 'fast');
 
     $("#"+a_div.id).stop(true,false);
     $("#"+a_div.id).animate({width:a_div.croppedWidth}, 'fast');
@@ -1003,14 +1008,13 @@ function loadViewportPhotos() {
 
     for (var i in artifacts) {
         var artifact = artifacts[i];
-        artifact_top = $("#artifact_"+artifact.id).offset().top;
+        var artifact_top = $("#artifact_"+artifact.id).offset().top;
         if (artifact_top >= load_top && artifact_top <= load_bottom) {
-            div_width = $("#artifact_"+artifact.id).width();
-            photo_width = $("#artifact_"+artifact.id).children(".photo_container").width();
-            centering = (photo_width - div_width) / -2;
+            var div_width = $("#artifact_"+artifact.id).width();
+            var photo_width = $("#artifact_"+artifact.id).children(".photo_container").width();
+            var centering = (photo_width - div_width) / -2;
 
-            imgdiv = "<img src="+artifact.thumb_url+" height='"+ARTIFACT_HEIGHT+"' class='photo'/>"
-            $("#artifact_"+artifact.id).children(".photo_container").css('position', 'relative');
+            var imgdiv = "<img src="+artifact.thumb_url+" height='"+ARTIFACT_HEIGHT+"' width='"+artifact.width+"' class='photo'/>"
             $("#artifact_"+artifact.id).children(".photo_container").css('left', centering);
             $("#artifact_"+artifact.id).children(".photo_container").html(imgdiv);
         }
