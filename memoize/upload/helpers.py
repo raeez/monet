@@ -164,6 +164,7 @@ def rand_photo(m):
 
 def claimed(m):
   return not (not m.user)
+
 def claim_memory(m):
   assert isinstance(m, Memory)
   if 'email' in session:
