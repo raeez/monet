@@ -53,8 +53,9 @@ rm /etc/nginx/sites-enabled/default
 rm /etc/nginx/sites-available/default
 
 #deploy mongodb dir structure
-mkdir /var/www/log
-mkdir /var/www/db
+mkdir -p /var/www/log
+mkdir -p /var/www/db
+mkdir -p /var/www/files/thumb
 
 chown -R ubuntu /var/www
 
