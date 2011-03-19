@@ -563,6 +563,7 @@ function artifactUnExpand(artifact) {
     var left_ofDiv = getArtifactDivByRowPos(a_div.row, a_div.posInRow - 1);
     var right_ofDiv = getArtifactDivByRowPos(a_div.row, a_div.posInRow + 1);
 
+    $("#"+a_div.id).children(".photo_container").stop(true,false);
     var centering = (a_div.realWidth - a_div.croppedWidth) / -2;
     $("#"+a_div.id).children(".photo_container").animate({left:centering}, 'fast');
 
