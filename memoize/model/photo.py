@@ -31,12 +31,10 @@ class Photo(Container):
     pass
 
   @valid # ensure we're working on a valid instance
-  def resize(self):
-    from client.app import client as app
+  def resize(self, abs_path):
     from PIL import Image as PIL
 
     thumb_size = (1000000, 175)
-    abs_path = app.photos.path(self.filename)
     img = PIL.open(abs_path)
     img.thumbnail(thumb_size, PIL.ANTIALIAS)
     img.save(abs_path)

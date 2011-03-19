@@ -19,12 +19,17 @@ sudo apt-get -y upgrade
 
 # system and python dependencies
 sudo apt-get -y install git \
-                    nginx \
-                    mongodb \
-                    python2.7 \
-                    libpython2.7 \
-                    python2.7-dev \
-                    build-essential \
+                        nginx \
+                        libjpeg \
+                        mongodb \
+                        python2.7 \
+                        libgif-dev \
+                        python-pip \
+                        libjpeg-dev \
+                        libpython2.7 \
+                        python2.7-dev \
+                        buildessential \
+                        libfreetype6-dev \
 
 # dev env
 wget -c http://pypi.python.org/packages/2.7/s/setuptools/setuptools-0.6c11-py2.7.egg#md5=fe1f997bc722265116870bc7919059ea

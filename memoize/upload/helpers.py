@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from flask import session, url_for, request, flash, redirect
-from flaskext.uploads import UploadNotAllowed
 from memoize.model import User, Photo, Quote, Memory
 from lib.db.objectid import ObjectId
 import json
@@ -64,7 +63,7 @@ def upload_photo(mem_id=None, multi_session=None):
       p.visible = 1 # TODO make this a boolean
       p.multi_session = multi_session
       p.memory = m._id
-      p.resize()
+      p.resize(app.photos.path(filename))
       p.save()
       m.artifacts = [p._id] + m.artifacts
       m.save()
@@ -85,10 +84,10 @@ def upload_photo(mem_id=None, multi_session=None):
                       'type' : 'image/jpeg'})
 
 def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden=0):
-  """Returns a list of artifacts from a given memory object
+  ''' Returns a list of artifacts from a given memory object
   offset and numArtifacts specify a selection of artifacts to return.
   If get_hidden is 1, we will also return hidden photos
-  """
+  '''
   from client.app import client as app
   artifacts = []
   index = 0
@@ -102,12 +101,13 @@ def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden
         else:
           continue
 
+      width, height = p.size()
+
       artifact = dict()
       artifact['id'] = str(p._id)
       artifact['image_url'] = app.photos.url(p.filename)
       artifact['thumb_url'] = app.photos.url(p.filename)
       artifact['visible'] = p.visible
-      width, height = p.size()
       artifact['width'] = width
       artifact['height'] = height
       artifacts.append(artifact)
@@ -148,7 +148,7 @@ def build_memory_stream():
     mem = { 'id' : memory._id,
             'name' : memory.name,
             'rand_artifacts':rand_artifacts,
-            'more_photos':more_photos }
+            'more_photos' : more_photos }
     s.insert(0,mem)
   return s
 
@@ -159,13 +159,13 @@ def rand_photo(m):
         rand_artifact = random.sample(visible_artifacts,1)
         photo = rand_artifact[0]
 
-        return json.dumps({"id":str(photo['id']), "thumb_url":photo['thumb_url']})
+        return json.dumps({ "id" : str(photo['id']),
+                            "thumb_url" : photo['thumb_url']})
     else:
         return None
 
 def claimed(m):
   return not (not m.user)
-
 def claim_memory(m):
   assert isinstance(m, Memory)
   if 'email' in session:
@@ -185,4 +185,6 @@ def succeed(resp=None):
   if not resp:
     resp = {}
   assert isinstance(resp, dict)
-  return json.dumps(dict({"success" : True, "errors" : []}, **resp)) # succint dictionary merge
+  return json.dumps(dict({ "success" : True,
+                           "errors" : [] },
+                           **resp)) # succint dictionary merge

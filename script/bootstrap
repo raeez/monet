@@ -20,12 +20,16 @@ apt-get -y upgrade
 # system and python dependencies
 apt-get -y install git \
                     nginx \
+                    libjpeg \
                     mongodb \
                     python2.7 \
+                    libgif-dev \
                     python-pip \
+                    libjpeg-dev \
                     libevent-dev \
                     python2.7-dev \
                     build-essential \
+                    libfreetype6-dev \
                     python-setuptools \
 
 
