@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from os.path import expanduser
-from fabric.api import env, local, run, put, cd
+from fabric.api import env, local, run, put, cd, lcd
 from paramiko.config import SSHConfig
 import json
 
 import memoize.test.run
 
-DEPLOY_DIR = '~/memoize'
+DEPLOY_DIR = '/home/ubuntu/memoize'
 PYTHON = 'memoize.python'
 TEMP_DIR = '/tmp/memoize'
 
@@ -79,13 +79,12 @@ def rebase(new=False):
   ARCHIVE = 'core.tar.gz'
 
   local('tar cvzf %s %s' % (ARCHIVE, " ".join(ITEMS)))
+
   if new:
-    try:
-      run('mkdir %s' % DEPLOY_DIR)
-    except:
-      raise Exception('Could not rebase target server')
+    run('mkdir -p %s' % DEPLOY_DIR)
 
   put(ARCHIVE, DEPLOY_DIR)
+
   local('rm %s' % ARCHIVE)
 
   with cd(DEPLOY_DIR):
