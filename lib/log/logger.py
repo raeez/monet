@@ -55,7 +55,7 @@ class Logger(dict):
 
     if lib.config.CONF.get('debug', True) is False and lib.config.CONF.get('log', False) is True:
 
-      SUBJECT = "Breakage in Manhattan::%s!" % self.system_name
+      SUBJECT = "Breakage in Memoize::%s!" % self.system_name
 
       self.email_handler = logging.handlers.SMTPHandler(MAIL_HOST, FROM_ADDR, MAIL_ADMINS, SUBJECT, credentials=AUTH)
       self.email_handler.setLevel(logging.ERROR)

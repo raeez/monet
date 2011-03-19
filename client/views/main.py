@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from flask import Module, session, redirect, url_for, request, render_template, flash, abort
-from flaskext.uploads import UploadNotAllowed
 from memoize.model import User
 from memoize.upload.helpers import get_memory, get_photo, create_memory, upload_photo, build_memory_stream, claimed, claim_memory, rand_photo, getArtifactsFromMemory
 from lib.db.objectid import ObjectId

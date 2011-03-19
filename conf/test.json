@@ -1,9 +1,23 @@
 {
 	"debug": true,
-	"syslog": "test",
 	"log": true,
+    "syslog" : "test",
+
+	"mail":{
+		"host": ["mail.authsmtp.com", 2525],
+		"auth": ["ac53391", "ezanqkp4gfzjbj"],
+		"address": "raeez@mit.edu"
+		},
+
 	"mongo": {
 		"host": ["localhost", 27017],
 		"safe": true,
-		"replicate_minimum": 1}
+		"replicate_minimum": 1
+		},
+
+	"uploads": {
+		"path": "/tmp",
+		"base": "http://localhost:5000/_uploads/"
+		}
 }
+

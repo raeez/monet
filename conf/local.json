@@ -1,6 +1,7 @@
 {
 	"debug": true,
 	"log": true,
+    "syslog" : "client",
 
 	"mail":{
 		"host": ["mail.authsmtp.com", 2525],
@@ -12,5 +13,10 @@
 		"host": ["localhost", 27017],
 		"safe": true,
 		"replicate_minimum": 1
+		},
+
+	"uploads": {
+		"path": "/tmp",
+		"base": "http://localhost:5000/_uploads/"
 		}
 }

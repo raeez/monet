@@ -7,7 +7,7 @@ import json
 
 import memoize.test.run
 
-DEPLOY_DIR = '~/memoize'
+DEPLOY_DIR = '/home/ubuntu/memoize'
 PYTHON = 'memoize.python'
 TEMP_DIR = '/tmp/memoize'
 
@@ -79,13 +79,12 @@ def rebase(new=False):
   ARCHIVE = 'core.tar.gz'
 
   local('tar cvzf %s %s' % (ARCHIVE, " ".join(ITEMS)))
+
   if new:
-    try:
-      run('mkdir %s' % DEPLOY_DIR)
-    except:
-      raise Exception('Could not rebase target server')
+    run('mkdir -p %s' % DEPLOY_DIR)
 
   put(ARCHIVE, DEPLOY_DIR)
+
   local('rm %s' % ARCHIVE)
 
   with cd(DEPLOY_DIR):
@@ -111,7 +110,8 @@ def bootstrap():
 def deploy():
 
   ARCHIVE = 'memoize.tar.gz'
-  DIST = local ('python setup.py --fullname').strip() # release name and version
+  DIST = local ('python setup.py --fullname', True).strip() # release name and version
+  local("echo %s" % DIST)
 
   header = "Deploying %s" % DIST
   print "*" * len(header)
