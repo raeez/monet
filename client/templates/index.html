@@ -10,7 +10,7 @@
 <div id="landing_bg">
     <div id="landing_wrapper">
     	<div id="titlebar">
-            <span class="title">Memoize</span><span class="subtitle">&nbsp;&nbsp;&nbsp;A home for shared memories</span>
+            <span class="title">Memoize</span><span class="subtitle">&nbsp;&nbsp;&nbsp;You know what's cool? A Billion photos</span>
         </div>
 
 		<div id="landing_drag_area_top"></div>
@@ -19,23 +19,24 @@
         
             <div id="landing_drag_area_content">
                 <div id="helper_text">
-                    <div id="inline_upload_leadtext">Simply drag or</div>
+                    <div id="inline_upload_leadtext">Drag in or</div>
                     <div id="inline_upload">
                         <form id="file_upload" action="{{url_for('create')}}" method="POST" enctype="multipart/form-data">
                             <input id="memory_id" type=hidden name=memory_id />
                             <input id="multi_session" type=hidden name=multi_session />
                             <input type="file" name="photo" multiple>
                             <button>Upload</button>
-                            <div>upload photos</div>
+                            <div>upload several photos</div>
                     </form></div>
-                    here. Share the link of your new canvas and let friends add their memories
+                    here. Share the link of your new canvas to let friends add their memories
 
                 </div>
 
                 <div id="memory_url_area">
-                    Your memory can now be found at:
+                    Your memories are now uploading.<br/>
+                    Even before they finish you can share and view your canvas now at:
                     <div id="memory_url"></div>
-                    Share with trusted friends so they can add memories too
+                    Share this link with friends. Have them add memories there too.
                 </div>
                 
                 <div id="upload_area">
@@ -86,7 +87,7 @@
                 </div>
 
                 <div class="login_email_div">
-                    <div class="login_label_div"><label for="email">Login email:</label></div>
+                    <div class="login_label_div"><label for="email">Your email:</label></div>
                     {% if session['fix_email'] %}
                     <div class="login_email"><input type="text" name="email" id="email" title="New or existing email" value="{{session['fix_email']}}" class="field100" /></div>
                     {% else %}

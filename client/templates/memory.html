@@ -44,8 +44,11 @@ $(document).ready(function() {
                     <div id="share_area">
                         <div id="share_bar"></div>
                         <div id="share_link_area">
-                            <p id="share_link_prompt">Copy selected text then paste in email or IM to let friends add memories</p>
-                            <script> document.write("<input id=\"share_link_value\" type=\"text\" value=\"" + window.location + "\"/>"); </script>
+                            <div id="prompt">Copy this Link:</div>
+                            <div id="chrome_fix_div">
+                            <div id="link"><script>document.write("<input id=\"share_link_value\" type=\"text\" value=\""+window.location+"\"/>"); </script>
+                            </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -72,7 +75,7 @@ $(document).ready(function() {
                     {% else %}
                         Don't forget this memory!
                         <br/>
-                        Login <a id="canvas_login_text" href="#">here</a> to keep it forever
+                        <a id="canvas_login_text" href="#">Login</a> or <a id="canvas_signup_text" href="#">signup</a> to remember it
                     </div>
                     
                     {% with messages = get_flashed_messages() %}
@@ -99,7 +102,7 @@ $(document).ready(function() {
                             </div>
 
                             <div class="login_email_div">
-                                <div class="login_label_div"><label for="email">Login email:</label></div>
+                                <div class="login_label_div"><label for="email">Your email:</label></div>
                                 {% if messages %}
                                 <div class="login_email"><input type="text" name="email" id="email" title="New or existing email" value="{{session['fix_email']}}" class="field100" /></div>
                                 {% else %}
@@ -110,11 +113,11 @@ $(document).ready(function() {
 
                             {% if messages %}
                             <div class="login_prompt" style="display:none">
-                                <strong>New here?</strong> Enter your email to make a new free, spamless account to save memories with
+                                <span class="memoize_white">New here?</span> Enter your email to make a new free, spamless account to save memories with
                             </div>
                             {% else %}
                             <div class="login_prompt">
-                                <strong>New here?</strong> Enter your email to make a new free, spamless account to save memories with
+                                <span class="memoize_white">New here?</span> Enter your email to make a new free, spamless account to save memories with
                             </div>
                             {% endif %}
                             
@@ -165,6 +168,22 @@ $(document).ready(function() {
             </div>
             <div class="canvas_center" id="photo_canvas_center">
                 <div id="header_block"></div>
+
+                {% if 'email' in session %}
+                <div id="alert_bar" style="display:none;">
+                {% else %}
+                <div id="alert_bar">
+                {% endif %}
+                    <div class="chevron">&#0187;</div>
+                    <div class="alert_bar_text"><span class="memoize_white">Don't forget this memory!</span> <a href="#" id="alert_bar_login">Login</a> or make a <a href="#" id="alert_bar_signup">new account</a> (takes about 6.28 sec)
+                        <br/>
+                        Have friends with photos of this event? <a href="#" id="share">Share</a> this page's url so they can drag in their memories too.
+                    </div>
+                    <div class="chevron">&#0171;</div>
+                    <div id="hide_this"><a href="#">hide this</a></div>
+                    <div class="clear"></div>
+                </div>
+
                 <div id="artifact_wrapper">
 
                     <div id="above_zoom_div" class="zoom_div">

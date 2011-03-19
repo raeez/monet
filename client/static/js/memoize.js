@@ -1,6 +1,5 @@
 // JavaScript Document
 var maxPhotoSize = 0;
-var originalCanvasWidth;
 var MARGIN_WIDTH = 10; // set a global margin
 var BORDER_WIDTH = 4; // set a global margin
 var ARTIFACT_HEIGHT = 175; // The standard height of all artifacts
@@ -20,20 +19,8 @@ window.timers = {}; // Dictionary of timers for the stream page
 $(document).ready(function(){
     BrowserDetect.init(); // See http://www.quirksmode.org/js/detect.html
 
-    /* ************************************************* *
-     * STREAM - Scrolls the page on table of contents hover
-     * **************************************************/
-	$("span.anchorLink").anchorAnimate()
-
-	originalCanvasWidth = $('#photo_canvas_center').width();
-	
     $("#multi_session").val(randomString());
-	
-    /* ************************************************* *
-     * CANVAS - Runs the initial horizontal fit on the canvas
-     * **************************************************/
-	//photoHFit();
-	
+
     /* ************************************************* *
      * INDEX - Vertically centers the uploader in the page
      * **************************************************/
@@ -43,6 +30,11 @@ $(document).ready(function(){
     /* ************************************************* *
      * CANVAS - Controls the hide button on artifacts
      * **************************************************/
+    $(".hide_photo").hover(function(){
+        $(this).parent(".artifact").addClass("opacity40");
+    }, function(){
+        $(this).parent(".artifact").removeClass("opacity40");
+    });
     $(".hide_photo").click(function(){
         var visible;
 
@@ -80,21 +72,38 @@ $(document).ready(function(){
 	$('#canvas_login_form').show();
     checkForEmail(); // Will see if the form is already filled in with an email
 
-	$("#landing_login_form").inputHintOverlay(-1, 6);
-	$("#canvas_login_form").inputHintOverlay(-1, 6);
+	$("#landing_login_form").inputHintOverlay(3, 5);
+	$("#canvas_login_form").inputHintOverlay(3, 5);
 	
 	$("div.inputHintOverlay").hover(function() {
 		$(this).children("input").toggleClass("input_hover");
 	});
 	
-	$("#canvas_login_text").click(function() {
-        $("#canvas_login_div").show();
-        $("#canvas_login_prompt").hide();
-	});
     $("#canvas_login_close").click(function(){
         $("#canvas_login_prompt").show();
         $("#canvas_login_div").hide();
     })
+	$("#canvas_login_text").click(function() {
+        $("#canvas_login_div").show();
+        $(".login_email #email").focus();
+        $("#canvas_login_prompt").hide();
+	});
+	$("#canvas_signup_text").click(function() {
+        $("#canvas_login_div").show();
+        $(".login_email #email").focus();
+        $("#canvas_login_prompt").hide();
+	});
+
+	$("#alert_bar_login").click(function() {
+        $("#canvas_login_div").show();
+        $(".login_email #email").focus();
+        $("#canvas_login_prompt").hide();
+	});
+	$("#alert_bar_signup").click(function() {
+        $("#canvas_login_div").show();
+        $(".login_email #email").focus();
+        $("#canvas_login_prompt").hide();
+	});
 
     $("form").submit(function(e){
         var validationFail = false;
@@ -194,14 +203,40 @@ $(document).ready(function(){
     /*****************
      * Controls basic interaction with the share bar on the view page
      */
+    var originalShareText = "<div id='prompt'>Copy this Link:</div><div id='chrome_fix_div'><div id='link'><input id='share_link_value' type='text' value='"+window.location+"' /></div></div>";
 	$("#share_area").hover(function() {
 		$("#share_link_area").show();
-        $("#share_link_value").focus().select();
-	}, function() {
-		$("#share_link_area").hide();
-        $("#share_link_value").blur();
+		$("#share_area #share_link_value").focus();
+		$("#share_area #share_link_value").select();
+	}, function(e) {
+        if (e.target == this || $(e.target).attr("id") == "share_bar" || $(e.target).attr("id") == "chrome_fix_div" || $(e.target).attr("id") == "share_link_area") {
+            $("#share_link_area").hide();
+            $("#share_area #share_link_area").html(originalShareText);
+        }
 	});
-	
+    $("#share_area").mousedown(function() {
+        $("#share_area #share_bar").css("background", "#11b0aa url(/static/images/share_hover.jpg) no-repeat top left");
+        $("#share_area #share_link_area").css("background", "#11b0aa");
+    });
+    $("#share_area").mouseup(function() {
+        $("#share_area #share_bar").css("background", "#189792 url(/static/images/share_default.jpg) no-repeat top left");
+        $("#share_area #share_link_area").css("background", "#189792");
+		$("#share_area #share_link_value").focus();
+		$("#share_area #share_link_value").select();
+    });
+
+    $("#share_area").bind("copy", function() {
+        var share_link_area_text = "<div id='prompt'>Copied to clipboard! Give to friends! Any of them with this link can add their photos too.</div>"
+        $("#share_area #share_link_area").html(share_link_area_text);
+    });
+
+    $("#alert_bar #share").click(function() {
+        $("#share_link_area").show();
+    });
+    $("#alert_bar #hide_this").click(function() {
+        $("#alert_bar").hide('fast');
+    });
+
 
     /* ************************************************* *
      * Control Hover action on artifact divs
@@ -328,6 +363,10 @@ $(document).ready(function(){
             }
         } else if (key.keyCode == 27) {
             // ESCAPE
+            if ($("#canvas_login_div:visible").length > 0) {
+                $("#canvas_login_div").hide();
+                $("#canvas_login_prompt").show();
+            }
             if (window.zoomedIn == true) {
                 key.preventDefault();
                 doUnZoom();
@@ -336,12 +375,59 @@ $(document).ready(function(){
     });
     
     /* ************************************************* *
-     * Stream page get more random photos
+     * STREAM PAGE
      * **************************************************/
+	$("span.anchorLink").anchorAnimate()
+
     updateStreamGrab();
     $(window).scroll(function() {
        updateStreamGrab(); 
     });
+
+    $(".memory_div .forget").hover(function() {
+        $(this).parents(".memory_div").removeClass("memory_shadow");
+    }, function() {
+        $(this).parents(".memory_div").addClass("memory_shadow");
+    });
+    $(".memory_div .forget").click(function(){
+        var id = parsePrefixToString($(this).parents(".memory_div").attr("id"),"memdiv_");
+
+        $.post("/forget_memory", {'id':id});
+
+        $(this).parents(".memory_div").hide('fast', function(){
+            if (window.timers[$(this).parents(".memory_div").attr("id")]) {
+                clearInterval(window.timers[id]);
+                delete window.timers[id];
+            }
+
+            var mem_title = $(this).find(".mem_title").html();
+            var mem_url = $(this).children(".mem_link").attr("href");
+            var forgotText = "<div class='forgotten_item'><a href="+mem_url+">"+mem_title+"</a></div>"
+            $("#forgotten_list").append(forgotText);
+
+            $(this).parents(".memory_div").remove();
+            $("#table_of_contents").children("#toc_"+id).remove();
+
+            $("#forgotten_memories").show();
+            $("#forgot_hide").show();
+            $("#forgot_show").hide();
+            $("#forgotten_list").show();
+        
+            updateStreamGrab();
+        });
+    });
+    $("#forgot_show_click").click(function() {
+        $("#forgot_show").hide();
+        $("#forgot_hide").show();
+        $("#forgotten_list").show();
+    });
+    $("#forgot_hide_click").click(function() {
+        $("#forgot_hide").hide();
+        $("#forgot_show").show();
+        $("#forgotten_list").hide();
+    });
+
+	
 
 
 	updateArtifactDivs();
@@ -613,6 +699,9 @@ function addBottomContainers() {
  * Zoom in on an artifact. Assume it's already in the #in_zoom_div
  */
 function doZoom(artifact) {
+    if ($("#alert_bar:visible").length > 0) {
+        $("#alert_bar").hide('fast');
+    }
     $("#artifact_wrapper").height($("#in_zoom_div").height()*window.scaleFactor);
 
     var artifactDiv = getArtifactDivByID($(artifact).attr("id"));
@@ -1294,7 +1383,7 @@ function moveArtifactDivs(artifactDivs) {
 
 function wrapResize(adjustment) {
     adjustment = typeof(adjustment) != 'undefined' ? adjustment : 0;
-    var standard_offset = 205;
+    var standard_offset = 255;
 
     // The zoomHeight is how big we want to scale images relative to the height
     // of the page 60 is the height of the top bar
