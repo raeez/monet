@@ -138,7 +138,6 @@ def memory(id):
     show_hidden = int(request.args.get('show_hidden', '0'))
 
     artifacts = getArtifactsFromMemory(m, 0, 100, show_hidden)
-    artifacts = artifacts[::-1]
 
     # Split things into rows:
     rows = []

@@ -87,10 +87,11 @@ def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden
   If get_hidden is 1, we will also return hidden photos
   '''
   from client.app import client as app
+  artifact_list = memory_object.artifacts[::-1]
   artifacts = []
   index = 0
   count = 0
-  for i in memory_object.artifacts:
+  for i in artifact_list:
     if index >= offset and count < numArtifacts:
       p = get_photo(i)
       if p.visible == 0:
