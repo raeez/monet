@@ -192,7 +192,6 @@ class Container(dict):
       self.__dict__['_validated'] = False
 
   def save(self):
-    self._validate()
     self._save()
 
   def delete(self):
@@ -204,6 +203,7 @@ class Container(dict):
     self._validated = True
 
   def enforce_validated(self):
+    self._validate()
     if self.__dict__['_validated'] is False:
       raise InvalidContainer()
 
