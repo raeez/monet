@@ -37,7 +37,7 @@ def upload_photo(mem_id=None, multi_session=None):
 
   if not mem_id:
     if multi_session:
-      p2 = Photo.find_one({'multi_session' : multi_session})
+      p2 = Photo.find_one({ 'multi_session' : multi_session })
     if not p2:
       m = create_memory()
     else:
@@ -65,9 +65,7 @@ def upload_photo(mem_id=None, multi_session=None):
       p.memory = m._id
       p.resize(app.photos.path(filename))
       p.save()
-      m.artifacts = [p._id] + m.artifacts
-      m.save()
-      
+      m.atomic_append({ "artifacts" : p._id })
       width, height = p.size()
 
       return succeed({'id' : str(p._id),

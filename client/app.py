@@ -24,7 +24,7 @@ client.config.update(
 
 client.photos = UploadSet('thumb', IMAGES)
 configure_uploads(client, client.photos)
-patch_request_class(client, 800 * 1024) #800kb
+patch_request_class(client, 1280 * 1024) #1.25
 
 
 @client.errorhandler(404)
