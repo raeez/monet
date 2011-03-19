@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import session, url_for, request, flash, redirect
+from flaskext.uploads import UploadNotAllowed
 from memoize.model import User, Photo, Quote, Memory
 from lib.db.objectid import ObjectId
 import json
@@ -28,15 +29,16 @@ def get_photo(_id):
   return Photo.find_one({"_id" : ObjectId(_id)})
 
 def upload_photo(mem_id=None, multi_session=None):
-  # multi_seession is a randomly generated string made on the homepage
-  # This is to associate multiple uploads from the home page before
-  # A memory ID has been created.
+  """multi_seession is a randomly generated string made on the homepage
+     This is to associate multiple uploads from the home page before
+     A memory ID has been created.
+  """
 
   photo = request.files.get('photo', None)
 
   if not mem_id:
     if multi_session:
-      p2 = Photo.find_one({'multi_session':multi_session})
+      p2 = Photo.find_one({'multi_session' : multi_session})
     if not p2:
       m = create_memory()
     else:
@@ -59,16 +61,15 @@ def upload_photo(mem_id=None, multi_session=None):
       p.user = session.get('_id', None)
       p.title = request.files.get('title', None)
       p.caption = request.files.get('caption', None)
-      p.visible = 1
+      p.visible = 1 # TODO make this a boolean
       p.multi_session = multi_session
       p.memory = m._id
+      p.resize()
       p.save()
       m.artifacts = [p._id] + m.artifacts
       m.save()
-
-      #TODO FIX the fact that we're returning random shit
-      width = random.randint(100, 300)
-      height = 175
+      
+      width, height = p.size()
 
       return succeed({'id' : str(p._id),
                       'memory' : str(m._id),
@@ -84,10 +85,10 @@ def upload_photo(mem_id=None, multi_session=None):
                       'type' : 'image/jpeg'})
 
 def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden=0):
-  ''' Returns a list of artifacts from a given memory object
+  """Returns a list of artifacts from a given memory object
   offset and numArtifacts specify a selection of artifacts to return.
   If get_hidden is 1, we will also return hidden photos
-  '''
+  """
   from client.app import client as app
   artifacts = []
   index = 0
@@ -106,9 +107,9 @@ def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden
       artifact['image_url'] = app.photos.url(p.filename)
       artifact['thumb_url'] = app.photos.url(p.filename)
       artifact['visible'] = p.visible
-      #TODO FIX the fact that we're returning random shit
-      artifact['width'] = random.randint(100, 300)
-      artifact['height'] = 175
+      width, height = p.size()
+      artifact['width'] = width
+      artifact['height'] = height
       artifacts.append(artifact)
       count += 1
     index += 1
@@ -147,7 +148,7 @@ def build_memory_stream():
     mem = { 'id' : memory._id,
             'name' : memory.name,
             'rand_artifacts':rand_artifacts,
-            'more_photos':more_photos}
+            'more_photos':more_photos }
     s.insert(0,mem)
   return s
 
@@ -164,6 +165,7 @@ def rand_photo(m):
 
 def claimed(m):
   return not (not m.user)
+
 def claim_memory(m):
   assert isinstance(m, Memory)
   if 'email' in session:
@@ -176,7 +178,8 @@ def error(error_list=None):
   if not error_list:
     error_list = []
   assert isinstance(error_list, list)
-  return json.dumps({"success" : False, "errors" : error_list})
+  return json.dumps({ "success" : False,
+                      "errors" : error_list })
 
 def succeed(resp=None):
   if not resp:

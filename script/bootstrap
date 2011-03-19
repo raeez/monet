@@ -35,7 +35,8 @@ virtualenv -p python2.7 --no-site-packages --distribute --clear env
 . env/bin/activate
 
 # python dependencies
-pip install Flask \
+pip install PIL \
+            Flask \
             gevent \
             pymongo \
             gunicorn \
