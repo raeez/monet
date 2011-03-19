@@ -25,7 +25,7 @@ _M_      _MM_ YMMMM9 _MM_  _MM_  _MM_ YMMMMM9 _MM_dMMMMMMMM YMMMM9
             = Running a local debug server =
             ================================
 
-    Local client servers run on "http://localhost:5000"
+    Local client servers run on localhost:5000
 
     . env/bin/activate
     python client.py
@@ -63,7 +63,7 @@ _M_      _MM_ YMMMM9 _MM_  _MM_  _MM_ YMMMMM9 _MM_dMMMMMMMM YMMMM9
         upstart scripts for starting, managing and monitoring services.
 
     client.py
-        launches a local debug server on "127.0.0.1:5000"
+        launches a local debug server on 127.0.0.1:5000
 
     fabfile.py
         specification for fabric remote deployments 'bootstrap', 'pack',
