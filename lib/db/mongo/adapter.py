@@ -56,3 +56,13 @@ class MongoAdapter(Adapter):
       if group in collection:
         self.delete(collection, _id)
     return
+
+  def atomic_append(self, collection, _id, item):
+    super(MongoAdapter, self).atomic_append(collection, _id, item)
+    self.db[collection].update({ "_id" : _id },
+                               { "$push" : item })
+
+  def save(self, collection, document):
+    super(MongoAdapter, self).insert(collection, document)
+    self.db[collection].save(document, safe=SAFE, w=REPLICATE_MIN)
+    syslog['db'].debug("Added a document to a mongo database")

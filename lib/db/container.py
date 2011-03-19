@@ -179,6 +179,12 @@ class Container(dict):
   def safe_member(cls, member):
     return member not in cls.__inter__
 
+  def atomic_append(self, item):
+    if self.__class__.default_adapter() is None:
+      raise NoAdapterError()
+    
+    self.__class__.default_adapter().atomic_append(self["_type"], self["_id"], item)
+
   def _save(self):
     try:
       self.enforce_validated()
