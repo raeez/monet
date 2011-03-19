@@ -216,8 +216,8 @@ input:focus {
  * Landing Page
  *****************************************/
 #landing_bg {
-    height:100%;
     background:#222;
+    min-height:100%;
 }
 
 #landing_wrapper {
@@ -888,7 +888,7 @@ input:focus {
 }
 
 #table_of_contents {
-    margin-top:32px;
+    margin-top:13px;
 }
 
 #table_of_contents .toc_item {

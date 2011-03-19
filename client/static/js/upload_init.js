@@ -115,8 +115,9 @@ $("#canvas_file_upload").fileUploadUI({
 
             $(".file_upload_link").attr("href", json.memory_url);
 
-            wrapResize(50); // Re-center since the images added space to the upload area
+            var heightAdjustment = $("#landing_drag_area_content").height() / 2 - 130;
 
+            wrapResize(heightAdjustment); // Re-center since the images added space to the upload area
         },
         buildUploadRow: function (files, index) {
             return $(
