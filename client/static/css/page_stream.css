@@ -1,0 +1,173 @@
+@charset "utf-8";
+/* CSS Document */
+
+/*****************************************
+ * Stream
+ *****************************************/
+
+#memory_lane_page {
+    background:#333;
+    height:100%;
+    width:100%;
+}
+
+#left_lane_positioning {
+    background:transparent;
+    z-index:1;
+    position:fixed;
+    top:0;
+    left:0;
+    right:50%;
+    height:100%;
+    text-align:right;
+}
+#left_lane {
+    background:transparent;
+    margin-right:250px;
+    margin-top:15px;
+}
+#left_lane #logo {
+    color:#11b0aa;
+    font-size:2.5em;
+}
+
+#table_of_contents {
+    margin-top:13px;
+}
+
+#table_of_contents .toc_item {
+    margin-top:9px;
+    text-align:right;
+}
+
+#table_of_contents .toc_marker {
+    width:3px;
+    height:18px;
+    float:right;
+    background:#aaa;
+}
+
+#table_of_contents .toc_memory {
+    padding-right:10px;
+    padding-top:2px;
+}
+
+#forgotten_memories {
+    margin-top:20px;
+}
+#forgotten_list {
+    margin-top:10px;
+}
+#forgotten_item {
+
+}
+
+#lane_wrap {
+    position:relative;
+    z-index:2;
+    background:#222 url(../images/memory_lane_bg.png) repeat-y top center;
+    width:460px;
+    min-height:100%;
+    margin:0 auto;
+    padding-bottom:1px;
+}
+
+#lane_wrap #title {
+    width:400px;
+    height:50px;
+    margin:0 auto 20px auto;
+    background:#333;
+	-moz-box-shadow: 0px 0px 10px #000;
+	-webkit-box-shadow: 0px 0px 10px #000;
+	box-shadow: 0px 0px 10px #000;
+    padding:5px 10px 5px 10px;
+}
+
+#lane_wrap #title .title_text {
+    font-size:1.8em;
+}
+#lane_wrap #title .title_subtext {
+}
+
+#memory_lane .memory_div {
+    width:420px;
+    height:260px;
+    background:#333;
+    margin:0px auto 20px auto;
+    opacity: .40;
+    -ms-filter: 'alpha(opacity=.40)';
+    filter: alpha(opacity=.40);
+}
+#memory_lane .memory_shadow {
+	-moz-box-shadow: 2px 2px 10px #000;
+	-webkit-box-shadow: 2px 2px 10px #000;
+	box-shadow: 2px 2px 10px #000;
+    opacity: 1;
+    -ms-filter: 'alpha(opacity=1)';
+    filter: alpha(opacity=1);
+}
+#memory_lane .memory_shadow:hover {
+	-moz-box-shadow: 2px 2px 10px #1e5957;
+	-webkit-box-shadow: 2px 2px 10px #1e5957;
+	box-shadow: 2px 2px 10px #1e5957;
+    cursor:pointer;
+}
+
+#memory_lane .memory_div .mem_title {
+    width:360px;
+    float:left;
+}
+
+#memory_lane .memory_div .header {
+    color:#ebebeb;
+    height:32px;
+    background:transparent url(../images/memory_lane_top_accent.jpg) top left no-repeat;
+    padding:8px 0px 0px 23px;
+    font-size:1.4em;
+}
+#memory_lane .memory_div .header:hover {
+    cursor:default;
+}
+#memory_lane .memory_div .forget {
+    float:right;
+    font-size:0.8em;
+    margin:-3px 5px 0px 0px;
+}
+#memory_lane .memory_div .header a {
+    color:#ebebeb;
+}
+#memory_lane .memory_div .header a:hover {
+    color:#ebebeb;
+}
+#memory_lane .memory_div .header .forget a {
+    color:#11b0aa;
+}
+#memory_lane .memory_div .header .forget a:hover {
+    color:#189792;
+}
+
+#memory_lane .memory_div .center {
+    height:200px;
+    background:#222;
+    overflow:hidden;
+}
+#memory_lane .artifact_item {
+    float:left;
+    margin-right:10px;
+    max-width:600px;
+    overflow:hidden;
+}
+#memory_lane .artifact_previews {
+    position:relative;
+    width:2440px;
+}
+
+#memory_lane .memory_div .footer {
+    height:18px;
+    background:transparent url(../images/memory_lane_bottom_accent.jpg) top right no-repeat;
+    text-align:right;
+    padding:2px 15px 0px 0px;
+    font-size:.9em;
+    color:#aaa;
+}
+

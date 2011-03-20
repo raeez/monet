@@ -4,33 +4,11 @@
 
 {% block head %}
 {{ super() }}
-    <script src="{{url_for('static', filename='js/jquery.transform-0.9.3.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/jquery.transform-0.9.3.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/jquery.jeditable.mini.js')}}"></script>
 
-    <script src="{{url_for('static', filename='js/jquery.jeditable.mini.js')}}"></script>
-
-    <script type="text/javascript">
-    /*****************
-     * Title editability
-     */
-$(document).ready(function() {
-    loadartifacts(0,100);
-
-    $(window).scroll(function(){
-        loadViewportPhotos();
-    });
-
-	$(".click").editable("/rename_memory", { 
-        indicator : "<img src='{{url_for('static', filename='images/indicator.gif')}}'>",
-        tooltip   : "Click to edit. Push enter to save.",
-        style  : "inherit",
-        id: "id",
-        name: "new_name",
-	onblur: "submit",
-	});
-});
-
-
-</script>
+<link rel="stylesheet" href="{{url_for('static', filename='css/page_canvas.css')}}">
+<script src="{{url_for('static', filename='js/memoize_canvas.js')}}"></script>
 {% endblock %}
 
 {% block content %}
@@ -247,9 +225,6 @@ $(document).ready(function() {
                 </div> <!-- End above_zoom_div -->
                 <div id="in_zoom_div" class="zoom_div"></div>
                 <div id="below_zoom_div" class="zoom_div"></div>
-
-                <script type="text/javascript" src="{{url_for('static', filename='js/upload_init.js')}}"></script> 
-
 
                 </div>
                 <div id="footer_block"></div>
