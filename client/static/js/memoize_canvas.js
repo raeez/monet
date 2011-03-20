@@ -615,27 +615,41 @@ function addBottomContainers() {
  * When the canvas is resized, make sure our all of our elements fit properly
  */
 function resizeCanvas() {
+    /**
+     * Resolutions to keep in mind:
+     * iPhone 3G: 320 x 480
+     * iPhone 4: 640 x 960
+     * iPad: 768 x 1024
+     */
+
     calculateScaleFactor();
 
     var windowWidth = $(window).width();
+    var sidemargins = 105; // The teal bars on the left and right
     if (windowWidth < 1060 && windowWidth > 320) {
-        if (windowWidth < 630) {
+        if (windowWidth <= 480) {
             $("#canvas_header #login").hide();
             $("#add_artifact").hide();
             $("#canvas_footer").hide();
+            $("#header_accent_bar").hide();
+            $(".canvas_center").css("margin-left",MARGIN_WIDTH + "px");
             var loginWidth = 0;
+            sidemargins = MARGIN_WIDTH *2;
         } else {
             $("#canvas_header #login").show();
             $("#add_artifact").show();
             $("#canvas_footer").show();
+            $("#header_accent_bar").show();
+            $(".canvas_center").css("margin-left",0);
             var loginWidth = $("#canvas_header #login").width();
+            sidemargins = 105;
         }
 
         $(".canvas_outer_wrapper").width(windowWidth);
-        $(".canvas_center").width(windowWidth - 105); // Normally 955px
+        $(".canvas_center").width(windowWidth - sidemargins); // Normally 955px
 
-        $("#canvas_title_wrap").width(windowWidth - 105 - loginWidth - 5);
-        truncateTitle(windowWidth - 105 - loginWidth - 5);
+        $("#canvas_title_wrap").width(windowWidth - sidemargins - loginWidth - 5);
+        truncateTitle(windowWidth - sidemargins - loginWidth - 5);
 
         // This is to get a default padding of 113 px when it's > 1060px
         var alertbar_padding = windowWidth - 947;
