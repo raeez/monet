@@ -13,9 +13,10 @@ window.zoomHeight; // A global that says how tall the center area of the page is
 window.scaleFactor = 1; // The factor that artifacts scale by when zoomed. Defaults to 1
 window.zoomedIn = false;
 window.previousZoomTarget = undefined; // The last target that we were zoom focused on
+window.canvasTitle = ""; // We store the canvas title as a global to get it back from the truncated version
 
 /***********************************************
- * ARTIFACTDIV Data Structure Handling
+  ARTIFACTDIV Data Structure Handling
  * *********************************************/
 
 /* STRATEGY:
@@ -207,6 +208,7 @@ function processRow(row_accumulator, width_accumulator, artifactDivs) {
 
     /*
      * We first need to remove all objects that we don't want to crop
+     * This pops it off of the row and adjusts the total width thresholds we use
      */
     var rowacc_length = row_accumulator.length
     for (var j = 0; j < row_accumulator.length; j++) {
@@ -222,8 +224,13 @@ function processRow(row_accumulator, width_accumulator, artifactDivs) {
         }
     }
 
-   /*
+    /*
      * Now we greedily crop the rest such that, pics not cropped past threshold
+     *
+     * We first bin the divs in the rows into buckets based on size.
+     * We then decide how much to crop each size category
+     * We then go through and bin, by bin, apply the crop to the photo's data structure
+     * The last photo in the row then takes up the slack to prevent us from accumulating rouding errors
      */
     if (width_accumulator >= max_width && width_accumulator > 0 && max_width > 0) {
 	//create a size map: size--->location(s)
@@ -269,28 +276,33 @@ function processRow(row_accumulator, width_accumulator, artifactDivs) {
 	    var newSize;
 	
 	    for (var z = 0; z < toCropList.length; z++) {
-		var artifact_id = toCropList[z];
-		var maxRemove = Math.ceil((1-threshold)*sizeIndex);
+            var artifact_id = toCropList[z];
+            var maxRemove = Math.ceil((1-threshold)*sizeIndex);
 
-		if (amtLeft > 0 && amtLeft <= maxRemove) {
-		    //cropping this pic will finish it off
-    		    newSize = sizeIndex - amtLeft;
-		    amtLeft = 0;
-	        } 
-		else if (amtLeft > maxRemove) {
-		    if (k == sizeListLength - 1) {
-			newSize = max_width - row_width_accumulator - MARGIN_WIDTH;
-			amtLeft = 0;
-		    } else {
-			newSize = sizeIndex - maxRemove;
-		    	amtLeft = amtLeft - maxRemove;
-		    }
-	    	} else {
-		    newSize = artifactDivs[artifact_id].realWidth;
-		}
-    	        artifactDivs[artifact_id].croppedWidth = newSize;
-		artifactDivs[artifact_id].posInRow = posDict[artifact_id];
-		row_width_accumulator += artifactDivs[artifact_id].croppedWidth + MARGIN_WIDTH;
+            if (amtLeft > 0 && amtLeft <= maxRemove) {
+                //cropping this pic will finish it off
+                newSize = sizeIndex - amtLeft;
+                amtLeft = 0;
+            } 
+            else if (amtLeft > maxRemove) {
+                if (k == sizeListLength - 1 && z == toCropList.length - 1) {
+                    // This means we're cropping the last one in the row.
+                    // We should be sure it takes up the remaining slack because
+                    // rounding errors could leave a couple pixel-wide jagged edge
+                    // otherwise
+                    newSize = max_width - row_width_accumulator - MARGIN_WIDTH;
+                    amtLeft = 0;
+                } else {
+                    newSize = sizeIndex - maxRemove;
+                    amtLeft = amtLeft - maxRemove;
+                }
+            } else {
+                newSize = artifactDivs[artifact_id].realWidth;
+            }
+
+            artifactDivs[artifact_id].croppedWidth = newSize;
+            artifactDivs[artifact_id].posInRow = posDict[artifact_id];
+            row_width_accumulator += artifactDivs[artifact_id].croppedWidth + MARGIN_WIDTH;
 	    }
 	}
     }
@@ -329,6 +341,17 @@ function moveArtifactDivs(artifactDivs) {
 
         if (artifactDiv.croppedWidth && $("#"+artifactDiv.id).width() != artifactDiv.croppedWidth) {
             $("#"+artifactDiv.id).width(artifactDiv.croppedWidth);
+        }
+        
+
+        // Be sure the images are centered properly
+        var photoContainer = $("#"+artifactDiv.id).children(".photo_container");
+        if (photoContainer.length > 0) {
+            var centering = (artifactDiv.realWidth - artifactDiv.croppedWidth) / -2;
+            var oldCenteringPos = photoContainer.css("left");
+            if (centering != parseCssPx(oldCenteringPos)) {
+                $("#"+artifactDiv.id).children(".photo_container").css('left', centering+"px");
+            }
         }
         
         var row_num = $("#"+artifactDiv.id).parents(".artifact_row").attr("id");
@@ -581,6 +604,77 @@ function addBottomContainers() {
 
 
 /**
+ * When the canvas is resized, make sure our all of our elements fit properly
+ */
+function resizeCanvas() {
+    calculateScaleFactor();
+
+    var windowWidth = $(window).width();
+    if (windowWidth < 1060 && windowWidth > 320) {
+        if (windowWidth < 630) {
+            $("#canvas_header #login").hide();
+            $("#add_artifact").hide();
+            $("#canvas_footer").hide();
+            var loginWidth = 0;
+        } else {
+            $("#canvas_header #login").show();
+            $("#add_artifact").show();
+            $("#canvas_footer").show();
+            var loginWidth = $("#canvas_header #login").width();
+        }
+
+        $(".canvas_outer_wrapper").width(windowWidth);
+        $(".canvas_center").width(windowWidth - 105); // Normally 955px
+
+        $("#canvas_title_wrap").width(windowWidth - 105 - loginWidth - 5);
+        truncateTitle(windowWidth - 105 - loginWidth - 5);
+
+        // This is to get a default padding of 113 px when it's > 1060px
+        var alertbar_padding = windowWidth - 947;
+        if (alertbar_padding >= 0) {
+            $("#canvas #alert_bar").show();
+            $("#canvas #alert_bar").css("padding-left", alertbar_padding+"px");
+        } else {
+            // This means it's too small for the alert bar
+            $("#canvas #alert_bar").hide();
+        }
+    }
+    WRAPPER_WIDTH = $(".canvas_center").width(); // Update resize global
+
+    updateArtifactDivs();
+}
+
+/**
+ * Truncates the title based on the amount of enclosing space available
+ * Replaces the text with a "Title ..."
+ */
+function truncateTitle(enclosingSize) {
+    enclosingSize = enclosingSize - 40; // Room for the '...'
+    var truncatedTitle = window.canvasTitle.slice();
+    var textSize = $("#canvas_title .click").width();
+    var addDotDotDot = false;
+
+    if (textSize <= 0 || enclosingSize <= 20) {
+        return;
+    }
+
+    while (textSize >= enclosingSize) {
+        addDotDotDot = true;
+        truncatedTitle = truncatedTitle.slice(0, truncatedTitle.length - 1); // Pop off char
+        $("#canvas_title .click").html(truncatedTitle);
+        textSize = $("#canvas_title .click").width();
+    }
+
+    if (addDotDotDot) {
+        truncatedTitle = truncatedTitle + "...";
+        $("#canvas_title .click").html(truncatedTitle);
+    } else {
+        $("#canvas_title .click").html(window.canvasTitle);
+    }
+}
+
+/**
+ *
  * ====================== NOTES ON ZOOMING BROWSER DETAILS ==========
  * We adjust the left and top css position properties because they
  * reliably work across all browsers.
@@ -1012,8 +1106,7 @@ $(document).ready(function(){
 
     loadartifacts(0,100);
 
-    calculateScaleFactor();
-	$(window).resize(calculateScaleFactor);
+    window.canvasTitle = $("#canvas_title .click").html();
 
     /* ************************************************* *
      * CANVAS - Controls the hide button on artifacts
@@ -1161,12 +1254,19 @@ $(document).ready(function(){
      * Title renaming
      * **************************************************/
 	$(".click").editable("/rename_memory", { 
+        data : function(value, settings) {
+            return window.canvasTitle;
+        },
         indicator : "<img src='{{url_for('static', filename='images/indicator.gif')}}'>",
         tooltip   : "Click to edit. Push enter to save.",
         style  : "inherit",
         id: "id",
         name: "new_name",
-	onblur: "submit",
+	    onblur: "submit",
+        callback : function(value, settings) {
+            window.canvasTitle = value;
+            truncateTitle($("#canvas_title_wrap").width());
+        }
 	});
     WRAPPER_WIDTH = $("#artifact_wrapper").width();
 
@@ -1276,6 +1376,11 @@ $(document).ready(function(){
     });
     
 
-	updateArtifactDivs();
+    truncateTitle($(".canvas_center").width() - $("#canvas_header #login").width());
+    resizeCanvas();
+	// updateArtifactDivs() is run by resizeCanvas
+
+	$(window).resize(resizeCanvas);
+
 });
 
