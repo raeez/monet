@@ -36,7 +36,7 @@ class Photo(Container):
 
     thumb_size = (1000000, 175)
     img = PIL.open(abs_path)
-    img.thumbnail(thumb_size, PIL.ANTIALIAS)
+    img.thumbnail(thumb_size, PIL.NEAREST)
     img.save(abs_path)
     size = img.size
 
