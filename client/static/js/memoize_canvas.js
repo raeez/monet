@@ -169,6 +169,7 @@ function calculateCrop(artifactDivs) {
 		width_accumulator += artifactDiv.realWidth + MARGIN_WIDTH;
                 if (artifactDiv.noCrop) {
 		    width_accumulator += BORDER_WIDTH;
+		}
                 row_accumulator.push(i);
                 artifactDivs[i].row = rownum;
             } else {
