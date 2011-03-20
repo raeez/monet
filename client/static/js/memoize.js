@@ -3,19 +3,11 @@ var maxPhotoSize = 0;
 var originalCanvasWidth;
 var MARGIN_WIDTH = 10; // set a global margin
 var BORDER_WIDTH = 4; // set a global margin
+var ARTIFACT_HEIGHT = 175; // The standard height of all artifacts
 window.artifacts = [] // A global that holds json representations of all returned artifacts
 window.artifactDivs; // A global used to keep track of the position of all artifact divs
-
-/*artifactsDivs=[{
-	nocrop:
-	id:
-	realWidth:
-	croppedWidth:
-	row:
-	div_area:
-	rowPos:
-}]
-*/
+window.zoomHeight; // A global that says how tall the center area of the page is
+window.scaleFactor = 1; // The factor that artifacts scale by when zoomed. Defaults to 1
 
 /*============================================================ 
  * On Startup
@@ -204,10 +196,10 @@ $(document).ready(function(){
 	});
 	
 
-    /*****************
-     * Control hover actions on photos
-     *
-     */
+    /* ************************************************* *
+     * Control Hover action on artifact divs
+     * **************************************************/
+
     $("#add_artifact").hover(function(){
         $(".blue_hover").css("color", "#11b0aa");
     }, function(){
@@ -224,20 +216,60 @@ $(document).ready(function(){
         $(this).animate({width:artifact.croppedWidth},'fast');
     });
 
-//	hover_in_queue = [];
-//	hover_out_queue = [];
-//	$(".artifact").hover(function() {
-//		hover_in_queue.push([$(this).attr('id'), $(this).width()]);
-//		updateHoverQueue(hover_in_queue, hover_out_queue);
-//	}, function() {
-//		hover_out.push([$(this).attr('id'), $(this).width()]);
-//		updateHoverQueue(hover_in_queue, hover_out_queue);
-//	});
-	
     /* ************************************************* *
      * Stream page get more random photos
      * **************************************************/
-   
+/*
+    $.zoomMooz.setup({
+        root:$("#artifact_wrapper"),
+        // zoomed size relative to screen
+        // 0.0-1.0
+        targetsize: 0.8,
+        // scale content to screen based on their size
+        // "width"|"height"|"both"
+        scalemode: "both",
+        // animation duration
+        duration: 500,
+        // easing of animation, similar to css transition params
+        // "linear"|"ease"|"ease-in"|"ease-out"|
+        // "ease-in-out"|[p1,p2,p3,p4]
+        // [p1, p2, p3, p4] refer to cubic-bezier curve params
+        easing: "ease",
+        // use browser native animation in webkit
+        // true|false
+        nativeanimation: true
+    });
+    $(".artifact").toggle(function(evt) {
+      evt.stopPropagation();
+      $(this).zoomTo();
+    },
+    function(evt) {
+        evt.stopPropagation();
+        $("#artifact_wrapper").zoomTo({targetsize:1.0});
+    });
+    */
+
+    $(".artifact").toggle(function(evt) {
+        zoomToArtifact($(this));
+    },
+    function(evt) {
+        $("#in_zoom_div").animate({
+            scaleX: 1,
+            scaleY: 1,
+            translateX: 0,
+            translateY: 0
+        },'slow');
+    });
+
+/*
+    $(".artifact").click(function() {
+        zoomToArtifact($(this));
+    })
+*/
+    
+    /* ************************************************* *
+     * Stream page get more random photos
+     * **************************************************/
     timers = [];
     $(".more_photos").each(function() {
         randomnumber=Math.floor(Math.random()*3000) + 4000;
@@ -248,6 +280,105 @@ $(document).ready(function(){
 
 	updateArtifactDivs();
 });
+
+
+
+
+
+
+/*
+ * STRATEGY:
+ * On click, load in existing artifacts
+ * Modify them to specify what div area they must be placed in
+ * Move all of the divs
+ * Calculate the zoom coordinates of the div
+ * Handle the zoom.
+ */
+
+
+/**
+ * Takes a jquery element as the zoom target.
+ * The zoom target must have the class 'artifact'
+ * It must be visible within the canvas area
+ */
+function zoomToArtifact(artifact) {
+    updateContainerDivs(artifact); // Modify the artifactDivs data structure
+    updateModifiedArtifactDivs(); // Move the divs to the appropriate spots
+    doZoom(artifact); // Actually do the transform
+}
+
+/**
+ * Updates the global window.artifactDivs data structure to indicate
+ * where the various photos should go
+ */
+function updateContainerDivs(artifact) {
+    // Create a local copy to perform updates on then update the global
+    var _artifactDivs = $.extend(true, [], window.artifactDivs);
+    var scroll_top = $(window).scrollTop();
+    var scroll_bottom = $(window).scrollTop() + $(window).height();
+    var artifactTop = $(artifact).offset().top;
+
+    var zoom_top;
+    var zoom_bottom;
+
+    if ((artifactTop - MARGIN_WIDTH - ARTIFACT_HEIGHT) <= scroll_top) {
+        // This means we need to add an extra row to the zoom_top
+        zoom_top = scroll_top - MARGIN_WIDTH - ARTIFACT_HEIGHT;
+    } else {
+        zoom_top = scroll_top - (ARTIFACT_HEIGHT - 60);
+    }
+
+    if ((artifactTop + ARTIFACT_HEIGHT + MARGIN_WIDTH) >= scroll_bottom) {
+        // This means we need to add an extra row to the zoom_bottom
+        zoom_bottom = scroll_bottom + MARGIN_WIDTH + ARTIFACT_HEIGHT;
+    } else {
+        zoom_bottom = scroll_bottom + (ARTIFACT_HEIGHT - 60);
+    }
+
+    var adiv_length = _artifactDivs.length;
+    for (var i = 0; i < adiv_length; i++) {
+        var a_top = $("#"+_artifactDivs[i].id).offset().top;
+        
+        if (a_top <= zoom_top) {
+            // This should be above the zoom div
+            _artifactDivs[i].divArea = "above_zoom_div";
+        } else if (a_top >= zoom_top && a_top <= zoom_bottom) {
+            // This should be in our zoom div
+            _artifactDivs[i].divArea = "in_zoom_div";
+        } else if (a_top >= zoom_bottom) {
+            // This should be below the zoom div
+            _artifactDivs[i].divArea = "below_zoom_div";
+        } else {
+            // We've got a problem
+        }
+    }
+    
+}
+
+/**
+ * Zoom in on an artifact. Assume it's already in the #in_zoom_div
+ */
+function doZoom(artifact) {
+    var offset = $(artifact).position();
+    var xorigin = offset.left / $("#in_zoom_div").width() * 100;
+    var yorigin = offset.top / $("#in_zoom_div").height() * 100;
+    console.log("xorigin: " + xorigin);
+    console.log("yorigin: " + yorigin);
+
+    var marginFix = (MARGIN_WIDTH / ARTIFACT_HEIGHT) * window.zoomHeight * .6;
+
+    $("#in_zoom_div").animate({
+        scaleX: window.scaleFactor,
+        scaleY: window.scaleFactor,
+        //origin: [xorigin+'%', yorigin+'%']
+        //origin:['100%', '100%']
+        origin:['0%', '0%'],
+        translateX:-offset.left,
+        translateY:-offset.top + 60 + marginFix
+    },'slow');
+}
+
+
 
 /** loadartifacts([offset[, end]])
  * Loads the artifacts in json format for this memory
@@ -277,22 +408,12 @@ function loadartifacts(offset, numartifacts) {
 
 function loadViewportPhotos() {
     if (window.artifacts == "") {return false;}
-    load_top = $(window).scrollTop() - 200;
-    load_bottom = $(window).scrollTop() + $(window).height() + 700;
+    var load_top = $(window).scrollTop() - 200;
+    var load_bottom = $(window).scrollTop() + $(window).height() + 700;
 
     var artifacts = jsonParse(window.artifacts);
 
     for (var i in artifacts) {
-            /*
-        if (window.stopScrolling == true) {
-             * If we're scrolling quickly past here, we don't want to get stuck loading
-             * a bunch of photos we won't see. Since Javascript doesn't have good
-             * threading controls, we have the scroll callback change a global variable
-             * from underneath us thereby stopping the loop and quitting this iteration
-             * of the loadViewportPhotos function
-            return
-        }
-             */
         var artifact = artifacts[i];
         artifact_top = $("#artifact_"+artifact.id).offset().top;
         if (artifact_top >= load_top && artifact_top <= load_bottom) {
@@ -300,7 +421,7 @@ function loadViewportPhotos() {
             photo_width = $("#artifact_"+artifact.id).children(".photo_container").width();
             centering = (photo_width - div_width) / -2;
 
-            imgdiv = "<img src="+artifact.thumb_url+" height='175' class='photo'/>"
+            imgdiv = "<img src="+artifact.thumb_url+" height='"+ARTIFACT_HEIGHT+"' class='photo'/>"
             $("#artifact_"+artifact.id).children(".photo_container").css('position', 'relative');
             $("#artifact_"+artifact.id).children(".photo_container").css('left', centering);
             $("#artifact_"+artifact.id).children(".photo_container").html(imgdiv);
@@ -339,70 +460,14 @@ function randomString() {
 }
 
 
-function findInHoverQueue(search, queue) {
-    // Searches for the id within the hover queue. Returns the index if it finds it
-    // otherwise it returns -1
-    queue.forEach(function(value, index){
-        if (search == value[0]) {
-            return index;
-        }
-    });
 
-    return -1;
-}
 
-function updateHoverQueue(in_queue, out_queue) {
-    /*
-     * Stat with the in_queue first
-     * Start the latest ones in the queue
-     * Stop anything else in the queue
-     * Call the a close function for those that do NOT exist in the out_queue
-     *
-     * Call a close on everything in the out queue
-     */
 
-    // Make sure our canvas is big enough to use
-	if ($('#photo_canvas_center').width() != originalCanvasWidth + maxPhotoSize) {
-        $('#photo_canvas_center').width(originalCanvasWidth + maxPhotoSize);
-    }
 
-    for (i=in_queue.length-1; i >= 0; i-- ) {
-        // Start at the end of the queue, or the latest one that was added.
-        if (i == in_queue.length - 1) {
-            // This is the latest hover request we've received
-            $('#' + in_queue[i][0]).animate(
-                {width: $('#' + in_queue[i][0]).children('.photo_container').width()},
-                500,
-                function() {
-                    in_index = findInHoverQueue($(this).attr('id'),in_queue);
-                    if (in_index >= 0) {
-                        // make sure we found something
-                        in_queue.splice(in_index, 1);
-                    }
-                }
-            );
-        } else {
-            $('#' + in_queue[i][0]).stop(true,true);
-            out_index = findInHoverQueue(in_queue[i][0], out_queue);
-            if (out_index == -1) {
-                // We're only going to call a close on things that aren't already
-                // in the out queue
-                $(in_queue[i][0]).animate(
-                    {width: in_queue[i][1]}, 
-                    500
-                );
 
-            }
-        }
-    }
 
-    for (i=out_queue.length - 1; i >= 0; i-- ) {
-        $(out_queue[i][0]).animate(
-            {width: out_queue[i][1]},
-            500
-        );
-    }
-}
+
+
 
 
 
@@ -439,11 +504,27 @@ function getArtifactDivByID(id) {
  * Then calls the methods to rearrange the page accordingly
  */
 function updateArtifactDivs() {
-    // Create a local copy to perform updates on then update the global
-    //var _artifactDivs = $.extend(true, [], window.artifactDivs);
+    // Create a new data structure to populate
     var _artifactDivs = [];
 
     populateArtifacts(_artifactDivs);
+
+    calculateCrop(_artifactDivs);
+
+    moveArtifactDivs(_artifactDivs);
+
+    window.artifactDivs = _artifactDivs;
+}
+
+/**
+ * Performs the same tasks as updateArtifactDivs except instead of populating a
+ * new data structure, it loads in the global one and applies any changes that
+ * may have been made to it. This is primarily used with other methods (such as the zoom)
+ * modify the global data structure and wish to see changes invoked on the page
+ */
+function updateModifiedArtifactDivs() {
+    // Create a local copy to perform updates on then update the global
+    var _artifactDivs = $.extend(true, [], window.artifactDivs);
 
     calculateCrop(_artifactDivs);
 
@@ -463,6 +544,7 @@ function populateArtifacts(_artifactDivs) {
         $(this).hasClass("no_crop") ? artifactDiv['noCrop'] = true : artifactDiv['noCrop'] = false;
         artifactDiv['realWidth'] = getRealWidth($(this));
         $(this).css('display') == "none" ? artifactDiv['display'] = false : artifactDiv['display'] = true;
+        artifactDiv['divArea'] = $(this).parents(".zoom_div").attr("id");
         _artifactDivs.push(artifactDiv);
     });
 }
@@ -475,7 +557,7 @@ function populateArtifacts(_artifactDivs) {
  *  returns the width of the div in pixels
  */
 function getRealWidth(artifactDiv) {
-    var width = 175;
+    var width = ARTIFACT_HEIGHT;
     if ($(artifactDiv).hasClass("photo")) {
         // The artifact is a photo
         width = $(artifactDiv).children(".photo_container").width();
@@ -526,21 +608,33 @@ function calculateCrop(artifactDivs) {
         var artifactDiv = artifactDivs[i];
         if (artifactDiv.display) {
             if (width_accumulator < max_width) {
-                width_accumulator += artifactDiv.realWidth + MARGIN_WIDTH;
+		if (artifactDiv.noCrop) {
+		    width_accumulator += artifactDiv.realWidth + MARGIN_WIDTH + BORDER_WIDTH;
+		} else {
+                    width_accumulator += artifactDiv.realWidth + MARGIN_WIDTH;
+		}
                 row_accumulator.push(i);
                 artifactDivs[i].row = rownum;
             } else {
+		// row overflows
+		// greedily crop this row as soon as it overflows
+//		row_accumulator.push(i)//<--add overflow pic to this row <---new
 
+		// do a greedy crop in processRow
                 processRow(row_accumulator, width_accumulator, artifactDivs);
 
-                width_accumulator = 0 + artifactDiv.realWidth + MARGIN_WIDTH;
+		//add this overflow artifact_div to next row <--old version
+		if (artifactDiv.noCrop) {
+		    width_accumulator += artifactDiv.realWidth + MARGIN_WIDTH + BORDER_WIDTH;
+		} else {
+                    width_accumulator = 0 + artifactDiv.realWidth + MARGIN_WIDTH;
+		}
                 row_accumulator = [];
                 rownum ++;
                 row_accumulator.push(i);
                 artifactDivs[i].row = rownum;
             }
         }
-
     }
 
     processRow(row_accumulator, width_accumulator, artifactDivs);
@@ -549,24 +643,29 @@ function calculateCrop(artifactDivs) {
 /**
  * Determines crop amount for a given row and updates the div object
  * Called an used exclusively from calculateCrop
+ * does a greedy cropping
+ * does not crop pictures past a certain threshold
+ * bigger pictures are cropped more than smaller pics
  */
 function processRow(row_accumulator, width_accumulator, artifactDivs) {
-    
+
+   
     var max_width = 955;
     var overspill;
     var crop;
+    var threshold = 0.8
 
     /*
      * We first need to remove all objects that we don't want to crop
      */
-    var rowacc_length = row_accumulator.length
+    var rowacc_length = row_accumulator.length;
     for (var j = 0; j < row_accumulator.length; j++) {
         // we need to recalculate row_accumulator.length each time since we
         // modify the data structure in place with this loop
         if (artifactDivs[row_accumulator[j]].noCrop) {
             rowacc_length -= 1;
             max_width = max_width - artifactDivs[row_accumulator[j]].realWidth - MARGIN_WIDTH - BORDER_WIDTH;
-            width_accumulator = width_accumulator - artifactDivs[row_accumulator[j]].realWidth;
+            width_accumulator = width_accumulator - artifactDivs[row_accumulator[j]].realWidth - MARGIN_WIDTH - BORDER_WIDTH;
             artifactDivs[row_accumulator[j]].croppedWidth = artifactDivs[row_accumulator[j]].realWidth;
             row_accumulator.splice(j,1);
             j -= 1; // Need to decrement the index we because we're removing the artifacts in place
@@ -574,40 +673,88 @@ function processRow(row_accumulator, width_accumulator, artifactDivs) {
     }
 
     /*
-     * Now we calcaulte and crop the rest
+     * Now we calculate and crop the rest
      */
     if (width_accumulator >= max_width && width_accumulator > 0 && max_width > 0) {
+	//create a size map: size--->location(s)
+	//
         overspill = width_accumulator - max_width;
         crop = Math.floor(overspill / rowacc_length);
+	var row_width_accumulator = 0;
+	var amtLeft = overspill;
+	var sizeDict = new Array();
+	var posDict = new Array();
+	var sizeList = []
+	// does size include margin size?????
 
-        var row_width_accumulator = 0;
-        for (var k = 0; k < rowacc_length; k ++) {
-            var artifact_id = row_accumulator.pop();
-            artifactDivs[artifact_id].posInRow = k;
-            if (k == rowacc_length - 1) {
-                // This means we're on the last photo. It should take up the remaining slack
-                var new_width = max_width - row_width_accumulator - MARGIN_WIDTH;
-                artifactDivs[artifact_id].croppedWidth = new_width;
-            } else {
-                var new_width = artifactDivs[artifact_id].realWidth - crop;
-                artifactDivs[artifact_id].croppedWidth = new_width;
-            }
+	// creates sizeDict. maps: size ---> list(indices)
+	// creates posDict. maps: artifact_id ---> position
+	for (var j = 0; j < rowacc_length; j++) {
+	    var index = row_accumulator[j];
+	    var size = artifactDivs[index].realWidth;
+	    posDict[index] = j;
+	    if (size in sizeDict) {
+		sizeDict[size].push(index);
+	    } else {
+		var indexList = [index];
+		sizeDict[size] = indexList;
+		sizeList.push(size);
+	    }
+	}
+	sizeList.sort();
+	sizeList.reverse();
 
-            row_width_accumulator += artifactDivs[artifact_id].croppedWidth + MARGIN_WIDTH;
-        }
-    } else {
-        // This means that the photos don't need to be cropped. Let's just copy in the
-        // appropriate width then
-        for (var k = 0; k < rowacc_length; k ++) {
-            var artifact_id = row_accumulator.pop();
-            artifactDivs[artifact_id].posInRow = k;
-            var real_width = artifactDivs[artifact_id].realWidth;
-            artifactDivs[artifact_id].croppedWidth = real_width;
+	var isPerfect = checkPerfectCrop(overspill, threshold, width_accumulator);
 
-        }
+	while(isPerfect == 'False') {
+		threshold = 0.9*threshold;
+		isPerfect = checkPerfectCrop(overspill, threshold, width_accumulator);
+	}
+	
+	var sizeListLength = sizeList.length;
+	for (var k = 0; k < sizeListLength; k++) {
+	    var sizeIndex = sizeList[k]; //<--a pic size
+	    var toCropList = sizeDict[sizeIndex];
+	    var newSize;
+	
+	    for (var z = 0; z < toCropList.length; z++) {
+		var artifact_id = toCropList[z];
+		var maxRemove = Math.ceil((1-threshold)*sizeIndex);
+
+		if (amtLeft > 0 && amtLeft <= maxRemove) {
+		    //cropping this pic will finish it off
+    		    newSize = sizeIndex - amtLeft;
+		    amtLeft = 0;
+	        } 
+		else if (amtLeft > maxRemove) {
+		    if (k == sizeListLength - 1) {
+			newSize = max_width - row_width_accumulator - MARGIN_WIDTH;
+			amtLeft = 0;
+		    } else {
+			newSize = sizeIndex - maxRemove;
+		    	amtLeft = amtLeft - maxRemove;
+		    }
+	    	} else {
+		    newSize = artifactDivs[artifact_id].realWidth;
+		}
+    	        artifactDivs[artifact_id].croppedWidth = newSize;
+		artifactDivs[artifact_id].posInRow = posDict[artifact_id];
+		row_width_accumulator += artifactDivs[artifact_id].croppedWidth + MARGIN_WIDTH;
+	    }
+	}
     }
 }
 
+/* checks if there is a perfect crop
+ * that is, we dont have to crop all pics past threshold
+ */
+function checkPerfectCrop(overspill, threshold, width_accumulator) {
+    if (Math.floor((1-threshold)*width_accumulator) >= overspill) {
+	return 'True';
+    } else {
+	return 'False';
+    }
+}
 
 /**
  * Given a fully populated list of artifactDivs, this method moves the divs to the appropriate
@@ -619,7 +766,7 @@ function moveArtifactDivs(artifactDivs) {
     for (var i=0; i < adivs_length; i++) {
         var artifactDiv = artifactDivs[i];
 
-        if (!artifactDiv.id || !artifactDiv.croppedWidth) {
+        if (!artifactDiv.id || !artifactDiv.croppedWidth || !artifactDiv.divArea) {
             console.log("ERROR: artifactDiv has undefined terms");
             console.log(artifactDiv);
         }
@@ -628,7 +775,7 @@ function moveArtifactDivs(artifactDivs) {
             $("#"+artifactDiv.id).width(artifactDiv.croppedWidth);
         }
         
-        row_num = $("#"+artifactDiv.id).parents(".artifact_row").attr("id");
+        var row_num = $("#"+artifactDiv.id).parents(".artifact_row").attr("id");
         row_num = row_num.slice(4,row_num.length); // Take off the "row_" prefix
         row_num = Number(row_num);
 
@@ -638,7 +785,7 @@ function moveArtifactDivs(artifactDivs) {
             } else {
                 // We need to make a new row first
                 new_row = "<div class='artifact_row' id='row_"+artifactDiv.row+"'></div>"
-                $("#artifact_wrapper").append(new_row);
+                $("#"+artifactDiv.divArea).append(new_row);
                 $("#row_"+artifactDiv.row).prepend($("#"+artifactDiv.id));
             }
         } else if (artifactDiv.row < row_num) {
@@ -646,14 +793,76 @@ function moveArtifactDivs(artifactDivs) {
         } else {
             // Do nothing. leave it where it is.
         }
+
+        // Move the rows to be in the correct div area
+        
+        var zoom_div = $("#"+artifactDiv.id).parents(".zoom_div").attr("id");
+        if (artifactDiv.divArea != zoom_div) {
+            // If we're not in the correct area, we should move the row
+            var first_num = $("#"+artifactDiv.divArea).children(".artifact_row:first").attr("id");
+            var last_num = $("#"+artifactDiv.divArea).children(".artifact_row:last").attr("id");
+            if (first_num) {
+                first_num = first_num.slice(4,first_num.length); // Take off the "row_" prefix
+                first_num = Number(first_num);
+            } else {first_num = -1;}
+            if (last_num) {
+                last_num = last_num.slice(4,last_num.length); // Take off the "row_" prefix
+                last_num = Number(last_num);
+            } else {last_num = 999999;}
+
+            if (first_num == -1) {
+                // This means the row doesn't have any divs in it yet. Doesn't matter whether
+                // or not I append or prepend
+                $("#"+artifactDiv.divArea).append($("#"+artifactDiv.id).parents(".artifact_row"));
+            } else if (row_num < first_num) {
+                $("#"+artifactDiv.divArea).prepend($("#"+artifactDiv.id).parents(".artifact_row"));
+            } else if (row_num > last_num) {
+                $("#"+artifactDiv.divArea).append($("#"+artifactDiv.id).parents(".artifact_row"));
+            } else if (row_num == first_num) {
+                // This shouldn't happen. Why do we have a duplicate row!
+                console.warn("Warning: Duplicate rows when trying to move rows in between divs");
+                $("#"+artifactDiv.divArea+" row_"+row_num).remove();
+                $("#"+artifactDiv.divArea).prepend($("#"+artifactDiv.id).parents(".artifact_row"));
+            } else if (row_num == last_num) {
+                // This shouldn't happen. Why do we have a duplicate row!
+                console.warn("Warning: Duplicate rows when trying to move rows in between divs");
+                $("#"+artifactDiv.divArea+" row_"+row_num).remove();
+                $("#"+artifactDiv.divArea).append($("#"+artifactDiv.id).parents(".artifact_row"));
+            } else if (row_num > first_num && row_num < last_num){
+                $("#"+artifactDiv.divArea).children(".artifact_row").each(function() {
+                    var iter_row_num = $(this).attr("id");
+                    iter_row_num = iter_row_num.slice(4,iter_row_num.length);
+                    iter_row_num = Number(iter_row_num);
+                    if (artifactDiv.row >= iter_row_num) {
+                        $("#"+artifactDiv.id).parents(".artifact_row").insertAfter($(this));
+                    }
+                })
+            }
+        }
     }
 }
+
+
+
+
+
+
+
+
+
 
 
 
 function wrapResize(adjustment) {
     adjustment = typeof(adjustment) != 'undefined' ? adjustment : 0;
     var standard_offset = 205;
+
+    window.zoomHeight = $(window).height() - 230;
+    if (window.zoomHeight > 175) {
+        window.scaleFactor = window.zoomHeight / ARTIFACT_HEIGHT;
+    } else {
+        window.scaleFactor = 1;
+    }
 
 	$('#landing_wrapper').css("top", function() {
 		if ($(window).height() > 300) {
@@ -776,3 +985,4 @@ jQuery.fn.inputHintOverlay = function (topNudge, leftNudge, useChangeEvent) {
 		});
 	});
 }
+
