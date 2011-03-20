@@ -305,6 +305,14 @@ function processRow(row_accumulator, width_accumulator, artifactDivs) {
             row_width_accumulator += artifactDivs[artifact_id].croppedWidth + MARGIN_WIDTH;
 	    }
 	}
+    } else {
+        // This means the row doesn't fill up the width. We simply need
+        // to give each element it's appropriate row * pos
+        for (var m = 0; m < rowacc_length; m++) {
+            var index = row_accumulator[m];
+            artifactDivs[index].croppedWidth = artifactDivs[index].realWidth;
+            artifactDivs[index].posInRow = m;
+        }
     }
 }
 
