@@ -1,15 +1,76 @@
-KNOWN BUGS
-----------
+                                                                    
+                                                                    
+___       ___                                                       
+`MMb     dMM'                                 68b                   
+ MMM.   ,PMM                                  Y89                   
+ M`Mb   d'MM   ____  ___  __    __     _____  ___ _________  ____   
+ M YM. ,P MM  6MMMMb `MM 6MMb  6MMb   6MMMMMb `MM MMMMMMMMP 6MMMMb  
+ M `Mb d' MM 6M'  `Mb MM69 `MM69 `Mb 6M'   `Mb MM /    dMP 6M'  `Mb 
+ M  YM.P  MM MM    MM MM'   MM'   MM MM     MM MM     dMP  MM    MM 
+ M  `Mb'  MM MMMMMMMM MM    MM    MM MM     MM MM    dMP   MMMMMMMM 
+ M   YP   MM MM       MM    MM    MM MM     MM MM   dMP    MM       
+ M   `'   MM YM    d9 MM    MM    MM YM.   ,M9 MM  dMP    /YM    d9 
+_M_      _MM_ YMMMM9 _MM_  _MM_  _MM_ YMMMMM9 _MM_dMMMMMMMM YMMMM9  
+                                                                    
+                                                                    
 
-glow effect kind of screwy in chrome (mostly fixed for landing page, need to fix for memory canvas page)
+        ==========================================
+        = Configure your development environment =
+        ==========================================
 
-On landing page, file name's do not show up in under picture once the file is done uploading (-->related to buildDownloadTable function in init.js)
+    ./script/dev.(ubuntu|osx)
+    . env/bin/activate
+ 
+            ================================
+            = Running a local debug server =
+            ================================
 
-On memory page, pictures are not inserted from left to right in order of newest to oldest
+    Local client servers run on localhost:5000
 
-On memory page, pictures are cropped weirdly - this fixes itself if you manually refresh the page
+    . env/bin/activate
+    python client.py
 
-Not able to rename a memory
+                    ==================
+                    = root directory =
+                    ==================
 
-On canvas/memory page, "share" thing in the upper left hand corner is kind of weird (hard to copy the link)
+    client/
+        Client flask application; implements public API
+        + html views.
 
+    conf/
+        Configuration files for various deployments.
+
+    lib/
+        Custom web framework built on top of flask.
+
+    log/
+        Local deployments log here
+
+    nginx/
+        nginx configuration scripts, temporary certs etc.
+
+    screenshots/
+        documentation of progress!
+
+    script/
+        deployment and development helper scripts
+
+    servlet/
+        gunicorn service launcher scripts
+
+    upstart/
+        upstart scripts for starting, managing and monitoring services.
+
+    client.py
+        launches a local debug server on 127.0.0.1:5000
+
+    fabfile.py
+        specification for fabric remote deployments 'bootstrap', 'pack',
+        'deploy', 'rebase', 'reconfig' etc.
+
+    MANIFEST.in
+        listing of static files to be included in a deployable python egg
+
+    setup.py
+        specification for packing the source into a python egg

@@ -26,22 +26,21 @@ sudo port install vim +python27 \
 			 MacVim +python27 \
 
 # dev env
-sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/easy_install pip # TODO ensure that this utilises the python27 version of easy_install installed above 'py27-setuptools'
+sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/easy_install pip
 sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/pip install virtualenv
 /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/virtualenv -p python2.7 --no-site-packages --distribute --clear env
 . env/bin/activate
 
 # python dependencies
 pip install Flask \
-				sphinx \
-				ipython \
-				pymongo \
-				greenlet \
-				eventlet \
-				gunicorn \
-				pyflakes \
-				py-bcrypt \
+                PIL \
+                sphinx \
+                ipython \
+                pymongo \
+                pyflakes \
+                py-bcrypt \
                 flask-uploads \
+                flask-celery \
 
 ln -s $(pwd) env/lib/python2.7/site-packages/memoize
 

@@ -28,15 +28,16 @@ def get_photo(_id):
   return Photo.find_one({"_id" : ObjectId(_id)})
 
 def upload_photo(mem_id=None, multi_session=None):
-  # multi_seession is a randomly generated string made on the homepage
-  # This is to associate multiple uploads from the home page before
-  # A memory ID has been created.
+  """multi_seession is a randomly generated string made on the homepage
+     This is to associate multiple uploads from the home page before
+     A memory ID has been created.
+  """
 
   photo = request.files.get('photo', None)
 
   if not mem_id:
     if multi_session:
-      p2 = Photo.find_one({'multi_session':multi_session})
+      p2 = Photo.find_one({ 'multi_session' : multi_session })
     if not p2:
       m = create_memory()
     else:
@@ -59,16 +60,13 @@ def upload_photo(mem_id=None, multi_session=None):
       p.user = session.get('_id', None)
       p.title = request.files.get('title', None)
       p.caption = request.files.get('caption', None)
-      p.visible = 1
+      p.visible = 1 # TODO make this a boolean
       p.multi_session = multi_session
       p.memory = m._id
+      p.resize(app.photos.path(filename))
       p.save()
-      m.artifacts = [p._id] + m.artifacts
-      m.save()
-
-      #TODO FIX the fact that we're returning random shit
-      width = random.randint(100, 300)
-      height = 175
+      m.atomic_append({ "artifacts" : p._id })
+      width, height = p.size()
 
       return succeed({'id' : str(p._id),
                       'memory' : str(m._id),
@@ -89,10 +87,11 @@ def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden
   If get_hidden is 1, we will also return hidden photos
   '''
   from client.app import client as app
+  artifact_list = memory_object.artifacts[::-1]
   artifacts = []
   index = 0
   count = 0
-  for i in memory_object.artifacts:
+  for i in artifact_list:
     if index >= offset and count < numArtifacts:
       p = get_photo(i)
       if p.visible == 0:
@@ -101,14 +100,15 @@ def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden
         else:
           continue
 
+      width, height = p.size()
+
       artifact = dict()
       artifact['id'] = str(p._id)
       artifact['image_url'] = app.photos.url(p.filename)
       artifact['thumb_url'] = app.photos.url(p.filename)
       artifact['visible'] = p.visible
-      #TODO FIX the fact that we're returning random shit
-      artifact['width'] = random.randint(100, 300)
-      artifact['height'] = 175
+      artifact['width'] = width
+      artifact['height'] = height
       artifacts.append(artifact)
       count += 1
     index += 1
@@ -147,7 +147,7 @@ def build_memory_stream():
     mem = { 'id' : memory._id,
             'name' : memory.name,
             'rand_artifacts':rand_artifacts,
-            'more_photos':more_photos}
+            'more_photos' : more_photos }
     s.insert(0,mem)
   return s
 
@@ -158,12 +158,14 @@ def rand_photo(m):
         rand_artifact = random.sample(visible_artifacts,1)
         photo = rand_artifact[0]
 
-        return json.dumps({"id":str(photo['id']), "thumb_url":photo['thumb_url']})
+        return json.dumps({ "id" : str(photo['id']),
+                            "thumb_url" : photo['thumb_url']})
     else:
         return None
 
 def claimed(m):
   return not (not m.user)
+
 def claim_memory(m):
   assert isinstance(m, Memory)
   if 'email' in session:
@@ -176,10 +178,13 @@ def error(error_list=None):
   if not error_list:
     error_list = []
   assert isinstance(error_list, list)
-  return json.dumps({"success" : False, "errors" : error_list})
+  return json.dumps({ "success" : False,
+                      "errors" : error_list })
 
 def succeed(resp=None):
   if not resp:
     resp = {}
   assert isinstance(resp, dict)
-  return json.dumps(dict({"success" : True, "errors" : []}, **resp)) # succint dictionary merge
+  return json.dumps(dict({ "success" : True,
+                           "errors" : [] },
+                           **resp)) # succint dictionary merge

@@ -19,12 +19,15 @@ sudo apt-get -y upgrade
 
 # system and python dependencies
 sudo apt-get -y install git \
-					nginx \
-					mongodb \
-					python2.7 \
-					libpython2.7 \
-					python2.7-dev \
-					build-essential \
+                        nginx \
+                        mongodb \
+                        python2.7 \
+                        libgif-dev \
+                        libjpeg-dev \
+                        libpython2.7 \
+                        python2.7-dev \
+                        build-essential \
+                        libfreetype6-dev \
 
 # dev env
 wget -c http://pypi.python.org/packages/2.7/s/setuptools/setuptools-0.6c11-py2.7.egg#md5=fe1f997bc722265116870bc7919059ea
@@ -33,31 +36,28 @@ sudo sh setuptools-0.6c11-py2.7.egg
 sudo python2.7 /usr/local/bin/easy_install-2.7 pip
 sudo python2.7 /usr/local/bin/pip-2.7 install virtualenv
 
-#sudo python2.7 /usr/local/bin/setuptools-2.7 pip
-#sudo python2.7 /usr/local/bin/pip-2.7 install virtualenv
-
 virtualenv -p python2.7 --no-site-packages --distribute --clear env
 
 . env/bin/activate
 
 # python dependencies
 pip install Flask \
-				sphinx \
-				ipython \
-				pymongo \
-				greenlet \
-				eventlet \
-				gunicorn \
-				pyflakes \
-				py-bcrypt \
-				flask-uploads
+                PIL \
+                sphinx \
+                ipython \
+                pymongo \
+                pyflakes \
+                py-bcrypt \
+                flask-uploads \
+                flask-celery \
+
 ln -s $(pwd) env/lib/python2.7/site-packages/memoize
 
 
 git clone git://fabfile.org/fabric.git fabric
 cd fabric
 python setup.py build
-python setup.py install
+sudo python setup.py install
 
 echo ""
 echo "***********************"

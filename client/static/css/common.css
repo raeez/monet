@@ -1,0 +1,320 @@
+@charset "utf-8";
+/* CSS Document */
+
+/*****************************************
+ * Color Scheme
+ *****************************************/
+
+/* White */
+.memoize_white {
+	color: #ebebeb;
+}
+
+/* Grey */
+.memoize_grey_dark {
+	color: #222222;
+}
+.memoize_grey_medium {
+	color: #333333;
+}
+.memoize_grey_light {
+	color: #aaaaaa;
+}
+
+/* Teal */
+.memoize_teal {
+	color: #11b0aa;
+}
+.memoize_darker_teal {
+	color:#189792;
+}
+
+/* Warning Red */
+.memoize_red {
+    color:#e3372d;
+}
+
+/*****************************************
+ * Reset Browser Defaults
+ *****************************************/
+ 
+ html, body, div, span, object, iframe,  h1, h2, h3, h4, h5, h6, p, blockquote, pre,  a, abbr, acronym, address, code,  del, dfn, em, img, q, dl, dt, dd, ol, ul, li,  fieldset, form, label, legend,  table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	vertical-align: baseline;
+}
+body {
+	line-height: 1.5;
+}
+/* Tables still need 'cellspacing="0"' in the markup. */
+
+table {
+	border-collapse: separate;
+	border-spacing: 0;
+}
+caption, th, td {
+	text-align: left;
+	font-weight: normal;
+}
+table, td, th {
+	vertical-align: middle;
+}
+/* Remove possible quote marks (") from <q>, <blockquote>. */
+
+blockquote:before, blockquote:after, q:before, q:after {
+	content: "";
+}
+blockquote, q {
+	quotes: "" "";
+}
+/* Remove annoying border on linked images. */
+
+a img {
+	border: none;
+}
+
+/*****************************************
+ * Primary Node Overrides
+ *****************************************/
+@font-face {  
+    font-family: "Trebuchet";  
+    src: url("TREBUC.TTF"); /* IE */  
+    src: local("Trebuchet"), url("TREBUC.TTF") format("truetype"); /* non-IE */  
+} 
+
+html {
+    height:100%;
+}
+	 
+body {
+    height:100%;
+	background: #333;
+
+	color:#ebebeb;
+	font-family: "Trebuchet", "Trebuchet MS", Trebuchet, Trebuchet MS, sans-serif;
+    font-size:12px;
+	line-height:1.5;
+    letter-spacing:0.1em;
+}
+
+h1 {
+	font-size:2em;
+	font-weight:normal;
+	color: #ebebeb;
+}
+
+h2 {
+    font-size:1.5em;
+    color:#ebebeb;
+}
+
+a {
+	color:#189792;
+	text-decoration:none;
+}
+a:hover {
+	color:#11b0aa;
+}
+.blue_hover {
+	color:#189792;
+	text-decoration:none;
+}
+.blue_hover:hover {
+	color:#11b0aa;
+    cursor:pointer;
+}
+
+p {
+}
+
+label {
+	color:#aaaaaa;
+    font-size:0.9em;
+}
+input {
+	color:#aaaaaa;
+	font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+
+	border:1px solid #444;
+	background:#222222;
+	padding:0.1em 0.2em 0.1em .4em;
+
+    height:1.5em;
+}
+input:hover {
+	border:1px solid #aaaaaa;
+	background:#222222;
+}
+.input_hover {
+	border:1px solid #aaaaaa;
+	background:#222222;
+}
+input:focus {
+	border:1px solid #aaaaaa;
+	background:#333333;
+}
+.input_button {
+    padding:0;
+    height:22px;
+}
+.input_button:hover {
+	cursor:pointer;
+}
+.input_button:active {
+	background:#444444;
+}
+
+.field100 {
+	width:100%;
+}
+
+.subtext {
+    color:#aaa;
+}
+
+/*****************************************
+ * General Classes
+ *****************************************/
+.wrapper {
+	width:960px;
+	margin:0 auto;
+	position:relative;
+}
+.visible {
+	display:inherit;
+}
+.invisible {
+	display:none;
+}
+.opacity10 {
+    opacity: .10;
+    -ms-filter: 'alpha(opacity=.10)';
+    filter: alpha(opacity=.10);
+}
+.opacity40 {
+    opacity: .40;
+    -ms-filter: 'alpha(opacity=.40)';
+    filter: alpha(opacity=.40);
+}
+.opacity65 {
+    opacity: .65;
+    -ms-filter: 'alpha(opacity=.65)';
+    filter: alpha(opacity=.65);
+}
+ 
+
+/*****************************************
+ * LOGIN FORM
+ *****************************************/
+.login_form {
+    color:#aaa;
+}
+
+.inputHintOverlay{
+    color:#666;
+    letter-spacing:0em;
+}
+
+.login_label_div {
+    width:70px;
+    float:left;
+    text-align:right;
+    padding-left:3px;
+    margin-top:.3em
+}
+.login_label_div_pass {
+    width:67px;
+}
+.login_email {
+    margin-left:0.5em;
+	width:203px;
+    float:left;
+}
+
+.login_email_div {
+    margin-top:0.5em;
+    margin-left:-3px;
+}
+.login_prompt, .login_checking, .login_welcome, .login_new_message, .login_blank {
+    margin-top:0.5em;
+    padding-left:3px;
+    font-size:0.9em;
+}
+
+.login_enter_pass_div {
+    margin-top:0.5em;
+}
+.login_existing_pass {
+	width:154px;
+	float:left;
+    margin:0em 0 0 0.5em;
+}
+
+.login_new_pass_div {
+    margin-top:.5em;
+    display:none;
+}
+.login_new_pass {
+    margin: 0 0 0 .5em;
+    float:left;
+}
+.login_new_pass input {
+    width:69px;
+}
+.login_new_confirm_pass {
+    margin: 0 0 0 .5em;
+    float:left;
+}
+.login_new_confirm_pass input {
+    width:69px;
+}
+
+.login_submit {
+	width:45px;
+	float:right;
+}
+
+.login_error_messages {
+    margin-top:5px;
+    padding-left:3px;
+    color:#e3372d;
+}
+
+/*****************************************
+ * Common File Upload Classes
+ *****************************************/
+
+.file_upload iframe, .file_upload button {
+  display: none;
+}
+
+.file_upload_progress .ui-progressbar-value {
+  background: url(pbar-ani.gif);
+}
+
+.file_upload_progress div {
+  width: 80px;
+  height: 80px;
+}
+
+.file_upload_cancel button {
+  cursor: pointer;
+}
+
+/*****************************************
+ * Miscellaneous
+ *****************************************/
+.clear {
+	clear:both;
+	content: "\0020";
+	display: block;
+	height: 0;
+	visibility: hidden;
+	overflow:hidden;
+}

@@ -179,6 +179,12 @@ class Container(dict):
   def safe_member(cls, member):
     return member not in cls.__inter__
 
+  def atomic_append(self, item):
+    if self.__class__.default_adapter() is None:
+      raise NoAdapterError()
+    
+    self.__class__.default_adapter().atomic_append(self["_type"], self["_id"], item)
+
   def _save(self):
     try:
       self.enforce_validated()
@@ -192,7 +198,6 @@ class Container(dict):
       self.__dict__['_validated'] = False
 
   def save(self):
-    self._validate()
     self._save()
 
   def delete(self):
@@ -204,6 +209,7 @@ class Container(dict):
     self._validated = True
 
   def enforce_validated(self):
+    self._validate()
     if self.__dict__['_validated'] is False:
       raise InvalidContainer()
 

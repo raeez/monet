@@ -2,7 +2,6 @@
 
 import lib.config
 lib.config.load('conf/local.json')
-lib.config.CONF['syslog'] = 'client'
 
 from client.app import client as app
 

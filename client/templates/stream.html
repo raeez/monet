@@ -4,6 +4,9 @@
 
 {% block head %}
   {{ super() }}
+
+<link rel="stylesheet" href="{{url_for('static', filename='css/page_stream.css')}}">
+<script src="{{url_for('static', filename='js/memoize_stream.js')}}"></script>
 {% endblock %}
 
 {% block content %}
@@ -13,20 +16,43 @@
 
 <div id="left_lane_positioning">
     <div id="left_lane">
-        <div id="logo"><a href="{{url_for('new')}}">Memoize</a></div>
+        <div id="logo"><a href="{{url_for('new')}}"><span class="anchorLink" id="top">Memoize</span></a></div>
         <div id="table_of_contents">
+            <h2>Recalling Memories:</h2>
+            <p class="subtext">We've remembered any memory you've visited</p>
             {% for memory in stream %}
-            <div class="toc_item">
-                <div class="toc_marker"></div>
-                <div class="toc_memory "><span id="{{memory['id']}}" class="anchorLink"><a href="{{url_for('memory', id=memory['id'])}}">{{memory['name']}}</a></span></div>
+            <div class="toc_item" id="toc_{{memory['id']}}">
+                <span class="anchorLink" id="{{memory['id']}}"><div class="toc_marker" id="marker_{{memory['id']}}"></div></span>
+                <div class="toc_memory ">
+                    {% if loop.index == 1 %}
+                    <span id="top" class="anchorLink">
+                    {% else %}
+                    <span id="{{memory['id']}}" class="anchorLink">
+                    {% endif %}
+                        <a href="{{url_for('memory', id=memory['id'])}}">{{memory['name']}}</a>
+                    </span>
+                </div>
             </div>
             {% endfor %}
+
+            {% if forgotten in stream %}
+            <div id="forgotten_memories">
+            {% else %}
+            <div id="forgotten_memories" style="display:none">
+            {% endif %}
+                <h2>Forgotten Memories:</h2>
+                <p class="subtext" id="forgot_show">Click <a href="#" id="forgot_show_click">here</a> to show these</p>
+                <p class="subtext" id="forgot_hide" style="display:none;">Click one to remember it again | <a href="#" id="forgot_hide_click">hide these</a></p>
+                <div id="forgotten_list" style="display:none">
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <div id="lane_wrap">
     <div id="memory_lane">
+        <div id="top_anchor"></div>
         <div id="title">
             <span class="title_text">Recalling the most recent memories</span>
             <br/>
@@ -36,21 +62,22 @@
 
         {% for memory in stream %}
         {% if memory['more_photos'] == 1 %}
-        <div class="memory_div more_photos" id="memdiv_{{memory['id']}}">
+        <div class="memory_div memory_shadow more_photos" id="memdiv_{{memory['id']}}">
         {% else %}
-        <div class="memory_div" id="memdiv_{{memory['id']}}">
+        <div class="memory_div memory_shadow" id="memdiv_{{memory['id']}}">
         {% endif %}
-        <a href="{{url_for('memory', id=memory['id'])}}">
             <div name="{{memory['id']}}" id="{{memory['id']}}_anchor"></div>
 
             <div class="header">
-                {{memory['name']}}
+                <div class="mem_title">{{memory['name']}}</div>
+                <div class="forget" title="Click here to forget this memory. You can undo this later"><a href="#">X</a></div>
             </div>
 
+        <a class="mem_link" href="{{url_for('memory', id=memory['id'])}}" >
             <div class="center">
                 <div class="artifact_previews">
                     {% for artifact in memory['rand_artifacts'] %}
-                    <div class="artifact_artifact">
+                    <div class="artifact_item">
                         <img src="{{artifact['thumb_url']}}" height="200px"/>
                     </div>
                     {% endfor %}
