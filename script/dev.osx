@@ -6,9 +6,9 @@ if [ `whoami` == root ]; then
 fi
 
 echo ""
-echo "****************************************"
+echo "**************************************"
 echo "* Setting up memoize-dev environment *"
-echo "****************************************"
+echo "**************************************"
 echo ""
 
 # system and python dependencies
@@ -39,6 +39,7 @@ sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/pip-2.7 ins
 pip install Flask \
                 PIL \
                 celery \
+                fabric \
                 sphinx \
                 ipython \
                 pymongo \
@@ -48,12 +49,8 @@ pip install Flask \
                 flask-uploads \
                 flask-celery \
 
+# mimick an installation of the current source tree
 ln -s $(pwd) env/lib/python2.7/site-packages/memoize
-
-git clone git://fabfile.org/fabric.git fabric
-cd fabric
-python setup.py build
-python setup.py install
 
 echo ""
 echo "************************"
