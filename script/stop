@@ -14,4 +14,4 @@ stop celery.memoize
 echo "*** memoize *** stopping rabbitmq..."
 stop rabbitmq.memoize
 echo "*** memoize *** stopping mongodb..."
-#stop mongodb.memoize
+stop mongodb.memoize

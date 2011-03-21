@@ -8,7 +8,7 @@ fi
 initctl reload-configuration
 
 echo "*** memoize *** starting mongodb..."
-#start mongodb.memoize
+start mongodb.memoize
 echo "*** memoize *** starting rabbitmq..."
 start rabbitmq.memoize
 echo "*** memoize *** starting celery..."
