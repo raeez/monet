@@ -30,11 +30,6 @@ sudo rabbitmqctl add_user memoize memoize # user / pass
 sudo rabbitmqctl add_vhost memoizevhost 
 sudo rabbitmqctl set_permissions -p memoizevhost memoize ".*" ".*" ".*"
 
-# add the celery config file to PYTHONPATH
-echo "Adding celery config file to PYTHONPATH"
-export PYTHONPATH=$(pwd)/celery:$PYTHONPATH
-echo "export PYTHONPATH=$(pwd)/celery:\$PYTHONPATH" >> ~/.bash_profile
-
 # dev env
 sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/easy_install pip
 sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/pip install virtualenv

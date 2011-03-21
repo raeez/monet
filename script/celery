@@ -1,5 +1,9 @@
 #!/bin/bash
 
+
+# point to the celery config directory
+export PYTHONPATH=$(pwd)/celery:$PYTHONPATH
+
 # make sure we have the latest codebase loaded into the virtualenv
 python setup.py install
 
