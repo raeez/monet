@@ -134,7 +134,7 @@ jQuery.fn.anchorAnimate = function(settings) {
 
 $(document).ready(function(){
 	$("span.anchorLink").anchorAnimate()
-    window.canvasTitle = $("#canvas_title .click").html();
+
 
     updateStreamGrab();
     $(window).scroll(function() {

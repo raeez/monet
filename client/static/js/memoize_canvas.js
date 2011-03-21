@@ -627,7 +627,7 @@ function resizeCanvas() {
     var windowWidth = $(window).width();
     var sidemargins = 105; // The teal bars on the left and right
     if (windowWidth < 1060 && windowWidth > 320) {
-        if (windowWidth <= 480) {
+        if (windowWidth <= 640) {
             $("#canvas_header #login").hide();
             $("#add_artifact").hide();
             $("#canvas_footer").hide();
@@ -1063,17 +1063,31 @@ $("#canvas_file_upload").fileUploadUI({
         dropZone: $('html'),
         uploadTable: $('#new_artifacts'),
         downloadTable: $('#new_artifacts'),
-        progressSelector: $('.file_upload_progress'),
-        cancelSelector: $('.file_upload_cancel'),
+        progressSelector: $('.file_upload_canvas_progress'),
+        initProgressBar: function (node, value) {
+            if (typeof node.progressbar === 'function') {
+                return node.progressbar({
+                    value: value
+                });
+            } else {
+                var progressbar = $('<progress value="' + value + '" max="100"/>').appendTo(node);
+                progressbar.progressbar = function (key, value) {
+                    progressbar.attr('value', value);
+                };
+                return progressbar;
+            }
+        },
         onDragEnter: function(event) {
             $("#add_artifact").css("-moz-box-shadow", "2px 2px 11px #1e5957");
             $("#add_artifact").css("-webkit-box-shadow", "2px 2px 11px #1e5957");
             $("#add_artifact").css("box-shadow", "2px 2px 11px #1e5957");
         },
-        onAbort: function(event) {
+        onAbort: function(event, files, index, xhr, handler) {
             $("#add_artifact").css("-moz-box-shadow", "2px 2px 7px #111");
             $("#add_artifact").css("-webkit-box-shadow", "2px 2px 7px #111");
             $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
+            handler.removeNode(handler.uploadRow);
+            handler.onCompleteAll(files);
         },
         onDragLeave: function(event) {
             $("#add_artifact").css("-moz-box-shadow", "2px 2px 7px #111");
@@ -1086,21 +1100,68 @@ $("#canvas_file_upload").fileUploadUI({
             $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
         },
         beforeSend:function (event, files, index, xhr, handler, callBack) {
-            updateArtifactDivs();
+            var regexp = /\.(png)|(jpg)|(gif)$/i;
+            // Using the filename extension for our test,
+            // as legacy browsers don't report the mime type
+            if (!regexp.test(files[index].name)) {
+                handler.uploadRow.find('.file_upload_canvas_content').html("MUST BE IMAGE (PNG JPG GIF)");
+                $(handler.uploadRow).css("border-color","#e3372d")
+                setTimeout(function () {
+                    handler.removeNode(handler.uploadRow);
+                    $(handler.uploadRow).remove();
+                    updateArtifactDivs();
+                }, 5000);
+                return;
+            }
+
+            if (files[index].size === 0) {
+                handler.uploadRow.find('.file_upload_canvas_content').html('FILE IS EMPTY!');
+                $(handler.uploadRow).css("border-color","#e3372d")
+                setTimeout(function () {
+                    handler.removeNode(handler.uploadRow);
+                    $(handler.uploadRow).remove();
+                    updateArtifactDivs();
+                }, 5000);
+                return;
+            }
+
+            if (files[index].size > FILE_UPLOAD_LIMIT) {
+                var maxSizeMB = FILE_UPLOAD_LIMIT / 1000000;
+                handler.uploadRow.find('.file_upload_canvas_content').html('FILE TOO BIG! Max: '+maxSizeMB+"MB");
+                $(handler.uploadRow).css("border-color","#e3372d")
+                setTimeout(function () {
+                    handler.removeNode(handler.uploadRow);
+                    $(handler.uploadRow).remove();
+                    updateArtifactDivs();
+                }, 5000);
+                return;
+            }
+
             callBack();
         },
         onComplete: function (event, files, index, xhr, handler) {
-            updateArtifactDivs();
+            handler.onCompleteAll(files);
+        },
+        onCompleteAll: function (files) {
+            // The files array is a shared object between the instances of an upload selection.
+            // We extend it with a uploadCounter to calculate when all uploads have completed:
+            if (!files.uploadCounter) {
+                files.uploadCounter = 1;  
+            } else {
+                files.uploadCounter = files.uploadCounter + 1;
+            }
+            if (files.uploadCounter === files.length) {
+                /* your code after all uplaods have completed */
+                updateArtifactDivs();
+            }
         },
         buildUploadRow: function (files, index) {
             return $(
             '       <div class="upload_file_canvas_div artifact no_crop" id="upload_'+randomString()+'">'+
             '           <div class="file_upload_canvas_content">'+
-                            files[index].name +
-            '               <div class="file_upload_progress"><\/div>'+
-            '               <div class="file_upload_cancel"><\/div>'+
+            '                uploading: '+ files[index].name +
             '           <\/div>'+
-            '           <div class="file_upload_canvas_preview"><\/div>'+
+            '           <div class="file_upload_canvas_progress"><\/div>'+
             '           <div class="photo_container"><div class="mock_photo><\/div><\/div>"'+
             '       <\/div>'
             );
