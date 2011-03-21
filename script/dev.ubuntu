@@ -24,10 +24,17 @@ sudo apt-get -y install git \
                         python2.7 \
                         libgif-dev \
                         libjpeg-dev \
+                        libevent-dev \
                         libpython2.7 \
                         python2.7-dev \
                         build-essential \
+                        rabbitmq-server \
                         libfreetype6-dev \
+
+# set up rabbitmq
+sudo rabbitmqctl add_user memoize memoize
+sudo rabbitmqctl add_vhost memoizevhost 
+sudo rabbitmqctl set_permissions -p memoizevhost memoize ".*" ".*" ".*"
 
 # dev env
 wget -c http://pypi.python.org/packages/2.7/s/setuptools/setuptools-0.6c11-py2.7.egg#md5=fe1f997bc722265116870bc7919059ea
@@ -43,6 +50,7 @@ virtualenv -p python2.7 --no-site-packages --distribute --clear env
 # python dependencies
 pip install Flask \
                 PIL \
+                celery \
                 sphinx \
                 ipython \
                 pymongo \

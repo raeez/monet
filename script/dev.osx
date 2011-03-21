@@ -13,17 +13,22 @@ echo ""
 
 # system and python dependencies
 sudo port install python27 \
-			 python_select \
-			 py27-setuptools \
+                  git-core +svn \
+                  mongodb +python27 \
+                  libevent +python27 \
+                  libevent-dev +python27 \
+                  python_select +python27 \
+                  py27-setuptools +python27 \
+                  rabbitmq-server +python27 \
 
 # ensure python27 is the active python
 sudo python_select python27
 
-sudo port install git-core +svn \
-			 mongodb +python27 \
-
-sudo port install vim +python27 \
-			 MacVim +python27 \
+# load rabbitmq server
+sudo port load rabbitmq-server
+sudo rabbitmqctl add_user memoize memoize # user / pass
+sudo rabbitmqctl add_vhost memoizevhost 
+sudo rabbitmqctl set_permissions -p memoizevhost memoize ".*" ".*" ".*"
 
 # dev env
 sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/easy_install pip
@@ -34,6 +39,7 @@ sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/pip install
 # python dependencies
 pip install Flask \
                 PIL \
+                celery \
                 sphinx \
                 ipython \
                 pymongo \
