@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# make sure we have the latest codebase loaded into the virtualenv
+python setup.py install
+
+# launch celery with the latest codebase
+celeryd -l INFO

@@ -5,5 +5,13 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
+echo "*** memoize *** stopping nginx..."
 stop nginx.memoize
+echo "*** memoize *** stopping client..."
 stop client.memoize
+echo "*** memoize *** stopping celery..."
+stop celery.memoize
+echo "*** memoize *** stopping rabbitmq..."
+stop rabbitmq.memoize
+echo "*** memoize *** stopping mongodb..."
+stop mongodb.memoize
