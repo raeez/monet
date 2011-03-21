@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+#celery config
+import sys
+sys.path.append("celery/local")
+
 import lib.config
 lib.config.load('conf/local.json')
 

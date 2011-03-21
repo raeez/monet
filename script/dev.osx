@@ -1,14 +1,14 @@
 #!/bin/bash
 
 if [ `whoami` == root ]; then
-	echo Please DONT run this script as root, or using sudo
+	echo "DONT run this script as root, or using sudo"
 	exit
 fi
 
 echo ""
-echo "****************************************"
+echo "**************************************"
 echo "* Setting up memoize-dev environment *"
-echo "****************************************"
+echo "**************************************"
 echo ""
 
 # system and python dependencies
@@ -16,9 +16,8 @@ sudo port install python27 \
                   git-core +svn \
                   mongodb +python27 \
                   libevent +python27 \
-                  libevent-dev +python27 \
                   python_select +python27 \
-                  py27-setuptools +python27 \
+                  py27-distribute +python27 \
                   rabbitmq-server +python27 \
 
 # ensure python27 is the active python
@@ -31,8 +30,8 @@ sudo rabbitmqctl add_vhost memoizevhost
 sudo rabbitmqctl set_permissions -p memoizevhost memoize ".*" ".*" ".*"
 
 # dev env
-sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/easy_install pip
-sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/pip install virtualenv
+sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/easy_install-2.7 pip
+sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/pip-2.7 install virtualenv
 /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/virtualenv -p python2.7 --no-site-packages --distribute --clear env
 . env/bin/activate
 
@@ -40,20 +39,18 @@ sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/pip install
 pip install Flask \
                 PIL \
                 celery \
+                fabric \
                 sphinx \
                 ipython \
                 pymongo \
+                eventlet \
                 pyflakes \
                 py-bcrypt \
                 flask-uploads \
                 flask-celery \
 
+# mimick an installation of the current source tree
 ln -s $(pwd) env/lib/python2.7/site-packages/memoize
-
-git clone git://fabfile.org/fabric.git fabric
-cd fabric
-python setup.py build
-python setup.py install
 
 echo ""
 echo "************************"

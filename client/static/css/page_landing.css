@@ -199,6 +199,10 @@
     filter: alpha(opacity=.85);
 }
 
+.file_upload_progress {
+    height:100%;
+}
+
 .file_upload_preview {
     position:absolute;
     z-index:1;
@@ -216,7 +220,7 @@
 }
 #inline_upload {
     position:relative;
-    width:11.2em;
+    width:11.3em;
     height:1em;
     float:left;
     overflow:visible;

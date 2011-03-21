@@ -17,27 +17,22 @@ apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
 apt-get -y update
 apt-get -y upgrade
 
-# add the celery config file to PYTHONPATH
-echo "Adding celery config file to PYTHONPATH"
-export PYTHONPATH=$(pwd)/celery:$PYTHONPATH
-echo "export PYTHONPATH=$(pwd)/celery:\$PYTHONPATH" >> ~/.bashrc
-
 # system and python dependencies
-apt-get -y install git \
-                    nginx \
-                    libjpeg \
-                    mongodb \
-                    python2.7 \
-                    libgif-dev \
-                    python-pip \
-                    libjpeg-dev \
-                    libevent-dev \
-                    python2.7-dev \
-                    build-essential \
-                    rabbitmq-server \
-                    libfreetype6-dev \
-                    python-setuptools \
+apt-get -y install nginx \
+                   mongodb \
+                   python2.7 \
+                   libgif-dev \
+                   python-pip \
+                   libjpeg-dev \
+                   libevent-dev \
+                   python2.7-dev \
+                   build-essential \
+                   rabbitmq-server \
+                   libfreetype6-dev \
+                   python-setuptools \
 
+
+rabbitmqctl stop
 
 # virtual env
 pip install virtualenv
@@ -50,8 +45,13 @@ pip install PIL \
             celery \
             gevent \
             pymongo \
+            eventlet \
             gunicorn \
             py-bcrypt \
             flask-uploads \
 
+sh script/celeryd
+
 sh script/reconfig
+
+sh script/rabbitmq

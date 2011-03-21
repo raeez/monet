@@ -6,7 +6,8 @@ var BORDER_WIDTH = 4; // set a global margin
 var ARTIFACT_HEIGHT = 175; // The standard height of all artifacts
 var WRAPPER_WIDTH = 955;
 var THRESHOLD = 0.8 // Maximum crop amount
-window.artifacts = [] // A global that holds json representations of all returned artifacts
+var STAGING_SIZE = 6 // Number of photos staged before they're added to the page
+window.artifactServerData = [] // A global that holds json representations of all returned artifacts
 window.artifactDivs; // A global used to keep track of the position of all artifact divs
 window.numRows = 0; // The total number of rows on the page
 window.zoomHeight; // A global that says how tall the center area of the page is
@@ -14,6 +15,14 @@ window.scaleFactor = 1; // The factor that artifacts scale by when zoomed. Defau
 window.zoomedIn = false;
 window.previousZoomTarget = undefined; // The last target that we were zoom focused on
 window.canvasTitle = ""; // We store the canvas title as a global to get it back from the truncated version
+window.justChangedHidden = false; // Used to temporarily disable the hide button hover
+window.uploadError = false; // Keeps track if there's an upload error
+window.stagingPhotos = {} // A dictionay of jQuery upload File objects keyed by index
+window.stagingPhotos.length = function () {
+    var count = 0;
+    for (var i in window.stagingPhotos) {count ++;}
+    return count;
+}
 
 /***********************************************
   ARTIFACTDIV Data Structure Handling
@@ -25,14 +34,24 @@ window.canvasTitle = ""; // We store the canvas title as a global to get it back
  * Move the elements to the correct locations.
  */
 function ArtifactDiv() {
+    // These bits are populated from the populateArtifacts method
     this.id = undefined;
     this.noCrop = undefined;
     this.realWidth = undefined;
+    this.divArea = undefined;
+    this.display = undefined;
+
+    // These bits come from the calculateCrop method
     this.croppedWidth = undefined;
     this.row = undefined;
     this.posInRow = undefined;
-    this.divArea = undefined;
-    this.display = undefined;
+
+    // These bits come from the server and are populated by refreshServerData
+    this.height = undefined;
+    this.width = undefined;
+    this.image_url = undefined;
+    this.thumb_url = undefined;
+    this.visible = undefined;
 }
 function getArtifactDivByID(id) {
     var adiv_length = window.artifactDivs.length;
@@ -65,6 +84,16 @@ function getArtifactDivRowLength(row) {
     }
     return row_length;
 }
+function getServerDataByID(id) {
+    var serverData;
+    for (var i in window.artifactServerData) {
+        serverData = window.artifactServerData[i];
+        if (serverData.id == id) {
+            return serverData;
+        }
+    }
+    return false;
+}
 
 
 /******************************************
@@ -79,6 +108,8 @@ function updateArtifactDivs() {
     var _artifactDivs = [];
 
     populateArtifacts(_artifactDivs);
+
+    refreshServerData(_artifactDivs);
 
     calculateCrop(_artifactDivs);
 
@@ -96,6 +127,8 @@ function updateArtifactDivs() {
 function updateModifiedArtifactDivs() {
     // Create a local copy to perform updates on then update the global
     var _artifactDivs = $.extend(true, [], window.artifactDivs);
+
+    refreshServerData(_artifactDivs);
 
     calculateCrop(_artifactDivs);
 
@@ -132,10 +165,12 @@ function getRealWidth(artifactDiv) {
         // The artifact is a photo
         width = $(artifactDiv).children(".photo_container").width();
     }
-    else if ($(artifactDiv).hasClass("add_artifact")) {
+    else if ($(artifactDiv).attr("id") == "add_artifact") {
         // The artifact is the "add artifact" button
         width = $(artifactDiv).width();
-        
+    } else if ($(artifactDiv).attr("id") == "new_artifacts") {
+        // We're looking at the add artifact upload area
+        width = $(artifactDiv).width();
     } else if ($(artifactDiv).hasClass("upload_file_canvas_div")) {
         // The artifact is a file upload progress box
        width = $(artifactDiv).children(".photo_container").width(); 
@@ -147,6 +182,34 @@ function getRealWidth(artifactDiv) {
 /********************************
 **FUNCTIONS FOR CROPPING PHOTOS**
 *********************************
+/**
+ * Once loadartifacts runs, a global is populated with server information
+ * for each artifactDiv. This method merges the two data sets into one.
+ *
+ * The format of artifactServerData is determined by the server.
+ * artifactDivs are full of ArtifactDiv objects
+ */
+function refreshServerData(artifactDivs) {
+    var serverData;
+    var artifact;
+    var id
+
+    var a_divlength = artifactDivs.length
+    for (var j = 0; j < a_divlength; j ++ ) {
+        serverData = getServerDataByID(parsePrefixToString(artifactDivs[j]["id"], "artifact_"));
+        if (serverData == false) {
+            continue;
+        } else {
+            artifactDivs[j]["height"] = serverData.height;
+            artifactDivs[j]["width"] = serverData.width;
+            artifactDivs[j]["image_url"] = serverData.image_url;
+            artifactDivs[j]["thumb_url"] = serverData.thumb_url;
+            artifactDivs[j]["visible"] = serverData.visible;
+        }
+    }
+}
+
+
 /**
  * This function should expect that the artifactDiv list
  * has nocrop, id, and realWidth filled in for each element
@@ -170,20 +233,20 @@ function calculateCrop(artifactDivs) {
         var artifactDiv = artifactDivs[i];
         if (artifactDiv.display) {
             if (width_accumulator < max_width) {
-		width_accumulator += artifactDiv.realWidth + MARGIN_WIDTH;
+		        width_accumulator += artifactDiv.realWidth + MARGIN_WIDTH;
                 if (artifactDiv.noCrop) {
-		    width_accumulator += BORDER_WIDTH;
-		}
+		             width_accumulator += BORDER_WIDTH;
+		        }
                 row_accumulator.push(i);
                 artifactDivs[i].row = rownum;
             } else {
-
                 processRow(row_accumulator, width_accumulator, artifactDivs);
-
                 width_accumulator = 0 + artifactDiv.realWidth + MARGIN_WIDTH;
-		if (artifactDiv.noCrop) {
-		    width_accumulator += BORDER_WIDTH;
-		}
+	    
+                if (artifactDiv.noCrop) {
+                    width_accumulator += BORDER_WIDTH;
+                }
+
                 row_accumulator = [];
                 rownum ++;
                 row_accumulator.push(i);
@@ -347,8 +410,12 @@ function moveArtifactDivs(artifactDivs) {
         }
 
         if (!artifactDiv.id || !artifactDiv.croppedWidth || !artifactDiv.divArea) {
-            console.log("ERROR: artifactDiv has undefined terms");
-            console.log(artifactDiv);
+            if (artifactDiv.id == "add_artifact" || artifactDiv.id == "new_artifacts") {
+                // Ignore this problem
+            } else {
+                console.log("ERROR: artifactDiv has undefined terms");
+                console.log(artifactDiv);
+            }
         }
 
         if (artifactDiv.croppedWidth && $("#"+artifactDiv.id).width() != artifactDiv.croppedWidth) {
@@ -371,7 +438,7 @@ function moveArtifactDivs(artifactDivs) {
         row_num = Number(row_num);
 
         if (artifactDiv.row > row_num) {
-            if ($("row_"+artifactDiv.row).length) {
+            if ($("#row_"+artifactDiv.row).length) {
                 $("#row_"+artifactDiv.row).prepend($("#"+artifactDiv.id));
             } else {
                 // We need to make a new row first
@@ -433,6 +500,72 @@ function moveArtifactDivs(artifactDivs) {
     }
 }
 
+
+/*****************************************
+ * ARTIFACT PROGRESSIVE LOADING
+ *****************************************/
+
+/** loadartifacts([offset[, end]])
+ * Loads the artifacts in json format for this memory
+ * Stores it in the window.artifactServerData global
+ *
+ * @param offset - The photo index to start loading from
+ * @param numartifacts - The number of artifacts to pull
+ *
+ * @returns Void
+ *
+ */
+function loadartifacts(offset, numartifacts) {
+    var loaded_artifacts = null;
+    var memory_id = $("#memory_id").html();
+    if ($("#hidden_prompt").hasClass("showing_hidden")) {
+        var show_hidden = 1;
+    } else { var show_hidden = 0;}
+
+    $.post("/get_artifacts/"+memory_id, {"offset":offset, "numartifacts":numartifacts, "show_hidden":show_hidden}, function(data) {
+        window.artifactServerData = jsonParse(data);
+        refreshServerData(window.artifactDivs);
+        loadViewportPhotos();
+    });
+}
+
+/**
+ * loadViewportPhotos will read from the window.artifactDivs,
+ * decide what photos are in the viewport, then insert the
+ * thumbnail images for only those that don't have one already
+ */
+function loadViewportPhotos() {
+    var load_top = $(window).scrollTop() - 200;
+    var load_bottom = $(window).scrollTop() + $(window).height() + 700;
+
+    var a_divlength = window.artifactDivs.length;
+    for (var i = 0; i < a_divlength; i++) {
+        var artifact = window.artifactDivs[i];
+
+        if (artifact.id == "add_artifact" || artifact.id == "new_artifacts") {continue;}
+
+        if (artifact.thumb_url == undefined) {
+            // This means that the server data hasn't populated yet.
+            // That needs to happen before this function runs.
+            return;
+        }
+
+        var artifact_top = $("#"+artifact.id).offset().top;
+        if (artifact_top >= load_top && artifact_top <= load_bottom) {
+            if ($("#"+artifact.id).find("img").attr("src") == artifact.thumb_url) {
+                // If the img doesn't exist, it will return 'undefined'
+                continue;
+            }
+            var div_width = $("#"+artifact.id).width();
+            var photo_width = $("#"+artifact.id).children(".photo_container").width();
+            var centering = (photo_width - div_width) / -2;
+
+            var imgdiv = "<img src="+artifact.thumb_url+" height='"+ARTIFACT_HEIGHT+"' width='"+artifact.width+"' class='photo'/>"
+            $("#"+artifact.id).children(".photo_container").css('left', centering);
+            $("#"+artifact.id).children(".photo_container").html(imgdiv);
+        }
+    }
+}
 
 
 /**************************************
@@ -631,7 +764,7 @@ function resizeCanvas() {
     var windowWidth = $(window).width();
     var sidemargins = 105; // The teal bars on the left and right
     if (windowWidth < 1060 && windowWidth > 320) {
-        if (windowWidth <= 480) {
+        if (windowWidth <= 640) {
             $("#canvas_header #login").hide();
             $("#add_artifact").hide();
             $("#canvas_footer").hide();
@@ -654,6 +787,8 @@ function resizeCanvas() {
 
         $("#canvas_title_wrap").width(windowWidth - sidemargins - loginWidth - 5);
         truncateTitle(windowWidth - sidemargins - loginWidth - 5);
+
+        $("#new_artifacts").width($(".canvas_center").width() - 175 - 10 - 10);
 
         // This is to get a default padding of 113 px when it's > 1060px
         var alertbar_padding = windowWidth - 947;
@@ -1004,61 +1139,89 @@ function doUnZoom() {
 }
 
 
-/*****************************************
- * ARTIFACT PROGRESSIVE LOADING
- *****************************************/
 
-/** loadartifacts([offset[, end]])
- * Loads the artifacts in json format for this memory
- *
- * For the given memory, loads just the containers for all of the artifacts
- * It also places those containers on the page and calls the progressive
- * artifact content loader.
- *
- * @param offset - The photo index to start loading from
- * @param numartifacts - The number of artifacts to pull
- *
- * @returns Void
- *
+/**
+ * In the upload area, we need to resize the holding and staging
+ * wrappers so the images tile properly and display correctly
  */
-function loadartifacts(offset, numartifacts) {
-    loaded_artifacts = null;
-    memory_id = $("#memory_id").html();
-    if ($("#hidden_prompt").hasClass("showing_hidden")) {
-        show_hidden = 1;
-    } else {show_hidden = 0;}
+function resizeHoldingWrappers() {
+    var numHolding = $("#uploadArea_holding_div").children(".canvas_upload_div").length
+    var numStaging = $("#uploadArea_staging_div #staging_content").children(".canvas_upload_div").length
 
-    $.post("/get_artifacts/"+memory_id, {"offset":offset, "numartifacts":numartifacts, "show_hidden":show_hidden}, function(data) {
-        window.artifacts = data;
-        loadViewportPhotos();
-    });
+    var holdingWidth = Math.ceil(numHolding / 2) * 80 + 10; // 70px + 10px of margins
+    var minStagingWidth = Math.ceil(numStaging / 2) * 80; // Space needed for staging photos
+    var availableArea = $("#new_artifacts").width() - 101; // 101px for #uploadArea_title_div and border
+    var maxHoldingWrapperWidth = availableArea - (minStagingWidth + 1);
+
+    if (holdingWidth <= maxHoldingWrapperWidth) {
+        var holdingWrapperWidth = holdingWidth;
+        var stagingWrapperWidth = availableArea - holdingWrapperWidth - 1;
+        var stagingWidth = minStagingWidth;
+    } else {
+        var holdingWrapperWidth = availableArea - (minStagingWidth +1);
+        var stagingWrapperWidth = minStagingWidth;
+        var stagingWidth = minStagingWidth;
+    }
+
+    $("#uploadArea_holding_div").width(holdingWidth);
+    $("#uploadArea_holding_wrapper").width(holdingWrapperWidth);
+    $("#uploadArea_staging_div").width(stagingWrapperWidth);
+    $("#uploadArea_staging_div #staging_content").width(stagingWidth);
 }
 
-function loadViewportPhotos() {
-    if (window.artifacts == "") {return false;}
-    var load_top = $(window).scrollTop() - 200;
-    var load_bottom = $(window).scrollTop() + $(window).height() + 700;
 
-    var artifacts = jsonParse(window.artifacts);
+/**
+ * Grabs the divs inside of the upload staging area and adds them to the page
+ * and calls updateArtifactDivs
+ */
+function clearStaging() {
+    if (window.zoomedIn == false) {
+        var id;
 
-    for (var i in artifacts) {
-        var artifact = artifacts[i];
-        var artifact_top = $("#artifact_"+artifact.id).offset().top;
-        if (artifact_top >= load_top && artifact_top <= load_bottom) {
-            var div_width = $("#artifact_"+artifact.id).width();
-            var photo_width = $("#artifact_"+artifact.id).children(".photo_container").width();
-            var centering = (photo_width - div_width) / -2;
-
-            var imgdiv = "<img src="+artifact.thumb_url+" height='"+ARTIFACT_HEIGHT+"' width='"+artifact.width+"' class='photo'/>"
-            $("#artifact_"+artifact.id).children(".photo_container").css('left', centering);
-            $("#artifact_"+artifact.id).children(".photo_container").html(imgdiv);
+        if (!$("#row_1").length) {
+            var new_row = "<div class='artifact_row' id='row_1'></div>"
+            $("#above_zoom_div").append(new_row);
         }
+
+        for (id in window.stagingPhotos) {
+            if (id == "length") {
+                continue;
+            }
+            var file = window.stagingPhotos[id];
+            $("#artifact_"+file.id).remove(); // Should remove from the staging area
+
+            // Now we build it again prepending to row 1
+            var newArtifact = ''+
+            '       <div id="artifact_'+file.id+'" class="artifact photo">'+
+            '           <div class="hide_photo"><a href="#">hide</a></div>'+
+            '           <div class="photo_container" style="width:'+file.width+'px; height:'+file.height+'px;">' + 
+            '               <img class="photo" src="'+file.thumb_url+'" height="175"\/>'+
+            '           </div>' + 
+            '       <\/div>';
+            $("#row_1").prepend(newArtifact);
+
+            delete window.stagingPhotos[id];
+        }
+
+        updateArtifactDivs();
+
     }
 }
 
-/****************************************
- * PHOTO DRAGGING FUNCTIONS
- * *************************************/
+
+/**
+ * When we get an upload error we leave divs lying around.
+ * This function cleans them up and is simply a copy and paste convenience
+ */
+function clearUploadError(handler) {
+    handler.removeNode(handler.uploadRow);
+    $(handler.uploadRow).remove();
+    window.uploadError = false;
+    $("#new_artifacts").hide('fast', function() {
+        clearStaging();
+    });
+}
+
 
 
 /****************************************
@@ -1069,19 +1232,33 @@ $("#canvas_file_upload").fileUploadUI({
     
         fieldName: "photo",
         dropZone: $('html'),
-        uploadTable: $('#new_artifacts'),
-        downloadTable: $('#new_artifacts'),
-        progressSelector: $('.file_upload_progress'),
-        cancelSelector: $('.file_upload_cancel'),
+        uploadTable: $('#uploadArea_holding_div'),
+        downloadTable: $('#uploadArea_staging_div #staging_content'),
+        progressSelector: $('.file_upload_canvas_progress'),
+        initProgressBar: function (node, value) {
+            if (typeof node.progressbar === 'function') {
+                return node.progressbar({
+                    value: value
+                });
+            } else {
+                var progressbar = $('<progress value="' + value + '" max="100"/>').appendTo(node);
+                progressbar.progressbar = function (key, value) {
+                    progressbar.attr('value', value);
+                };
+                return progressbar;
+            }
+        },
         onDragEnter: function(event) {
             $("#add_artifact").css("-moz-box-shadow", "2px 2px 11px #1e5957");
             $("#add_artifact").css("-webkit-box-shadow", "2px 2px 11px #1e5957");
             $("#add_artifact").css("box-shadow", "2px 2px 11px #1e5957");
         },
-        onAbort: function(event) {
+        onAbort: function(event, files, index, xhr, handler) {
             $("#add_artifact").css("-moz-box-shadow", "2px 2px 7px #111");
             $("#add_artifact").css("-webkit-box-shadow", "2px 2px 7px #111");
             $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
+            handler.removeNode(handler.uploadRow);
+            handler.onCompleteAll(files);
         },
         onDragLeave: function(event) {
             $("#add_artifact").css("-moz-box-shadow", "2px 2px 7px #111");
@@ -1094,33 +1271,96 @@ $("#canvas_file_upload").fileUploadUI({
             $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
         },
         beforeSend:function (event, files, index, xhr, handler, callBack) {
-            updateArtifactDivs();
+            if (!files.uploadCounter) {
+                files.uploadCounter = 1;  
+                /* files.uploadCounter is set the after the first upload 
+                 * If we get here that means we're looking at the first upload */
+                $("#new_artifacts").show();
+                $("#uploadArea_title_div #total").html(files.length);
+                updateArtifactDivs();
+            } 
+            $("#uploadArea_title_div #current").html(files.uploadCounter);
+            resizeHoldingWrappers();
+
+            var regexp = /\.(bmp)|(png)|(jpg)|(jpeg)|(gif)$/i;
+            // Using the filename extension for our test,
+            // as legacy browsers don't report the mime type
+            if (!regexp.test(files[index].name)) {
+                $(handler.uploadRow).html("MUST BE IMAGE (BMP PNG JPG JPEG GIF)");
+                $(handler.uploadRow).css("border-color","#e3372d")
+                window.uploadError = true;
+                setTimeout(function () {
+                    clearUploadError(handler);
+                }, 5000);
+                return;
+            }
+
+            if (files[index].size === 0) {
+                $(handler.uploadRow).html('FILE IS EMPTY!');
+                $(handler.uploadRow).css("border-color","#e3372d")
+                window.uploadError = true;
+                setTimeout(function () {
+                    clearUploadError(handler);
+                }, 5000);
+                return;
+            }
+
+            if (files[index].size > FILE_UPLOAD_LIMIT) {
+                var maxSizeMB = FILE_UPLOAD_LIMIT / 1000000;
+                $(handler.uploadRow).html('FILE TOO BIG! Max: '+maxSizeMB+"MB");
+                $(handler.uploadRow).css("border-color","#e3372d")
+                window.uploadError = true;
+                setTimeout(function () {
+                    clearUploadError(handler);
+                }, 5000);
+                return;
+            }
+
+
             callBack();
         },
         onComplete: function (event, files, index, xhr, handler) {
-            updateArtifactDivs();
+            handler.onCompleteAll(files);
+        },
+        onCompleteAll: function (files) {
+            // The files array is a shared object between the instances of an upload selection.
+            // We extend it with a uploadCounter to calculate when all uploads have completed:
+            if (!files.uploadCounter) {
+                files.uploadCounter = 1;  
+            } else {
+                files.uploadCounter = files.uploadCounter + 1;
+            }
+
+            if (files.uploadCounter != 0 && files.uploadCounter % STAGING_SIZE == 0) {
+                clearStaging();
+            }
+        
+            resizeHoldingWrappers();
+
+            if (files.uploadCounter === files.length) {
+                /* your code after all uplaods have completed */
+                if (window.stagingPhotos.length()) {
+                    clearStaging();
+                }
+
+                if (window.uploadError == false) {
+                    $("#new_artifacts").hide('fast', function() {
+                        updateArtifactDivs();
+                    });
+                }
+            }
         },
         buildUploadRow: function (files, index) {
             return $(
-            '       <div class="upload_file_canvas_div artifact no_crop" id="upload_'+randomString()+'">'+
-            '           <div class="file_upload_canvas_content">'+
-                            files[index].name +
-            '               <div class="file_upload_progress"><\/div>'+
-            '               <div class="file_upload_cancel"><\/div>'+
-            '           <\/div>'+
-            '           <div class="file_upload_canvas_preview"><\/div>'+
-            '           <div class="photo_container"><div class="mock_photo><\/div><\/div>"'+
-            '       <\/div>'
+                '<div class="canvas_upload_div">'+files[index].name+'</div>'
             );
         },
         buildDownloadRow: function (file) {
+            window.stagingPhotos[file.id] = file;
             return $(
-            '       <div id="artifact_'+file.id+'" class="artifact photo">'+
-            '           <div class="hide_photo"><a href="#">hide</a></div>'+
-            '           <div class="photo_container" style="width:'+file.width+'px; height:'+file.height+'px;">' + 
-            '               <img class="photo" src="'+file.thumb_url+'" height="175"\/>'+
-            '           </div>' + 
-            '       <\/div>'
+                '<div id="artifact_'+file.id+'" class="canvas_upload_div" style="float:left">' +
+                '   <img class="photo" src="'+file.thumb_url+'" height="70"\/>'+
+                '<\/div>'
             );
         }
 
@@ -1143,8 +1383,22 @@ $(document).ready(function(){
      * **************************************************/
     $(".hide_photo").hover(function(){
         $(this).parent(".artifact").addClass("opacity40");
+        if ($(this).parent(".artifact").hasClass("artifact_hidden")) {
+            // Don't do anything, keep it lit.
+        } else {
+            $(this).parent(".artifact").css("opacity", "0.5");
+            $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=.5)");
+            $(this).parent(".artifact").css("filter", "alpha(opacity=.5)");
+        }
     }, function(){
         $(this).parent(".artifact").removeClass("opacity40");
+        if($(this).parent(".artifact").hasClass("artifact_hidden")) {
+            // Do nothing
+        } else {
+            $(this).parent(".artifact").css("opacity", "1");
+            $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=1)");
+            $(this).parent(".artifact").css("filter", "alpha(opacity=1)");
+        }
     });
     $(".hide_photo").click(function(){
         var visible;
@@ -1156,21 +1410,27 @@ $(document).ready(function(){
         if ($(this).parent().hasClass("artifact_hidden")) {
             visible = 0;
             $.post("/toggle_visibility", {'visibility':visible, 'id':id});
+            $(this).parent(".artifact").css("opacity", "1");
+            $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=1)");
+            $(this).parent(".artifact").css("filter", "alpha(opacity=1)");
             $(this).html("<a href='#'>hide</a>");
             $(this).parent().removeClass("artifact_hidden");
+            window.justChangedHidden = true;
         } else { 
             visible = 1; 
             $.post("/toggle_visibility", {'visibility':visible, 'id':id});
 
             if ($("#hidden_prompt").hasClass("showing_hidden")) {
+                $(this).parent(".artifact").css("opacity", "0.5");
+                $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=.5)");
+                $(this).parent(".artifact").css("filter", "alpha(opacity=.5)");
                 $(this).parent().addClass("artifact_hidden");
                 $(this).html("hidden photo<br/><a href='#'>show</a>");
+                window.justChangedHidden = true;
             } else {
-                $(this).parent(".artifact").hide('fast', function(){
-                    $(this).parent(".artifact").remove();
-                    updateArtifactDivs();
-                    //photoHFit();
-                });
+                $(this).parent(".artifact").hide();
+                $(this).parent(".artifact").remove();
+                updateArtifactDivs();
             }
         }
 
@@ -1270,11 +1530,23 @@ $(document).ready(function(){
     $(".artifact").live("mouseenter", function() {
         if (window.zoomedIn == false) {
             $(this).children(".hide_photo").show();
+
+            $(this).css("opacity", "1");
+            $(this).css("-ms-filter", "alpha(opacity=1)");
+            $(this).css("filter", "alpha(opacity=1)");
+
             artifactExpand($(this));
         }
     }).live("mouseleave", function() {
         if (window.zoomedIn == false) {
             $(this).children(".hide_photo").hide();
+
+            if($(this).hasClass("artifact_hidden")) {
+                $(this).css("opacity", "0.5");
+                $(this).css("-ms-filter", "alpha(opacity=.5)");
+                $(this).css("filter", "alpha(opacity=.5)");
+            }
+
             artifactUnExpand($(this));
         }
     });
@@ -1414,6 +1686,7 @@ $(document).ready(function(){
 
     truncateTitle($(".canvas_center").width() - $("#canvas_header #login").width());
     resizeCanvas();
+    loadViewportPhotos();
 	// updateArtifactDivs() is run by resizeCanvas
 
 	$(window).resize(resizeCanvas);

@@ -28,7 +28,14 @@ function landingPageResize(adjustment) {
 }
 
 
-
+/**
+ * Checks the center area to see if it's empty. If so, bring back the dashed boxes
+ */
+function checkForEmptyArea() {
+    if ($.trim($("#upload_area #files").html()) == "") {
+        $(".example_fileholders").show();
+    }
+}
 
 /****************************************
  * FILE UPLOAD ON LANDING PAGE
@@ -49,19 +56,60 @@ $('#file_upload').fileUploadUI({
     dropZone: $('html'),
     uploadTable: $('#files'),
     downloadTable: $('#files'),
-    previewSelector: $('.file_upload_preview'),
-    progressSelector: $('.file_upload_progress'),
-    cancelSelector: $('.file_upload_cancel'),
-    onProgress: function (event, files, index, xhr, handler) {
-        if (handler.progressbar) {
-            handler.progressbar.progressbar(
-                'value',
-                parseInt(event.loaded / event.total * 100, 10)
-            );
+    progressSelector: $(".file_upload_progress"),
+    initProgressBar: function (node, value) {
+        if (typeof node.progressbar === 'function') {
+            return node.progressbar({
+                value: value
+            });
+        } else {
+            var progressbar = $('<progress value="' + value + '" max="100"/>').appendTo(node);
+            progressbar.progressbar = function (key, value) {
+                progressbar.attr('value', value);
+            };
+            return progressbar;
         }
     },
     beforeSend:function (event, files, index, xhr, handler, callBack) {
         $(".example_fileholders").hide();
+
+        var regexp = /\.(bmp)|(png)|(jpg)|(jpeg)|(gif)$/i;
+        // Using the filename extension for our test,
+        // as legacy browsers don't report the mime type
+        if (!regexp.test(files[index].name)) {
+            handler.uploadRow.find('.file_upload_message').html("MUST BE IMAGE (BMP PNG JPG JPEG GIF)");
+            $(handler.uploadRow).css("border-color","#e3372d")
+            setTimeout(function () {
+                handler.removeNode(handler.uploadRow);
+                $(handler.uploadRow).remove();
+                checkForEmptyArea();
+            }, 5000);
+            return;
+        }
+
+        if (files[index].size === 0) {
+            handler.uploadRow.find('.file_upload_message').html('FILE IS EMPTY!');
+            $(handler.uploadRow).css("border-color","#e3372d")
+            setTimeout(function () {
+                handler.removeNode(handler.uploadRow);
+                $(handler.uploadRow).remove();
+                checkForEmptyArea();
+            }, 5000);
+            return;
+        }
+
+        if (files[index].size > FILE_UPLOAD_LIMIT) {
+            var maxSizeMB = FILE_UPLOAD_LIMIT / 1000000;
+            handler.uploadRow.find('.file_upload_message').html('FILE TOO BIG! Max: '+maxSizeMB+"MB");
+            $(handler.uploadRow).css("border-color","#e3372d")
+            setTimeout(function () {
+                handler.removeNode(handler.uploadRow);
+                $(handler.uploadRow).remove();
+                checkForEmptyArea();
+            }, 5000);
+            return;
+        }
+
         callBack();
     },
     onComplete: function (event, files, index, xhr, handler) {
@@ -86,12 +134,10 @@ $('#file_upload').fileUploadUI({
     buildUploadRow: function (files, index) {
         return $(
         '       <div class="upload_file_div">'+
+        '           <div class="file_upload_progress"></div>'+
         '           <div class="file_upload_content">'+
-                        'uploading...' +
-        '               <div class="file_upload_progress"><\/div>'+
-        '               <div class="file_upload_cancel"><\/div>'+
+        '               <div class="file_upload_message">uploading...</div>' +
         '           <\/div>'+
-        '           <div class="file_upload_preview"><\/div>'+
         '       <\/div>'
         );
     },

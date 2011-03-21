@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-import sys
-sys.path.append("/home/ubuntu/memoize/celery")
 import lib.config
 lib.config.CONF = {
   'debug' : False,
@@ -18,4 +15,4 @@ lib.config.CONF = {
                 'base' : 'http://memoize.raeez.com/' }
 }
 
-from client.app import client as app
+from memoize.tasks import *

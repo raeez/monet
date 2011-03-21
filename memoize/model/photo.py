@@ -26,11 +26,11 @@ class Photo(Container):
   def val_processed(self):
     pass
 
-  @mandatory(tuple, dimensions=(300,175))
+  @mandatory(tuple, dimensions=(175,175))
   def val_dimensions(self):
     width, height = self.dimensions
     assert height == 175, "Invalid height of '%d' pixels; must be 175 pixels in size" % height
-  
+
   @optional(str, multi_session=None)
   def val_multi_session(self):
     pass
@@ -43,5 +43,5 @@ class Photo(Container):
   def resize(self, filename, abs_path):
     assert (not self.processed), "Image already resized!"
 
-    from memoize.tasks import thumbnail 
+    from memoize.tasks import thumbnail
     thumbnail.delay(filename, abs_path, str(self._id))

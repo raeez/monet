@@ -28,6 +28,8 @@ _M_      _MM_ YMMMM9 _MM_  _MM_  _MM_ YMMMMM9 _MM_dMMMMMMMM YMMMM9
     Local client servers run on localhost:5000
 
     . env/bin/activate
+    mongod
+    ./script/celery
     python client.py
 
                     ==================
