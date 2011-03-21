@@ -14,6 +14,7 @@ window.scaleFactor = 1; // The factor that artifacts scale by when zoomed. Defau
 window.zoomedIn = false;
 window.previousZoomTarget = undefined; // The last target that we were zoom focused on
 window.canvasTitle = ""; // We store the canvas title as a global to get it back from the truncated version
+window.justChangedHidden = false; // Used to temporarily disable the hide button hover
 
 /***********************************************
   ARTIFACTDIV Data Structure Handling
@@ -1018,11 +1019,11 @@ function doUnZoom() {
  *
  */
 function loadartifacts(offset, numartifacts) {
-    loaded_artifacts = null;
-    memory_id = $("#memory_id").html();
+    var loaded_artifacts = null;
+    var memory_id = $("#memory_id").html();
     if ($("#hidden_prompt").hasClass("showing_hidden")) {
-        show_hidden = 1;
-    } else {show_hidden = 0;}
+        var show_hidden = 1;
+    } else { var show_hidden = 0;}
 
     $.post("/get_artifacts/"+memory_id, {"offset":offset, "numartifacts":numartifacts, "show_hidden":show_hidden}, function(data) {
         window.artifacts = data;
@@ -1196,8 +1197,22 @@ $(document).ready(function(){
      * **************************************************/
     $(".hide_photo").hover(function(){
         $(this).parent(".artifact").addClass("opacity40");
+        if ($(this).parent(".artifact").hasClass("artifact_hidden")) {
+            // Don't do anything, keep it lit.
+        } else {
+            $(this).parent(".artifact").css("opacity", "0.5");
+            $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=.5)");
+            $(this).parent(".artifact").css("filter", "alpha(opacity=.5)");
+        }
     }, function(){
         $(this).parent(".artifact").removeClass("opacity40");
+        if($(this).parent(".artifact").hasClass("artifact_hidden")) {
+            // Do nothing
+        } else {
+            $(this).parent(".artifact").css("opacity", "1");
+            $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=1)");
+            $(this).parent(".artifact").css("filter", "alpha(opacity=1)");
+        }
     });
     $(".hide_photo").click(function(){
         var visible;
@@ -1209,21 +1224,27 @@ $(document).ready(function(){
         if ($(this).parent().hasClass("artifact_hidden")) {
             visible = 0;
             $.post("/toggle_visibility", {'visibility':visible, 'id':id});
+            $(this).parent(".artifact").css("opacity", "1");
+            $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=1)");
+            $(this).parent(".artifact").css("filter", "alpha(opacity=1)");
             $(this).html("<a href='#'>hide</a>");
             $(this).parent().removeClass("artifact_hidden");
+            window.justChangedHidden = true;
         } else { 
             visible = 1; 
             $.post("/toggle_visibility", {'visibility':visible, 'id':id});
 
             if ($("#hidden_prompt").hasClass("showing_hidden")) {
+                $(this).parent(".artifact").css("opacity", "0.5");
+                $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=.5)");
+                $(this).parent(".artifact").css("filter", "alpha(opacity=.5)");
                 $(this).parent().addClass("artifact_hidden");
                 $(this).html("hidden photo<br/><a href='#'>show</a>");
+                window.justChangedHidden = true;
             } else {
-                $(this).parent(".artifact").hide('fast', function(){
-                    $(this).parent(".artifact").remove();
-                    updateArtifactDivs();
-                    //photoHFit();
-                });
+                $(this).parent(".artifact").hide();
+                $(this).parent(".artifact").remove();
+                updateArtifactDivs();
             }
         }
 
@@ -1317,11 +1338,23 @@ $(document).ready(function(){
     $(".artifact").live("mouseenter", function() {
         if (window.zoomedIn == false) {
             $(this).children(".hide_photo").show();
+
+            $(this).css("opacity", "1");
+            $(this).css("-ms-filter", "alpha(opacity=1)");
+            $(this).css("filter", "alpha(opacity=1)");
+
             artifactExpand($(this));
         }
     }).live("mouseleave", function() {
         if (window.zoomedIn == false) {
             $(this).children(".hide_photo").hide();
+
+            if($(this).hasClass("artifact_hidden")) {
+                $(this).css("opacity", "0.5");
+                $(this).css("-ms-filter", "alpha(opacity=.5)");
+                $(this).css("filter", "alpha(opacity=.5)");
+            }
+
             artifactUnExpand($(this));
         }
     });

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import Module, session, redirect, url_for, request, render_template, flash, abort
-from memoize.model import User, Memory
+from memoize.model import User, Memory, Photo
 from memoize.upload.helpers import create_memory, upload_photo, build_memory_stream, claimed, claim_memory, rand_photo, getArtifactsFromMemory
 from lib.db.objectid import ObjectId
 import bcrypt
@@ -30,41 +30,41 @@ def index():
 
 @main_module.route('/new_user', methods=['GET', 'POST'])
 def new_user():
-    if not request.form['email'] or not request.form['new_pass'] or not request.form['confirm']:
-        flash("The form submission broke. Please refresh and try again")
-        return redirect(request.referrer)
-
-    email = request.form['email']
-    password = request.form['new_pass']
-    confirm = request.form['confirm']
-
-    if password != confirm:
-        flash("The passwords must match. Please send us matching passwords")
-        return redirect(request.referrer)
-
-    u = User()
-    u.name = email
-    u.email = email
-    u.set_password(password)
-    u.save()
-
-    session['email'] = u.email
-    session['id'] = str(u._id)
-    session['password'] = password
-    log['login'].debug(session['email'])
-
+  if not request.form['email'] or not request.form['new_pass'] or not request.form['confirm']:
+    flash("The form submission broke. Please refresh and try again")
     return redirect(request.referrer)
+
+  email = request.form['email']
+  password = request.form['new_pass']
+  confirm = request.form['confirm']
+
+  if password != confirm:
+    flash("The passwords must match. Please send us matching passwords")
+    return redirect(request.referrer)
+
+  u = User()
+  u.name = email
+  u.email = email
+  u.set_password(password)
+  u.save()
+
+  session['email'] = u.email
+  session['id'] = str(u._id)
+  session['password'] = password
+  log['login'].debug(session['email'])
+
+  return redirect(request.referrer)
 
 @main_module.route('/check_for_email', methods=['GET', 'POST'])
 def check_for_email():
-    if not request.form['email']:
-        abort(400)
-    user = User.find_one({'email' : request.form['email']})
+  if not request.form['email']:
+    abort(400)
+  user = User.find_one({'email' : request.form['email']})
 
-    if user is None:
-        return '0'
-    else:
-        return '1'
+  if user is None:
+    return '0'
+  else:
+    return '1'
 
 @main_module.route('/login', methods=['GET', 'POST'])
 def login():
@@ -159,9 +159,9 @@ def memory(id):
 def get_artifact_containers(id):
   m = Memory.find_one({ "_id" : id })
 
-  offset = int(request.args.get('offset', '0'))
-  numArtifacts = int(request.args.get('numArtifacts', '100'))
-  showHidden = int(request.args.get('show_hidden', '0'))
+  offset = int(request.form.get('offset', '0'))
+  numArtifacts = int(request.form.get('numArtifacts', '100'))
+  showHidden = int(request.form.get('show_hidden', '0'))
 
   if not m:
     abort(404)
@@ -172,26 +172,26 @@ def get_artifact_containers(id):
 
 @main_module.route('/toggle_visibility', methods=['POST'])
 def toggle_visibility():
-    if not request.form['visibility'] or not request.form['id']:
-        abort(400)
+  if not request.form['visibility'] or not request.form['id']:
+    abort(400)
 
-    try:
-        visibility = int(request.form['visibility'])
-    except ValueError:
-        abort(403)
-
-    p = Photo.find_one({ "_id" : request.form['id'] })
-    if p:
-        if visibility == 1:
-            p.visible = 0
-        elif visibility == 0:
-            p.visible = 1
-        else:
-            abort(403)
-        p.save()
-        return '1'
-
+  try:
+    visibility = int(request.form['visibility'])
+  except ValueError:
     abort(403)
+
+  p = Photo.find_one({ "_id" : request.form['id'] })
+  if p:
+    if visibility == 1:
+      p.visible = 0
+    elif visibility == 0:
+      p.visible = 1
+    else:
+      abort(403)
+    p.save()
+    return '1'
+
+  abort(403)
 
 @main_module.route('/rename_memory', methods=['POST'])
 def rename():
@@ -227,16 +227,16 @@ def stream():
 
 @main_module.route('/get_rand_photo', methods=['GET'])
 def get_rand_photo():
-    if not request.args['mem_id']:
-        abort(400)
+  if not request.args['mem_id']:
+    abort(400)
 
-    m = Memory.find_one({ "_id" : request.args['mem_id'] })
+  m = Memory.find_one({ "_id" : request.args['mem_id'] })
 
-    if m:
-        photo = rand_photo(m)
-        if photo:
-            return photo
-        else:
-            abort(400)
+  if m:
+    photo = rand_photo(m)
+    if photo:
+      return photo
     else:
-        abort(404)
+      abort(400)
+  else:
+    abort(404)

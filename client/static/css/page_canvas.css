@@ -389,9 +389,11 @@
     filter: alpha(opacity=.50);
 }
 .artifact_hidden:hover {
+    /*
     opacity: 1;
     -ms-filter: 'alpha(opacity=1)';
     filter: alpha(opacity=1);
+    */
 }
 
 .hide_photo {
