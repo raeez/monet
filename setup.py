@@ -13,5 +13,5 @@ setup(
   author_email = 'raeez@mit.edu',
   description = 'memoize photo sharing',
 
-  install_requires=['Flask>=0.6', 'pymongo', 'py-bcrypt', 'gunicorn', 'gevent', 'celery', 'flask-uploads']
+  install_requires=['Flask>=0.6', 'pymongo', 'py-bcrypt', 'gunicorn', 'gevent', 'eventlet', 'celery', 'flask-uploads']
 )
