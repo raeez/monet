@@ -29,10 +29,12 @@ cp nginx/cert.key /var/www/
 mkdir -p /var/www/log
 mkdir -p /var/www/db
 mkdir -p /var/www/files/thumb
+mkdir -p /var/www/files/static
 
-#link static resources
-ln -s static /var/www/static
-cp static/images/unprocessed.jpg /var/www/files/thumb
+#copy over static resources
+echo "installing static files..."
+cp -R static/* /var/www/files/static/
+cp -R static/images/unprocessed.jpg /var/www/files/thumb
 
 chown -R ubuntu /var/www
 

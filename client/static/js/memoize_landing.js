@@ -73,11 +73,11 @@ $('#file_upload').fileUploadUI({
     beforeSend:function (event, files, index, xhr, handler, callBack) {
         $(".example_fileholders").hide();
 
-        var regexp = /\.(png)|(jpg)|(gif)$/i;
+        var regexp = /\.(bmp)|(png)|(jpg)|(jpeg)|(gif)$/i;
         // Using the filename extension for our test,
         // as legacy browsers don't report the mime type
         if (!regexp.test(files[index].name)) {
-            handler.uploadRow.find('.file_upload_message').html("MUST BE IMAGE (PNG JPG GIF)");
+            handler.uploadRow.find('.file_upload_message').html("MUST BE IMAGE (BMP PNG JPG JPEG GIF)");
             $(handler.uploadRow).css("border-color","#e3372d")
             setTimeout(function () {
                 handler.removeNode(handler.uploadRow);
