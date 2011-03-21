@@ -43,6 +43,7 @@ pip install Flask \
                 sphinx \
                 ipython \
                 pymongo \
+                eventlet \
                 pyflakes \
                 py-bcrypt \
                 flask-uploads \

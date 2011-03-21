@@ -50,6 +50,7 @@ pip install PIL \
             celery \
             gevent \
             pymongo \
+            eventlet \
             gunicorn \
             py-bcrypt \
             flask-uploads \
