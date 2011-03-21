@@ -143,6 +143,9 @@ function getRealWidth(artifactDiv) {
     return width;
 }
 
+/********************************
+**FUNCTIONS FOR CROPPING PHOTOS**
+*********************************
 /**
  * This function should expect that the artifactDiv list
  * has nocrop, id, and realWidth filled in for each element
@@ -306,7 +309,8 @@ function checkPerfectCrop(overspill, threshold, width_accumulator) {
 	return 'False';
     }
 }
-
+/************************************
+************************************/
 
 /**
  * Given a fully populated list of artifactDivs, this method moves the divs to the appropriate
@@ -936,6 +940,10 @@ function loadViewportPhotos() {
     }
 }
 
+/****************************************
+ * PHOTO DRAGGING FUNCTIONS
+ * *************************************/
+
 
 /****************************************
  * FILE UPLOAD ON CANVAS PAGE
@@ -1122,7 +1130,13 @@ $(document).ready(function(){
     $("#alert_bar #hide_this").click(function() {
         $("#alert_bar").hide('fast');
     });
-
+    
+    /* ************************************************* *
+     * Control photo-drag action on artifact divs
+     * **************************************************/
+    //getArtifactDivByID($(artifact).attr("id"));
+    $("#artifact_4d86aa671d41c8088400000a").sortable();
+    $("#artifact_4d86aa671d41c8088400000a").disableSelection();
 
     /* ************************************************* *
      * Control Hover action on artifact divs
