@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # point to the celery config directory
 export PYTHONPATH=$(pwd)/celery:$PYTHONPATH
 
@@ -8,4 +7,8 @@ export PYTHONPATH=$(pwd)/celery:$PYTHONPATH
 python setup.py install
 
 # launch celery with the latest codebase
-celeryd -l INFO
+celeryd --events \¬
+        --loglevel INFO \¬
+        --maxtasksperchild 10000 \¬
+        --pid /tmp/celery.memoize.pid \
+        --pool gevent --concurrency=1000 \¬
