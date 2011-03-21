@@ -305,9 +305,12 @@
     position:relative;
     z-index:2;
 }
+#add_artifact .photo_container {
+    height:100%;
+}
 #canvas_file_upload {
     position:relative;
-    z-index:3;
+    z-index:4;
 }
 #canvas_file_upload input{
     position: absolute;
@@ -316,8 +319,8 @@
     right: 0;
     -o-transform: translate(-500px, 70px) scale(10);
     -moz-transform: translate(-500px, 70px) scale(10);
-    -webkit-transform: translate(-500px, 70px) scale(10);
-    
+    -webkit-transform: translate(-20px, 0px) scale(2,15);
+    z-index:4;
     opacity: 0;
     -ms-filter: 'alpha(opacity=0)';
     filter: alpha(opacity=0);
