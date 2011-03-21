@@ -6,7 +6,7 @@ from memoize.model import Memory
 
 class Photo(Container):
 
-  @mandatory(str, filename=None)
+  @mandatory(str, filename="unprocessed.jpg")
   def val_user(self):
     assert len(self.filename) < 255, "username must be less than 255 characters long"
 
@@ -21,6 +21,15 @@ class Photo(Container):
   @mandatory(int, visible=1)
   def val_visible(self):
     assert self.visible == 1 or self.visible == 0, "visible must be a binary value!"
+
+  @mandatory(bool, processed=False)
+  def val_processed(self):
+    pass
+
+  @mandatory(tuple, dimensions=(300,175))
+  def val_dimensions(self):
+    width, height = self.dimensions
+    assert height == 175, "Invalid height of '%d' pixels; must be 175 pixels in size" % height
   
   @optional(str, multi_session=None)
   def val_multi_session(self):
@@ -31,21 +40,8 @@ class Photo(Container):
     pass
 
   @valid # ensure we're working on a valid instance
-  def resize(self, abs_path):
-    from PIL import Image as PIL
+  def resize(self, filename, abs_path):
+    assert (not self.processed), "Image already resized!"
 
-    thumb_size = (1000000, 175)
-    img = PIL.open(abs_path)
-    img.thumbnail(thumb_size, PIL.NEAREST)
-    img.save(abs_path)
-    size = img.size
-
-    self.processed = True
-    self.dimensions = size # height, width
-
-  @valid
-  def size(self):
-    dim = self.get('dimensions', None)
-    if not dim:
-      raise "Image %s not yet processed! call resize first" % self.filename
-    return dim
+    from memoize.tasks import thumbnail 
+    thumbnail.delay(filename, abs_path, str(self._id))
