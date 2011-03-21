@@ -30,6 +30,10 @@ mkdir -p /var/www/log
 mkdir -p /var/www/db
 mkdir -p /var/www/files/thumb
 
+#link static resources
+ln -s static /var/www/static
+cp static/images/unprocessed.jpg /var/www/files/thumb
+
 chown -R ubuntu /var/www
 
 echo ""

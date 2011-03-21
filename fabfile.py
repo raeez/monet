@@ -75,10 +75,10 @@ def pack():
 # ----------
 
 def rebase(new=False):
-  ITEMS = ['upstart', 'nginx', 'script',  'conf', 'celery']
+  ITEMS = ['upstart', 'nginx', 'script',  'conf', 'celery', 'static']
   ARCHIVE = 'core.tar.gz'
 
-  local('tar cvzf %s %s' % (ARCHIVE, " ".join(ITEMS)))
+  local('tar cvzhf %s %s' % (ARCHIVE, " ".join(ITEMS)))
 
   if new:
     run('mkdir -p %s' % DEPLOY_DIR)
