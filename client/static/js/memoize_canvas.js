@@ -6,6 +6,7 @@ var BORDER_WIDTH = 4; // set a global margin
 var ARTIFACT_HEIGHT = 175; // The standard height of all artifacts
 var WRAPPER_WIDTH = 955;
 var THRESHOLD = 0.8 // Maximum crop amount
+var STAGING_SIZE = 6 // Number of photos staged before they're added to the page
 window.artifacts = [] // A global that holds json representations of all returned artifacts
 window.artifactDivs; // A global used to keep track of the position of all artifact divs
 window.numRows = 0; // The total number of rows on the page
@@ -15,6 +16,13 @@ window.zoomedIn = false;
 window.previousZoomTarget = undefined; // The last target that we were zoom focused on
 window.canvasTitle = ""; // We store the canvas title as a global to get it back from the truncated version
 window.justChangedHidden = false; // Used to temporarily disable the hide button hover
+window.uploadError = false; // Keeps track if there's an upload error
+window.stagingPhotos = {} // A dictionay of jQuery upload File objects keyed by index
+window.stagingPhotos.length = function () {
+    var count = 0;
+    for (var i in window.stagingPhotos) {count ++;}
+    return count;
+}
 
 /***********************************************
   ARTIFACTDIV Data Structure Handling
@@ -133,10 +141,12 @@ function getRealWidth(artifactDiv) {
         // The artifact is a photo
         width = $(artifactDiv).children(".photo_container").width();
     }
-    else if ($(artifactDiv).hasClass("add_artifact")) {
+    else if ($(artifactDiv).attr("id") == "add_artifact") {
         // The artifact is the "add artifact" button
         width = $(artifactDiv).width();
-        
+    } else if ($(artifactDiv).attr("id") == "new_artifacts") {
+        // We're looking at the add artifact upload area
+        width = $(artifactDiv).width();
     } else if ($(artifactDiv).hasClass("upload_file_canvas_div")) {
         // The artifact is a file upload progress box
        width = $(artifactDiv).children(".photo_container").width(); 
@@ -168,20 +178,20 @@ function calculateCrop(artifactDivs) {
         var artifactDiv = artifactDivs[i];
         if (artifactDiv.display) {
             if (width_accumulator < max_width) {
-		width_accumulator += artifactDiv.realWidth + MARGIN_WIDTH;
+		        width_accumulator += artifactDiv.realWidth + MARGIN_WIDTH;
                 if (artifactDiv.noCrop) {
-		    width_accumulator += BORDER_WIDTH;
-		}
+		             width_accumulator += BORDER_WIDTH;
+		        }
                 row_accumulator.push(i);
                 artifactDivs[i].row = rownum;
             } else {
-
                 processRow(row_accumulator, width_accumulator, artifactDivs);
-
                 width_accumulator = 0 + artifactDiv.realWidth + MARGIN_WIDTH;
-		if (artifactDiv.noCrop) {
-		    width_accumulator += BORDER_WIDTH;
-		}
+	    
+                if (artifactDiv.noCrop) {
+                    width_accumulator += BORDER_WIDTH;
+                }
+
                 row_accumulator = [];
                 rownum ++;
                 row_accumulator.push(i);
@@ -368,7 +378,7 @@ function moveArtifactDivs(artifactDivs) {
         row_num = Number(row_num);
 
         if (artifactDiv.row > row_num) {
-            if ($("row_"+artifactDiv.row).length) {
+            if ($("#row_"+artifactDiv.row).length) {
                 $("#row_"+artifactDiv.row).prepend($("#"+artifactDiv.id));
             } else {
                 // We need to make a new row first
@@ -1054,6 +1064,88 @@ function loadViewportPhotos() {
 }
 
 
+/**
+ * In the upload area, we need to resize the holding and staging
+ * wrappers so the images tile properly and display correctly
+ */
+function resizeHoldingWrappers() {
+    var numHolding = $("#uploadArea_holding_div").children(".canvas_upload_div").length
+    var numStaging = $("#uploadArea_staging_div #staging_content").children(".canvas_upload_div").length
+
+    var holdingWidth = Math.ceil(numHolding / 2) * 80 + 10; // 70px + 10px of margins
+    var minStagingWidth = Math.ceil(numStaging / 2) * 80; // Space needed for staging photos
+    var availableArea = $("#new_artifacts").width() - 101; // 101px for #uploadArea_title_div and border
+    var maxHoldingWrapperWidth = availableArea - (minStagingWidth + 1);
+
+    if (holdingWidth <= maxHoldingWrapperWidth) {
+        var holdingWrapperWidth = holdingWidth;
+        var stagingWrapperWidth = availableArea - holdingWrapperWidth - 1;
+        var stagingWidth = minStagingWidth;
+    } else {
+        var holdingWrapperWidth = availableArea - (minStagingWidth +1);
+        var stagingWrapperWidth = minStagingWidth;
+        var stagingWidth = minStagingWidth;
+    }
+
+    $("#uploadArea_holding_div").width(holdingWidth);
+    $("#uploadArea_holding_wrapper").width(holdingWrapperWidth);
+    $("#uploadArea_staging_div").width(stagingWrapperWidth);
+    $("#uploadArea_staging_div #staging_content").width(stagingWidth);
+}
+
+
+/**
+ * Grabs the divs inside of the upload staging area and adds them to the page
+ * and calls updateArtifactDivs
+ */
+function clearStaging() {
+    if (window.zoomedIn == false) {
+        var id;
+
+        if (!$("#row_1").length) {
+            var new_row = "<div class='artifact_row' id='row_1'></div>"
+            $("#above_zoom_div").append(new_row);
+        }
+
+        for (id in window.stagingPhotos) {
+            if (id == "length") {
+                continue;
+            }
+            var file = window.stagingPhotos[id];
+            $("#artifact_"+file.id).remove(); // Should remove from the staging area
+
+            // Now we build it again prepending to row 1
+            var newArtifact = ''+
+            '       <div id="artifact_'+file.id+'" class="artifact photo">'+
+            '           <div class="hide_photo"><a href="#">hide</a></div>'+
+            '           <div class="photo_container" style="width:'+file.width+'px; height:'+file.height+'px;">' + 
+            '               <img class="photo" src="'+file.thumb_url+'" height="175"\/>'+
+            '           </div>' + 
+            '       <\/div>';
+            $("#row_1").prepend(newArtifact);
+
+            delete window.stagingPhotos[id];
+        }
+
+        updateArtifactDivs();
+
+    }
+}
+
+/**
+ * When we get an upload error we leave divs lying around.
+ * This function cleans them up and is simply a copy and paste convenience
+ */
+function clearUploadError(handler) {
+    handler.removeNode(handler.uploadRow);
+    $(handler.uploadRow).remove();
+    window.uploadError = false;
+    $("#new_artifacts").hide('fast', function() {
+        clearStaging();
+    });
+}
+
+
 /****************************************
  * FILE UPLOAD ON CANVAS PAGE
  * *************************************/
@@ -1062,8 +1154,8 @@ $("#canvas_file_upload").fileUploadUI({
     
         fieldName: "photo",
         dropZone: $('html'),
-        uploadTable: $('#new_artifacts'),
-        downloadTable: $('#new_artifacts'),
+        uploadTable: $('#uploadArea_holding_div'),
+        downloadTable: $('#uploadArea_staging_div #staging_content'),
         progressSelector: $('.file_upload_canvas_progress'),
         initProgressBar: function (node, value) {
             if (typeof node.progressbar === 'function') {
@@ -1101,42 +1193,51 @@ $("#canvas_file_upload").fileUploadUI({
             $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
         },
         beforeSend:function (event, files, index, xhr, handler, callBack) {
+            if (!files.uploadCounter) {
+                files.uploadCounter = 1;  
+                /* files.uploadCounter is set the after the first upload 
+                 * If we get here that means we're looking at the first upload */
+                $("#new_artifacts").show();
+                $("#uploadArea_title_div #total").html(files.length);
+                updateArtifactDivs();
+            } 
+            $("#uploadArea_title_div #current").html(files.uploadCounter);
+            resizeHoldingWrappers();
+
             var regexp = /\.(bmp)|(png)|(jpg)|(jpeg)|(gif)$/i;
             // Using the filename extension for our test,
             // as legacy browsers don't report the mime type
             if (!regexp.test(files[index].name)) {
-                handler.uploadRow.find('.file_upload_canvas_content').html("MUST BE IMAGE (BMP PNG JPG JPEG GIF)");
+                $(handler.uploadRow).html("MUST BE IMAGE (BMP PNG JPG JPEG GIF)");
                 $(handler.uploadRow).css("border-color","#e3372d")
+                window.uploadError = true;
                 setTimeout(function () {
-                    handler.removeNode(handler.uploadRow);
-                    $(handler.uploadRow).remove();
-                    updateArtifactDivs();
+                    clearUploadError(handler);
                 }, 5000);
                 return;
             }
 
             if (files[index].size === 0) {
-                handler.uploadRow.find('.file_upload_canvas_content').html('FILE IS EMPTY!');
+                $(handler.uploadRow).html('FILE IS EMPTY!');
                 $(handler.uploadRow).css("border-color","#e3372d")
+                window.uploadError = true;
                 setTimeout(function () {
-                    handler.removeNode(handler.uploadRow);
-                    $(handler.uploadRow).remove();
-                    updateArtifactDivs();
+                    clearUploadError(handler);
                 }, 5000);
                 return;
             }
 
             if (files[index].size > FILE_UPLOAD_LIMIT) {
                 var maxSizeMB = FILE_UPLOAD_LIMIT / 1000000;
-                handler.uploadRow.find('.file_upload_canvas_content').html('FILE TOO BIG! Max: '+maxSizeMB+"MB");
+                $(handler.uploadRow).html('FILE TOO BIG! Max: '+maxSizeMB+"MB");
                 $(handler.uploadRow).css("border-color","#e3372d")
+                window.uploadError = true;
                 setTimeout(function () {
-                    handler.removeNode(handler.uploadRow);
-                    $(handler.uploadRow).remove();
-                    updateArtifactDivs();
+                    clearUploadError(handler);
                 }, 5000);
                 return;
             }
+
 
             callBack();
         },
@@ -1151,30 +1252,37 @@ $("#canvas_file_upload").fileUploadUI({
             } else {
                 files.uploadCounter = files.uploadCounter + 1;
             }
+
+            if (files.uploadCounter != 0 && files.uploadCounter % STAGING_SIZE == 0) {
+                clearStaging();
+            }
+        
+            resizeHoldingWrappers();
+
             if (files.uploadCounter === files.length) {
                 /* your code after all uplaods have completed */
-                updateArtifactDivs();
+                if (window.stagingPhotos.length()) {
+                    clearStaging();
+                }
+
+                if (window.uploadError == false) {
+                    $("#new_artifacts").hide('fast', function() {
+                        updateArtifactDivs();
+                    });
+                }
             }
         },
         buildUploadRow: function (files, index) {
             return $(
-            '       <div class="upload_file_canvas_div artifact no_crop" id="upload_'+randomString()+'">'+
-            '           <div class="file_upload_canvas_content">'+
-            '                uploading: '+ files[index].name +
-            '           <\/div>'+
-            '           <div class="file_upload_canvas_progress"><\/div>'+
-            '           <div class="photo_container"><div class="mock_photo><\/div><\/div>"'+
-            '       <\/div>'
+                '<div class="canvas_upload_div">'+files[index].name+'</div>'
             );
         },
         buildDownloadRow: function (file) {
+            window.stagingPhotos[file.id] = file;
             return $(
-            '       <div id="artifact_'+file.id+'" class="artifact photo">'+
-            '           <div class="hide_photo"><a href="#">hide</a></div>'+
-            '           <div class="photo_container" style="width:'+file.width+'px; height:'+file.height+'px;">' + 
-            '               <img class="photo" src="'+file.thumb_url+'" height="175"\/>'+
-            '           </div>' + 
-            '       <\/div>'
+                '<div id="artifact_'+file.id+'" class="canvas_upload_div" style="float:left">' +
+                '   <img class="photo" src="'+file.thumb_url+'" height="70"\/>'+
+                '<\/div>'
             );
         }
 
