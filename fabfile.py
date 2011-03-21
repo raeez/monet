@@ -75,7 +75,7 @@ def pack():
 # ----------
 
 def rebase(new=False):
-  ITEMS = ['upstart', 'nginx', 'script',  'conf']
+  ITEMS = ['upstart', 'nginx', 'script',  'conf', 'celery']
   ARCHIVE = 'core.tar.gz'
 
   local('tar cvzf %s %s' % (ARCHIVE, " ".join(ITEMS)))

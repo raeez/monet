@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ `whoami` != root ]; then
+	echo Please run this script as root, or using sudo
+	exit
+fi
+
+rabbitmqctl add_user memoize memoize
+rabbitmqctl add_vhost memoizevhost
+rabbitmqctl set_permissions -p memoizevhost memoize ".*" ".*" ".*"
