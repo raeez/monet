@@ -7,7 +7,7 @@ var ARTIFACT_HEIGHT = 175; // The standard height of all artifacts
 var WRAPPER_WIDTH = 955;
 var THRESHOLD = 0.8 // Maximum crop amount
 var STAGING_SIZE = 6 // Number of photos staged before they're added to the page
-window.artifacts = [] // A global that holds json representations of all returned artifacts
+window.artifactServerData = [] // A global that holds json representations of all returned artifacts
 window.artifactDivs; // A global used to keep track of the position of all artifact divs
 window.numRows = 0; // The total number of rows on the page
 window.zoomHeight; // A global that says how tall the center area of the page is
@@ -34,14 +34,24 @@ window.stagingPhotos.length = function () {
  * Move the elements to the correct locations.
  */
 function ArtifactDiv() {
+    // These bits are populated from the populateArtifacts method
     this.id = undefined;
     this.noCrop = undefined;
     this.realWidth = undefined;
+    this.divArea = undefined;
+    this.display = undefined;
+
+    // These bits come from the calculateCrop method
     this.croppedWidth = undefined;
     this.row = undefined;
     this.posInRow = undefined;
-    this.divArea = undefined;
-    this.display = undefined;
+
+    // These bits come from the server and are populated by refreshServerData
+    this.height = undefined;
+    this.width = undefined;
+    this.image_url = undefined;
+    this.thumb_url = undefined;
+    this.visible = undefined;
 }
 function getArtifactDivByID(id) {
     var adiv_length = window.artifactDivs.length;
@@ -74,6 +84,16 @@ function getArtifactDivRowLength(row) {
     }
     return row_length;
 }
+function getServerDataByID(id) {
+    var serverData;
+    for (var i in window.artifactServerData) {
+        serverData = window.artifactServerData[i];
+        if (serverData.id == id) {
+            return serverData;
+        }
+    }
+    return false;
+}
 
 
 /******************************************
@@ -88,6 +108,8 @@ function updateArtifactDivs() {
     var _artifactDivs = [];
 
     populateArtifacts(_artifactDivs);
+
+    refreshServerData(_artifactDivs);
 
     calculateCrop(_artifactDivs);
 
@@ -105,6 +127,8 @@ function updateArtifactDivs() {
 function updateModifiedArtifactDivs() {
     // Create a local copy to perform updates on then update the global
     var _artifactDivs = $.extend(true, [], window.artifactDivs);
+
+    refreshServerData(_artifactDivs);
 
     calculateCrop(_artifactDivs);
 
@@ -154,6 +178,34 @@ function getRealWidth(artifactDiv) {
 
     return width;
 }
+
+/**
+ * Once loadartifacts runs, a global is populated with server information
+ * for each artifactDiv. This method merges the two data sets into one.
+ *
+ * The format of artifactServerData is determined by the server.
+ * artifactDivs are full of ArtifactDiv objects
+ */
+function refreshServerData(artifactDivs) {
+    var serverData;
+    var artifact;
+    var id
+
+    var a_divlength = artifactDivs.length
+    for (var j = 0; j < a_divlength; j ++ ) {
+        serverData = getServerDataByID(parsePrefixToString(artifactDivs[j]["id"], "artifact_"));
+        if (serverData == false) {
+            continue;
+        } else {
+            artifactDivs[j]["height"] = serverData.height;
+            artifactDivs[j]["width"] = serverData.width;
+            artifactDivs[j]["image_url"] = serverData.image_url;
+            artifactDivs[j]["thumb_url"] = serverData.thumb_url;
+            artifactDivs[j]["visible"] = serverData.visible;
+        }
+    }
+}
+
 
 /**
  * This function should expect that the artifactDiv list
@@ -440,6 +492,72 @@ function moveArtifactDivs(artifactDivs) {
     }
 }
 
+
+/*****************************************
+ * ARTIFACT PROGRESSIVE LOADING
+ *****************************************/
+
+/** loadartifacts([offset[, end]])
+ * Loads the artifacts in json format for this memory
+ * Stores it in the window.artifactServerData global
+ *
+ * @param offset - The photo index to start loading from
+ * @param numartifacts - The number of artifacts to pull
+ *
+ * @returns Void
+ *
+ */
+function loadartifacts(offset, numartifacts) {
+    var loaded_artifacts = null;
+    var memory_id = $("#memory_id").html();
+    if ($("#hidden_prompt").hasClass("showing_hidden")) {
+        var show_hidden = 1;
+    } else { var show_hidden = 0;}
+
+    $.post("/get_artifacts/"+memory_id, {"offset":offset, "numartifacts":numartifacts, "show_hidden":show_hidden}, function(data) {
+        window.artifactServerData = jsonParse(data);
+        refreshServerData(window.artifactDivs);
+        loadViewportPhotos();
+    });
+}
+
+/**
+ * loadViewportPhotos will read from the window.artifactDivs,
+ * decide what photos are in the viewport, then insert the
+ * thumbnail images for only those that don't have one already
+ */
+function loadViewportPhotos() {
+    var load_top = $(window).scrollTop() - 200;
+    var load_bottom = $(window).scrollTop() + $(window).height() + 700;
+
+    var a_divlength = window.artifactDivs.length;
+    for (var i = 0; i < a_divlength; i++) {
+        var artifact = window.artifactDivs[i];
+
+        if (artifact.id == "add_artifact" || artifact.id == "new_artifacts") {continue;}
+
+        if (artifact.thumb_url == undefined) {
+            // This means that the server data hasn't populated yet.
+            // That needs to happen before this function runs.
+            return;
+        }
+
+        var artifact_top = $("#"+artifact.id).offset().top;
+        if (artifact_top >= load_top && artifact_top <= load_bottom) {
+            if ($("#"+artifact.id).find("img").attr("src") == artifact.thumb_url) {
+                // If the img doesn't exist, it will return 'undefined'
+                continue;
+            }
+            var div_width = $("#"+artifact.id).width();
+            var photo_width = $("#"+artifact.id).children(".photo_container").width();
+            var centering = (photo_width - div_width) / -2;
+
+            var imgdiv = "<img src="+artifact.thumb_url+" height='"+ARTIFACT_HEIGHT+"' width='"+artifact.width+"' class='photo'/>"
+            $("#"+artifact.id).children(".photo_container").css('left', centering);
+            $("#"+artifact.id).children(".photo_container").html(imgdiv);
+        }
+    }
+}
 
 
 /**************************************
@@ -1011,58 +1129,6 @@ function doUnZoom() {
 }
 
 
-/*****************************************
- * ARTIFACT PROGRESSIVE LOADING
- *****************************************/
-
-/** loadartifacts([offset[, end]])
- * Loads the artifacts in json format for this memory
- *
- * For the given memory, loads just the containers for all of the artifacts
- * It also places those containers on the page and calls the progressive
- * artifact content loader.
- *
- * @param offset - The photo index to start loading from
- * @param numartifacts - The number of artifacts to pull
- *
- * @returns Void
- *
- */
-function loadartifacts(offset, numartifacts) {
-    var loaded_artifacts = null;
-    var memory_id = $("#memory_id").html();
-    if ($("#hidden_prompt").hasClass("showing_hidden")) {
-        var show_hidden = 1;
-    } else { var show_hidden = 0;}
-
-    $.post("/get_artifacts/"+memory_id, {"offset":offset, "numartifacts":numartifacts, "show_hidden":show_hidden}, function(data) {
-        window.artifacts = data;
-        loadViewportPhotos();
-    });
-}
-
-function loadViewportPhotos() {
-    if (window.artifacts == "") {return false;}
-    var load_top = $(window).scrollTop() - 200;
-    var load_bottom = $(window).scrollTop() + $(window).height() + 700;
-
-    var artifacts = jsonParse(window.artifacts);
-
-    for (var i in artifacts) {
-        var artifact = artifacts[i];
-        var artifact_top = $("#artifact_"+artifact.id).offset().top;
-        if (artifact_top >= load_top && artifact_top <= load_bottom) {
-            var div_width = $("#artifact_"+artifact.id).width();
-            var photo_width = $("#artifact_"+artifact.id).children(".photo_container").width();
-            var centering = (photo_width - div_width) / -2;
-
-            var imgdiv = "<img src="+artifact.thumb_url+" height='"+ARTIFACT_HEIGHT+"' width='"+artifact.width+"' class='photo'/>"
-            $("#artifact_"+artifact.id).children(".photo_container").css('left', centering);
-            $("#artifact_"+artifact.id).children(".photo_container").html(imgdiv);
-        }
-    }
-}
-
 
 /**
  * In the upload area, we need to resize the holding and staging
@@ -1602,6 +1668,7 @@ $(document).ready(function(){
 
     truncateTitle($(".canvas_center").width() - $("#canvas_header #login").width());
     resizeCanvas();
+    loadViewportPhotos();
 	// updateArtifactDivs() is run by resizeCanvas
 
 	$(window).resize(resizeCanvas);
