@@ -119,7 +119,8 @@ def checkPerfectCrop(rowToCheck, constraint, maxRowWidth, relaxed=False):
         ### somehow modify the constraint (make it looser)
         constraint *= relaxNumber
     if amtToCrop > 0 and constraint*rowWidth > amtToCrop:
-        return (True,)
+##        return (True,)
+        return True
     else:
         if amtToCrop < 0:
             ### the row is too small, won't fill up entire row
