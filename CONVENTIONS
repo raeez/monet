@@ -1,0 +1,4 @@
+always label a container id "_id", both in dictionaries and in variables:
+
+  def new_func(_id, some_data):
+    Memory.find_one({ "_id" : _id })

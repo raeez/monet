@@ -5,9 +5,15 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
+initctl reload-configuration
+
+echo "*** memoize *** starting mongodb..."
+start mongodb.memoize
+echo "*** memoize *** starting rabbitmq..."
+start rabbitmq.memoize
+echo "*** memoize *** starting celery..."
+start celery.memoize
 echo "*** memoize *** starting client..."
 start client.memoize
 echo "*** memoize *** starting nginx..."
 start nginx.memoize
-echo "*** memoize *** starting mongodb..."
-start mongodb.memoize

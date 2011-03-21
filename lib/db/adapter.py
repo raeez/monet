@@ -15,6 +15,9 @@ class Adapter(object):
   def atomic_append(self, collection, _id, item):
     syslog['db'].debug("Atomically appending %s into object %s in collection %s" % (str(item), str(_id), collection))
 
+  def atomic_set(self, collection, _id, item):
+    syslog['db'].debug("Atomically setting %s into object %s in collection %s" % (str(item), str(_id), collection))
+
   def insert(self, collection, document):
     syslog['db'].debug("Inserting document %s into collection %s" % (str(document), collection))
 

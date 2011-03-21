@@ -9,7 +9,7 @@ import random
 
 def create_memory():
   date = datetime.date.today().strftime("%B %d, %Y")
-  mem_name = request.form.get('mem_name',None) or "Memorable Moments on " + date
+  mem_name = request.form.get('mem_name', None) or "Memorable Moments on " + date
   m = Memory()
   m.user = None
   if 'email' in session:
@@ -20,12 +20,6 @@ def create_memory():
   m.artifacts = []
   m.save()
   return m
-
-def get_memory(_id):
-  return Memory.find_one({'_id' : ObjectId(_id)})
-
-def get_photo(_id):
-  return Photo.find_one({"_id" : ObjectId(_id)})
 
 def upload_photo(mem_id=None, multi_session=None):
   """multi_seession is a randomly generated string made on the homepage
@@ -42,9 +36,9 @@ def upload_photo(mem_id=None, multi_session=None):
       m = create_memory()
     else:
       mem_id = p2.memory
-      m = get_memory(mem_id)
+      m = Memory.find_one({ "_id" : mem_id })
   else:
-    m = get_memory(mem_id)
+    m = Memory.find_one({ "_id" : mem_id })
 
   from client.app import client as app
   if not photo:
@@ -56,36 +50,37 @@ def upload_photo(mem_id=None, multi_session=None):
       return error(['upload not allowed'])
     else:
       p = Photo()
-      p.filename = filename
       p.user = session.get('_id', None)
       p.title = request.files.get('title', None)
       p.caption = request.files.get('caption', None)
       p.visible = 1 # TODO make this a boolean
       p.multi_session = multi_session
       p.memory = m._id
-      p.resize(app.photos.path(filename))
       p.save()
-      m.atomic_append({ "artifacts" : p._id })
-      width, height = p.size()
+      p.resize(filename, app.photos.path(filename)) # we have these values already, so save some computation and pass them explicitly
+      Memory.atomic_append({ "_id" : m._id },
+                           { "artifacts" : p._id })
+      width, height = p.dimensions
 
-      return succeed({'id' : str(p._id),
-                      'memory' : str(m._id),
-                      'memory_url' : url_for('memory', id=m._id),
-                      'thumb_url' : app.photos.url(p.filename), # TODO start building these
-                      'image_url' : app.photos.url(p.filename),
-                      'width': width,
-                      'height' : height,
-                      'title' : p.title,
-                      'caption' : p.caption,
-                      'visible' : p.visible,
-                      'multi_session' : multi_session,
-                      'type' : 'image/jpeg'})
+      return succeed({ 'id' : str(p._id),
+                       'memory' : str(m._id),
+                       'memory_url' : url_for('memory', id=m._id),
+                       'thumb_url' : app.photos.url(p.filename), # TODO start building these
+                       'image_url' : app.photos.url(p.filename),
+                       'width': width,
+                       'height' : height,
+                       'title' : p.title,
+                       'caption' : p.caption,
+                       'visible' : p.visible,
+                       'multi_session' : multi_session,
+                       'type' : 'image/jpeg' })
 
 def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden=0):
-  ''' Returns a list of artifacts from a given memory object
+  """
+  Returns a list of artifacts from a given memory object
   offset and numArtifacts specify a selection of artifacts to return.
   If get_hidden is 1, we will also return hidden photos
-  '''
+  """
   from client.app import client as app
   artifact_list = memory_object.artifacts[::-1]
   artifacts = []
@@ -93,14 +88,14 @@ def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden
   count = 0
   for i in artifact_list:
     if index >= offset and count < numArtifacts:
-      p = get_photo(i)
+      p = Photo.find_one({ "_id" : i })
       if p.visible == 0:
         if get_hidden == 1:
           pass
         else:
           continue
 
-      width, height = p.size()
+      width, height = p.dimensions
 
       artifact = dict()
       artifact['id'] = str(p._id)
@@ -116,18 +111,20 @@ def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden
   return artifacts
 
 def getVisibleArtifacts(artifacts):
-    ''' Given a list of artifacts, returns a list of only the visible ones
-    '''
-    from client.app import client as app
-    visible_artifacts = []
-    for artifact_id in artifacts:
-        p = get_photo(artifact_id)
-        photo = dict()
-        photo['id'] = p._id
-        photo['thumb_url'] = app.photos.url(p.filename)
+  """
+  Given a list of artifacts, returns a list of only the visible ones
+  """
+  from client.app import client as app
+  visible_artifacts = []
+  for artifact_id in artifacts:
+    p = Photo.find_one({ "_id" : artifact_id })
+    photo = dict()
+    photo['id'] = p._id
+    photo['thumb_url'] = app.photos.url(p.filename)
 
-        if p.visible == 1:
-          visible_artifacts.append(photo)
+    if p.visible == 1:
+      visible_artifacts.append(photo)
+
     return visible_artifacts
 
 def build_memory_stream():

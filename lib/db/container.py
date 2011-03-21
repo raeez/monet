@@ -59,7 +59,7 @@ class MetaContainer(type):
     items = __module__.split('.')
     items.pop() # get rid of current module
     items.reverse()
-    _name = items.pop() #get first element
+    _name = items.pop() # get first element
     for i in items:
       _name += '.' + items.pop()
 
@@ -147,6 +147,14 @@ class Container(dict):
     return cls.default_adapter().group_find_one(cls.__group__, params)
 
   @classmethod
+  def atomic_append(cls, query, item):
+    return cls.default_adapter().atomic_append(cls.__type__, query, item)
+
+  @classmethod
+  def atomic_set(cls, query, item):
+    return cls.default_adapter().atomic_set(cls.__type__, query, item)
+
+  @classmethod
   def validate_member(cls, member, data):
   
     #TODO reimplement sane
@@ -178,12 +186,6 @@ class Container(dict):
   @classmethod
   def safe_member(cls, member):
     return member not in cls.__inter__
-
-  def atomic_append(self, item):
-    if self.__class__.default_adapter() is None:
-      raise NoAdapterError()
-    
-    self.__class__.default_adapter().atomic_append(self["_type"], self["_id"], item)
 
   def _save(self):
     try:

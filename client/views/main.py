@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from flask import Module, session, redirect, url_for, request, render_template, flash, abort
-from memoize.model import User
-from memoize.upload.helpers import get_memory, get_photo, create_memory, upload_photo, build_memory_stream, claimed, claim_memory, rand_photo, getArtifactsFromMemory
+from memoize.model import User, Memory
+from memoize.upload.helpers import create_memory, upload_photo, build_memory_stream, claimed, claim_memory, rand_photo, getArtifactsFromMemory
 from lib.db.objectid import ObjectId
 import bcrypt
 import random
@@ -97,7 +97,7 @@ def login():
 
 @main_module.route('/claim/<id>', methods=['GET'])
 def claim(id):
-  m = get_memory(id)
+  m = Memory.find_one({ "_id" : id })
   if m:
     return claim_memory(m)
   abort(400)
@@ -126,7 +126,7 @@ def new():
 
 @main_module.route('/memory/<id>', methods=['GET'])
 def memory(id):
-  m = get_memory(id)
+  m = Memory.find_one({"_id" : id})
 
   if not m:
     abort(404)
@@ -157,7 +157,7 @@ def memory(id):
 
 @main_module.route('/get_artifacts/<id>', methods=['GET', 'POST'])
 def get_artifact_containers(id):
-  m = get_memory(id)
+  m = Memory.find_one({ "_id" : id })
 
   offset = int(request.args.get('offset', '0'))
   numArtifacts = int(request.args.get('numArtifacts', '100'))
@@ -180,7 +180,7 @@ def toggle_visibility():
     except ValueError:
         abort(403)
 
-    p = get_photo(request.form['id'])
+    p = Photo.find_one({ "_id" : request.form['id'] })
     if p:
         if visibility == 1:
             p.visible = 0
@@ -198,7 +198,7 @@ def rename():
   if not request.form['new_name'] or not request.form['id']:
     abort(400)
 
-  m = get_memory(request.form['id'])
+  m = Memory.find_one({ "_id" : request.form['id'] })
   if m:
     if claimed(m):
       if ('email' in session) and (m.user == session['id']):
@@ -230,7 +230,7 @@ def get_rand_photo():
     if not request.args['mem_id']:
         abort(400)
 
-    m = get_memory(request.args['mem_id'])
+    m = Memory.find_one({ "_id" : request.args['mem_id'] })
 
     if m:
         photo = rand_photo(m)
