@@ -406,8 +406,12 @@ function moveArtifactDivs(artifactDivs) {
         }
 
         if (!artifactDiv.id || !artifactDiv.croppedWidth || !artifactDiv.divArea) {
-            console.log("ERROR: artifactDiv has undefined terms");
-            console.log(artifactDiv);
+            if (artifactDiv.id == "add_artifact" || artifactDiv.id == "new_artifacts") {
+                // Ignore this problem
+            } else {
+                console.log("ERROR: artifactDiv has undefined terms");
+                console.log(artifactDiv);
+            }
         }
 
         if (artifactDiv.croppedWidth && $("#"+artifactDiv.id).width() != artifactDiv.croppedWidth) {
@@ -779,6 +783,8 @@ function resizeCanvas() {
 
         $("#canvas_title_wrap").width(windowWidth - sidemargins - loginWidth - 5);
         truncateTitle(windowWidth - sidemargins - loginWidth - 5);
+
+        $("#new_artifacts").width($(".canvas_center").width() - 175 - 10 - 10);
 
         // This is to get a default padding of 113 px when it's > 1060px
         var alertbar_padding = windowWidth - 947;

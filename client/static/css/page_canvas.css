@@ -311,7 +311,7 @@
 
 #new_artifacts {
     display:none;
-    width:756px; /* 955 - 175-10 - 10*/
+    width:756px; /* 955 - 175-10 - 10    This is adjusted on page resize*/
     height:171px;
     border: 2px dashed #aaa;
     overflow:hidden;
@@ -329,7 +329,7 @@
     font-size:0.8em;
 }
 #uploadArea_holding_wrapper {
-    width:300px; /* This width set by js to always complement staging div */
+    width:1px; /* This width set by js to always complement staging div */
     height:171px;
     float:left;
     overflow:hidden;
@@ -337,11 +337,11 @@
 }
 #uploadArea_holding_div {
     padding:5px;
-    width:450px; /* This width set by js to tile internal divs properly */
+    width:1px; /* This width set by js to tile internal divs properly */
     float:right;
 }
 #uploadArea_staging_div {
-    width: 161px; /* This width set by js to always complement holding div */
+    width: 1px; /* This width set by js to always complement holding div */
     height:171px;
     border-left:1px solid #444;
     float:left;
