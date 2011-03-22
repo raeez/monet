@@ -12,6 +12,7 @@ window.artifactDivs; // A global used to keep track of the position of all artif
 window.numRows = 0; // The total number of rows on the page
 window.zoomHeight; // A global that says how tall the center area of the page is
 window.scaleFactor = 1; // The factor that artifacts scale by when zoomed. Defaults to 1
+window.previousScaleFactor = 1; // Used to adjust zooming when the scale factor changes
 window.zoomedIn = false;
 window.previousZoomTarget = undefined; // The last target that we were zoom focused on
 window.canvasTitle = ""; // We store the canvas title as a global to get it back from the truncated version
@@ -571,11 +572,49 @@ function loadViewportPhotos() {
 /**************************************
  * Expansion Functions
  * ************************************/
+
+/**
+ * Our zoom function needs to know what the image looks like
+ * after it has expanded. That's the only way we can get accurate
+ * reference coordinates of the image.
+ *
+ * This method is very similar to the artifactExpand method, except
+ * it does not actually change any photos
+ *
+ * It returns the number of pixels the top-left corner will move by.
+ * + means it moves to the right
+ * - means it moves to the left
+ *
+ * Note that currently this should always return either 0 or a negative number
+ */
+function calculateArtifactExpansion(artifact) {
+    var a_div = getArtifactDivByID($(artifact).attr("id"));
+    var left_ofDiv = getArtifactDivByRowPos(a_div.row, a_div.posInRow - 1);
+    var right_ofDiv = getArtifactDivByRowPos(a_div.row, a_div.posInRow + 1);
+    var slack = a_div.realWidth - a_div.croppedWidth;
+    if (left_ofDiv !== false && right_ofDiv !== false) {
+        // This means there are items to both the left AND right
+        return -slack / 2
+    } else if (left_ofDiv === false && right_ofDiv !== false) {
+        // This means our artifact is on the far left margin
+        // The top-left corner should not move
+        return 0;
+    } else if (left_ofDiv !== false && right_ofDiv === false) {
+        // This means our artifact is on the far right margin
+        return -slack;
+    } else {
+        // This means our div is all by itself on the row
+        // The top-left corner should not move
+        return 0;
+    }
+}
+
 /**
  * Expands the preview of the current artifact and shrinks
  * the surrounding artifacts so it fits properly
  */
-function artifactExpand(artifact) {
+function artifactExpand(artifact, instant) {
+    instant = instant || false;
     var a_div = getArtifactDivByID($(artifact).attr("id"));
     var left_ofDiv = getArtifactDivByRowPos(a_div.row, a_div.posInRow - 1);
     var right_ofDiv = getArtifactDivByRowPos(a_div.row, a_div.posInRow + 1);
@@ -589,29 +628,55 @@ function artifactExpand(artifact) {
         $("#"+right_ofDiv.id).stop(true,false);
     }
 
-    $("#"+a_div.id).animate({width:a_div.realWidth}, 'fast');
+    if (instant) {
+        $("#"+a_div.id).width(a_div.realWidth);
+    } else {
+        $("#"+a_div.id).animate({width:a_div.realWidth}, 'fast');
+    }
     
-    $("#"+a_div.id).children(".photo_container").animate({left:0}, 'fast');
+    if (instant) {
+        $("#"+a_div.id).children(".photo_container").css("left","0px");
+    } else {
+        $("#"+a_div.id).children(".photo_container").animate({left:0}, 'fast');
+    }
 
     if (left_ofDiv !== false && right_ofDiv !== false) {
         // This means there are items to both the left AND right
         var leftWidth = left_ofDiv.croppedWidth - slack / 2;
         var rightWidth = right_ofDiv.croppedWidth - slack / 2;
-        $("#"+left_ofDiv.id).animate({width:leftWidth},'fast');
-        $("#"+right_ofDiv.id).animate({width:rightWidth},'fast');
+        if (instant) {
+            $("#"+left_ofDiv.id).width(leftWidth);
+            $("#"+right_ofDiv.id).width(rightWidth);
+        } else {
+            $("#"+left_ofDiv.id).animate({width:leftWidth},'fast');
+            $("#"+right_ofDiv.id).animate({width:rightWidth},'fast');
+        }
     } else if (left_ofDiv === false && right_ofDiv !== false) {
         // This means our artifact is on the far left margin
         var rightWidth = right_ofDiv.croppedWidth - slack;
-        $("#"+right_ofDiv.id).animate({width:rightWidth},'fast');
+        if (instant) {
+            $("#"+right_ofDiv.id).width(rightWidth);
+        } else {
+            $("#"+right_ofDiv.id).animate({width:rightWidth},'fast');
+        }
     } else if (left_ofDiv !== false && right_ofDiv === false) {
         // This means our artifact is on the far right margin
         var leftWidth = left_ofDiv.croppedWidth - slack;
-        $("#"+left_ofDiv.id).animate({width:leftWidth},'fast');
+        if (instant) {
+            $("#"+left_ofDiv.id).width(leftWidth);
+        } else {
+            $("#"+left_ofDiv.id).animate({width:leftWidth},'fast');
+        }
     } else {
         // This means our div is all by itself on the row
     }
 }
-function artifactUnExpand(artifact) {
+/**
+ * unexpands the div and fixes its neighbors. If instant is true, it does
+ * not animate. This is used by the doZoom function notably
+ */
+function artifactUnExpand(artifact, instant) {
+    instant = instant || false;
     
     var a_div = getArtifactDivByID($(artifact).attr("id"));
     var left_ofDiv = getArtifactDivByRowPos(a_div.row, a_div.posInRow - 1);
@@ -619,18 +684,34 @@ function artifactUnExpand(artifact) {
 
     $("#"+a_div.id).children(".photo_container").stop(true,false);
     var centering = (a_div.realWidth - a_div.croppedWidth) / -2;
-    $("#"+a_div.id).children(".photo_container").animate({left:centering}, 'fast');
+    if (instant) {
+        $("#"+a_div.id).children(".photo_container").css("left", centering+"px");
+    } else {
+        $("#"+a_div.id).children(".photo_container").animate({left:centering}, 'fast');
+    }
 
     $("#"+a_div.id).stop(true,false);
-    $("#"+a_div.id).animate({width:a_div.croppedWidth}, 'fast');
+    if (instant) {
+        $("#"+a_div.id).width( a_div.croppedWidth );
+    } else {
+        $("#"+a_div.id).animate({width:a_div.croppedWidth}, 'fast');
+    }
 
     if (left_ofDiv !== false) {
         $("#"+left_ofDiv.id).stop(true,false);
-        $("#"+left_ofDiv.id).animate({width:left_ofDiv.croppedWidth},'fast');
+        if (instant) {
+            $("#"+left_ofDiv.id).width( left_ofDiv.croppedWidth );
+        } else {
+            $("#"+left_ofDiv.id).animate({width:left_ofDiv.croppedWidth}, 'fast');
+        }
     }
     if (right_ofDiv !== false) {
         $("#"+right_ofDiv.id).stop(true,false);
-        $("#"+right_ofDiv.id).animate({width:right_ofDiv.croppedWidth},'fast');
+        if (instant) {
+            $("#"+right_ofDiv.id).width( right_ofDiv.croppedWidth );
+        } else {
+            $("#"+right_ofDiv.id).animate({width:right_ofDiv.croppedWidth}, 'fast');
+        }
     }
 }
 
@@ -651,10 +732,11 @@ function artifactUnExpand(artifact) {
  * If no inputs are given, it uses ARTIFACT_HEIGHT as the default scale value
  */
 function calculateScaleFactor(a_width, a_height) {
+    window.previousScaleFactor = window.scaleFactor;
     a_height = a_height || ARTIFACT_HEIGHT;
     a_width = a_width || ARTIFACT_HEIGHT;
-    window.zoomHeight = ($(window).height() - 60) * (1 - (3.5 * MARGIN_WIDTH / a_height));
-    window.zoomWidth = ($(window).width()) * (1 - (3.5 * MARGIN_WIDTH / a_width));
+    window.zoomHeight = ($(window).height() - 60) * (1 - (4 * MARGIN_WIDTH / a_height));
+    window.zoomWidth = ($(window).width()) * (1 - (4.5 * MARGIN_WIDTH / a_width));
 
     var scaleWidth = window.zoomWidth / a_width;
     var scaleHeight = window.zoomHeight / a_height;
@@ -665,6 +747,7 @@ function calculateScaleFactor(a_width, a_height) {
     window.scaleFactor = Math.min(window.scaleFactor, 4.5714);
 
     if(window.scaleFactor <= 0) {window.scaleFactor = 0.1;}
+
 }
 
 
@@ -861,8 +944,6 @@ function truncateTitle(enclosingSize) {
  * scale factor
  *
  */
-
-
 /**
  * Zoom in on an artifact. Assume it's already in the #in_zoom_div
  */
@@ -870,6 +951,37 @@ function doZoom(artifact) {
     var artifactDiv = getArtifactDivByID($(artifact).attr("id"));
 
     calculateScaleFactor(artifactDiv.realWidth, ARTIFACT_HEIGHT);
+
+    if (window.zoomedIn == false) {
+        // If we're zooming in for the first time, quickly re-fix
+        // the width to be expanding. This will hide a glitch caused
+        // by updateModifiedArtifactDivs which undoes the expansion
+        // Note, that if we already expand it, we don't need to recalculate
+        // the expansion shift
+        artifactExpand(artifact,true);
+        var xExpansionShift = 0;
+    } else {
+        var xExpansionShift = calculateArtifactExpansion(artifact);
+    }
+
+    if (window.previousZoomTarget) {
+        // Assuming there was a previous...
+        if (window.zoomedIn == true) {
+            // Return the previous photo to its normal cropped state
+            // We need to do this so we can more easily calculate the appropriate
+            // offset to move the divs when we're zoomed in.
+            // It's easier to just move the divs (which we have to do anyways)
+            // than to recalculate the whole thing
+            if ($(window.previousZoomTarget).attr("id") != $(artifact).attr("id")) {
+                // Only do this, of course, if we haven't clicked on the same image
+                // If so, we're actually just zooming out
+                var previousArtifactDiv = getArtifactDivByID($(window.previousZoomTarget).attr("id"));
+                artifactUnExpand(window.previousZoomTarget, true);
+            }
+
+        }
+    }
+
 
     if ($("#alert_bar:visible").length > 0) {
         $("#alert_bar").hide('fast');
@@ -881,30 +993,37 @@ function doZoom(artifact) {
     var zoomDivHeight = $("#in_zoom_div").height();
 
     var artifactPos = $(artifact).position();
-    if (BrowserDetect.browser == "Firefox" && window.zoomedIn == true) {
-        // See zoom notes above as to why we have to do this
-        artifactPos.left = artifactPos.left * window.scaleFactor;
-        artifactPos.top = artifactPos.top * window.scaleFactor;
+    if (window.zoomedIn == false) {
+        artifactPos.left = artifactPos.left + 0; // Shift because of image expansion
+    } else {
+        if (BrowserDetect.browser == "Firefox") {
+            // See zoom notes above as to why we have to do this
+            artifactPos.left = (artifactPos.left + xExpansionShift) * window.scaleFactor;
+            artifactPos.top = artifactPos.top * window.scaleFactor;
+        } else {
+            artifactPos.left = artifactPos.left + (xExpansionShift * window.scaleFactor); // Shift because of image expansion
+        }
     }
 
-    var xOrigin = artifactPos.left / $("#in_zoom_div").width() * 100;
-    var yOrigin = artifactPos.top / $("#in_zoom_div").height() * 100;
+    var xOrigin = (artifactPos.left) / $("#in_zoom_div").width() * 100;
+    var yOrigin = (artifactPos.top) / $("#in_zoom_div").height() * 100;
 
-    var topOffset = 1.5*MARGIN_WIDTH * window.scaleFactor;
+    var topOffset = ($(window).height() - 70 - ( $(artifact).height() + 10 ) * window.scaleFactor) / 2;
     var scrollOffset = $(window).scrollTop();
-    var centeringOffset = $("#in_zoom_div").width() / 2 - (artifactDiv.realWidth / 2 * window.scaleFactor);
-    var expansionOffset = (artifactDiv.realWidth - artifactDiv.croppedWidth) * window.scaleFactor;
+
+    var rightMargin = $(window).width() - $("#artifact_wrapper").width() - $("#artifact_wrapper").offset().left;
+    var leftMargin = $("#artifact_wrapper").offset().left;
+    var symmetryBias = ( rightMargin - leftMargin ) / 2 - 20; // subtract 20 for the scrollbar
+    var centeringOffset = $("#artifact_wrapper").width() / 2 + symmetryBias - (artifactDiv.realWidth / 2 * window.scaleFactor);
 
     $("#above_zoom_div").css("visibility", "hidden");
     $("#below_zoom_div").css("visibility", "hidden");
 
     var aboveZoomDivHeight = $("#above_zoom_div").height();
 
-    var newPosX = artifactPos.left - centeringOffset - expansionOffset;
-    var newPosY = artifactPos.top - scrollOffset - topOffset + aboveZoomDivHeight;
+    var newPosX = $("#in_zoom_div").width() * (xOrigin/100) - centeringOffset;
+    var newPosY = $("#in_zoom_div").height() * (yOrigin/100) - scrollOffset - topOffset + aboveZoomDivHeight;
 
-    //var xTranslate = posXToLeft(newPosX, zoomDivWidth, window.scaleFactor, xOrigin);
-    //var yTranslate = posYToTop(newPosY, zoomDivHeight, window.scaleFactor, yOrigin, aboveZoomDivHeight);
     var xTranslate = newPosX;
     var yTranslate = newPosY;
 
@@ -926,9 +1045,6 @@ function doZoom(artifact) {
         window.zoomedIn = true;
     } else if (window.zoomedIn == true) {
 
-        // This means we're already zoomed in
-        var previousArtifactDiv = getArtifactDivByID($(window.previousZoomTarget).attr("id"));
-        
         if (window.previousZoomTarget) {
             if ($(window.previousZoomTarget).attr("id") == $(artifact).attr("id")) {
                 // This means we've clicked on the same thing
@@ -936,13 +1052,9 @@ function doZoom(artifact) {
                 return
             }
 
-            // Return the previous photo to its normal cropped state
-            var previousArtifactDiv = getArtifactDivByID($(window.previousZoomTarget).attr("id"));
-            artifactUnExpand(window.previousZoomTarget);
         }
-
         $("#in_zoom_div").animate({
-            origin: ['0%', '0%'],
+            origin: ["0%", "0%"],
             scaleX: window.scaleFactor,
             scaleY: window.scaleFactor,
             left: - xTranslate + 'px',
@@ -952,14 +1064,34 @@ function doZoom(artifact) {
             // need to update #in_zoom_div. This will happen any time
             // we pan up or down since we need to add or pop rows
             // accordingly
-
             updateInZoomDivPan(artifactDiv, previousArtifactDiv);
         });
     }
+
     // Be sure we're looking at an expanded photo with no cruft on it
     artifactExpand(artifact);
 
     window.previousZoomTarget = artifact;
+}
+
+function doBetterZoom(artifact) {
+    var artifactDiv = getArtifactDivByID($(artifact).attr("id"));
+    calculateScaleFactor(artifactDiv.realWidth, ARTIFACT_HEIGHT);
+
+    artifactPos = $(artifact).position();
+    var xOrigin = (artifactPos.left) / $("#in_zoom_div").width();
+    var yOrigin = (artifactPos.top) / $("#in_zoom_div").height();
+
+    var newPosY = $("#in_zoom_div").height() * (yOrigin);
+    var newPosX = $("#in_zoom_div").width() * (xOrigin);
+    $("#in_zoom_div").animate({
+        origin: [xOrigin+'%', yOrigin+'%'],
+        //origin: ["0%", "0%"],
+        scaleX: window.scaleFactor,
+        scaleY: window.scaleFactor,
+        left: - newPosX + 'px',
+        top: - newPosY + 'px',
+    },'slow');
 }
 
 
