@@ -130,6 +130,13 @@ $('#file_upload').fileUploadUI({
         var heightAdjustment = $("#landing_drag_area_content").height() / 2 - 130;
 
         landingPageResize(heightAdjustment); // Re-center since the images added space to the upload area
+
+        setTimeout(function() {
+            // WARNING Does NOT work in IE
+            // #InternetExplorer
+            window.open(json.memory_url,'_newtab');
+            console.log("function!");
+        }, 1)
     },
     buildUploadRow: function (files, index) {
         return $(
