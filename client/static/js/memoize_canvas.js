@@ -568,6 +568,17 @@ function loadViewportPhotos() {
     }
 }
 
+/**************************************
+ * Photo Drag Functions
+ * ***********************************/
+function initPhotoDrag() {
+    $(".artifact_row").sortable({
+	connectWith: ".artifact_row"
+    });
+
+    $(".artifact_row").disableSelection();
+
+}
 
 /**************************************
  * Expansion Functions
@@ -1639,11 +1650,10 @@ $(document).ready(function(){
     });
     
     /* ************************************************* *
-     * Control photo-drag action on artifact divs
+     * Control photo-dragging on artifact divs
      * **************************************************/
     //getArtifactDivByID($(artifact).attr("id"));
-    $("#artifact_4d86aa671d41c8088400000a").sortable();
-    $("#artifact_4d86aa671d41c8088400000a").disableSelection();
+    initPhotoDrag();
 
     /* ************************************************* *
      * Control Hover action on artifact divs
