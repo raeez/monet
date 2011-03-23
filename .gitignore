@@ -18,7 +18,8 @@ develop-eggs
 .installed.cfg
 *.egg
 *.egg-info
-manhattan.egg-info
+node\
+zeromq-*\
 
 # installer logs
 pip-log.txt
