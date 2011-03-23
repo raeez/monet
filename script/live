@@ -2,4 +2,4 @@
 
 # launch celery with the latest codebase
 cd live
-nodejs server.js
+node server.js
