@@ -11,6 +11,8 @@ echo "*** memoize *** starting mongodb..."
 start mongodb.memoize
 echo "*** memoize *** starting rabbitmq..."
 start rabbitmq.memoize
+echo "*** memoize *** starting live..."
+start live.memoize
 echo "*** memoize *** starting celery..."
 start celery.memoize
 echo "*** memoize *** starting client..."

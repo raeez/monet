@@ -11,6 +11,8 @@ echo "*** memoize *** restarting mongodb..."
 restart mongodb.memoize
 echo "*** memoize *** restarting rabbitmq..."
 restart rabbitmq.memoize
+echo "*** memoize *** restarting live..."
+restart live.memoize
 echo "*** memoize *** restarting celery..."
 restart celery.memoize
 echo "*** memoize *** restarting client..."
