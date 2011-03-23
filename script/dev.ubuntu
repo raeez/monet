@@ -52,13 +52,7 @@ sudo sh setuptools-0.6c11-py2.7.egg
 
 sudo python2.7 /usr/local/bin/easy_install-2.7 pip
 sudo python2.7 /usr/local/bin/pip-2.7 install virtualenv
-
 virtualenv -p python2.7 --no-site-packages --distribute --clear env
-
-echo "env bin activate -----------------------------------------"
-echo "----------------------------------------------------------"
-echo "----------------------------------------------------------"
-
 . env/bin/activate
 
 # python dependencies
