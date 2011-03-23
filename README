@@ -32,7 +32,7 @@ _M_      _MM_ YMMMM9 _MM_  _MM_  _MM_ YMMMMM9 _MM_dMMMMMMMM YMMMM9
     . env/bin/activate
     mongod
     ./script/celery
-    cd live; node server.js
+    ./script/live
     python client.py
 
                     ==================
