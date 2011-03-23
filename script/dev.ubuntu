@@ -47,6 +47,7 @@ cd zeromq-*
 make
 sudo make install
 cd ..
+rm zeromq*.tar.gz
 
 # set up node
 git clone https://github.com/joyent/node.git && cd node
