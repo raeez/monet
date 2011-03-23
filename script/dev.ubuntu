@@ -57,6 +57,7 @@ sudo make install
 
 # install node packages
 curl http://npmjs.org/install.sh | sudo sh
+rm install.sh
 sudo npm install zeromq
 sudo npm install socket.io
 
