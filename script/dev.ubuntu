@@ -19,9 +19,10 @@ sudo apt-get -y upgrade
 
 # system and python dependencies
 sudo apt-get -y install curl \
+                        openssl \
+                        libssl-dev \
                         git \
                         nginx \
-                        nodejs \
                         mongodb \
                         python2.7 \
                         nodejs-dev \
@@ -41,6 +42,12 @@ sudo apt-get -y install curl \
 sudo rabbitmqctl add_user memoize memoize
 sudo rabbitmqctl add_vhost memoizevhost 
 sudo rabbitmqctl set_permissions -p memoizevhost memoize ".*" ".*" ".*"
+
+# install node
+git clone https://github.com/joyent/node.git && cd node
+./configure
+make
+sudo make install
 
 # install node packages
 curl http://npmjs.org/install.sh | sudo sh
