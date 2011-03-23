@@ -12,7 +12,9 @@ echo "**************************************"
 echo ""
 
 # system and python dependencies
-sudo port install python27 \
+sudo port install zmq \
+                  nodejs \
+                  python27 \
                   git-core +svn \
                   mongodb +python27 \
                   libevent +python27 \
@@ -29,6 +31,11 @@ sudo rabbitmqctl add_user memoize memoize # user / pass
 sudo rabbitmqctl add_vhost memoizevhost 
 sudo rabbitmqctl set_permissions -p memoizevhost memoize ".*" ".*" ".*"
 
+# install node packages
+curl http://npmjs.org/install.sh | sudo sh
+sudo npm install zeromq
+sudo npm install socket.io
+
 # dev env
 sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/easy_install-2.7 pip
 sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/pip-2.7 install virtualenv
@@ -38,6 +45,7 @@ sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/pip-2.7 ins
 # python dependencies
 pip install Flask \
                 PIL \
+                pyzmq \
                 celery \
                 fabric \
                 sphinx \
@@ -47,7 +55,6 @@ pip install Flask \
                 pyflakes \
                 py-bcrypt \
                 flask-uploads \
-                flask-celery \
 
 # mimick an installation of the current source tree
 ln -s $(pwd) env/lib/python2.7/site-packages/memoize

@@ -18,7 +18,6 @@ develop-eggs
 .installed.cfg
 *.egg
 *.egg-info
-Fabric.egg-info
 manhattan.egg-info
 
 # installer logs

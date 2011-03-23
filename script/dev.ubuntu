@@ -20,8 +20,13 @@ sudo apt-get -y upgrade
 # system and python dependencies
 sudo apt-get -y install git \
                         nginx \
+                        nodejs \
                         mongodb \
                         python2.7 \
+                        nodejs-dev \
+                        nodejs-dbg \
+                        libzmq-dev \
+                        libzmq-dbg \
                         libgif-dev \
                         libjpeg-dev \
                         libevent-dev \
@@ -35,6 +40,11 @@ sudo apt-get -y install git \
 sudo rabbitmqctl add_user memoize memoize
 sudo rabbitmqctl add_vhost memoizevhost 
 sudo rabbitmqctl set_permissions -p memoizevhost memoize ".*" ".*" ".*"
+
+# install node packages
+curl http://npmjs.org/install.sh | sudo sh
+sudo npm install zeromq
+sudo npm install socket.io
 
 # dev env
 wget -c http://pypi.python.org/packages/2.7/s/setuptools/setuptools-0.6c11-py2.7.egg#md5=fe1f997bc722265116870bc7919059ea
@@ -50,7 +60,9 @@ virtualenv -p python2.7 --no-site-packages --distribute --clear env
 # python dependencies
 pip install Flask \
                 PIL \
+                pyzmq \
                 celery \
+                fabric \
                 sphinx \
                 ipython \
                 pymongo \
@@ -58,7 +70,6 @@ pip install Flask \
                 pyflakes \
                 py-bcrypt \
                 flask-uploads \
-                flask-celery \
 
 ln -s $(pwd) env/lib/python2.7/site-packages/memoize
 

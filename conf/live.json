@@ -1,0 +1,21 @@
+{
+    "debug": false,
+    "log": true,
+    "syslog" : "client",
+
+    "mail":{
+        "host": ["mail.authsmtp.com", 2525],
+        "auth": ["ac53391", "ezanqkp4gfzjbj"],
+        "address": "raeez@mit.edu"
+    },
+
+    "mongo": {
+        "host": ["localhost", 5500],
+        ssafe": true,
+        "replicate_minimum": 1
+    },
+
+    "uploads" : { "path" : "/var/www/files",
+                  "base"  : "http://memoize.raeez.com/" }
+
+}
