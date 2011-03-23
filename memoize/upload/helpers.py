@@ -150,15 +150,15 @@ def build_memory_stream():
 
 
 def rand_photo(m):
-    if m:
-        visible_artifacts = getVisibleArtifacts(m.artifacts)
-        rand_artifact = random.sample(visible_artifacts,1)
-        photo = rand_artifact[0]
+  if m:
+    visible_artifacts = getVisibleArtifacts(m.artifacts)
+    rand_artifact = random.sample(visible_artifacts,1)
+    photo = rand_artifact[0]
 
-        return json.dumps({ "id" : str(photo['id']),
+    return json.dumps({ "id" : str(photo['id']),
                             "thumb_url" : photo['thumb_url']})
-    else:
-        return None
+  else:
+    return None
 
 def claimed(m):
   return not (not m.user)
