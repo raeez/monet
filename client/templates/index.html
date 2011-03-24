@@ -49,7 +49,7 @@
                 <div id="helper_text">
                     <div id="inline_upload_leadtext">Drag in or</div>
                     <div id="inline_upload">
-                        <form id="file_upload" action="{{url_for('create')}}" method="POST" enctype="multipart/form-data">
+                        <form id="file_upload" action="{{url_for('photo')}}" method="POST" enctype="multipart/form-data">
                             <input id="memory_id" type=hidden name=memory_id />
                             <input id="multi_session" type=hidden name=multi_session />
                             <input type="file" name="photo" multiple>
@@ -175,7 +175,7 @@
 
   <h3> Build a new Memory!</h3>
 
-    <form method=POST enctype=multipart/form-data action="{{url_for('create')}}">
+    <form method=POST enctype=multipart/form-data action="{{url_for('memory')}}">
         <p><label>Photo:</label><input type=file name=photo></p>
         <p><label>Title:</label><input type=text name=title></p>
         <label>Caption:</label><input type=text name=caption></p>
