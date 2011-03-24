@@ -50,7 +50,7 @@ def new_user():
   u.save()
 
   session['email'] = u.email
-  session['id'] = str(u._id)
+  session['_id'] = str(u._id)
   session['password'] = password
   log['login'].debug(session['email'])
 
@@ -86,7 +86,7 @@ def login():
 
     if bcrypt.hashpw(request.form['password'], user.password) == user.password:
       session['email'] = request.form['email']
-      session['id'] = str(user._id)
+      session['_id'] = str(user._id)
       session['password'] = request.form['password']
       log['login'].debug(session['email'])
       return redirect(request.referrer)
@@ -218,7 +218,7 @@ def rename():
   m = Memory.find_one({ "_id" : request.form['id'] })
   if m:
     if claimed(m):
-      if ('email' in session) and (m.user == session['id']):
+      if ('email' in session) and (m.user == session['_id']):
         m.name = request.form['new_name']
         m.save()
         return m.name
