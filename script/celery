@@ -4,7 +4,7 @@
 export PYTHONPATH=$(pwd)/celery/local:$PYTHONPATH
 
 # make sure we have the latest codebase loaded into the virtualenv
-#python setup.py install
+python setup.py install
 
 # launch celery with the latest codebase
 celeryd --events --loglevel INFO --maxtasksperchild 10000 --pid /tmp/celery.memoize.pid --pool eventlet --concurrency=1000

@@ -11,6 +11,8 @@ echo "*** memoize *** stopping client..."
 stop client.memoize
 echo "*** memoize *** stopping celery..."
 stop celery.memoize
+echo "*** memoize *** stopping live..."
+stop live.memoize
 echo "*** memoize *** stopping rabbitmq..."
 stop rabbitmq.memoize
 echo "*** memoize *** stopping mongodb..."

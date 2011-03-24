@@ -25,11 +25,14 @@ _M_      _MM_ YMMMM9 _MM_  _MM_  _MM_ YMMMMM9 _MM_dMMMMMMMM YMMMM9
             = Running a local debug server =
             ================================
 
-    Local client servers run on localhost:5000
+    html client server runs on localhost:5000
+    events are passed on localhost:6000
+    websockets server runs on localhost:7000
 
     . env/bin/activate
     mongod
     ./script/celery
+    ./script/live
     python client.py
 
                     ==================

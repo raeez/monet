@@ -40,8 +40,8 @@ class Photo(Container):
     pass
 
   @valid # ensure we're working on a valid instance
-  def resize(self, filename, abs_path):
+  def resize(self, filename, path, url, memory_id):
     assert (not self.processed), "Image already resized!"
 
     from memoize.tasks import thumbnail
-    thumbnail.delay(filename, abs_path, str(self._id))
+    thumbnail.delay(filename, path, url, str(self._id), str(memory_id))

@@ -106,11 +106,11 @@ function getServerDataByID(id) {
  * Creates a data structure that calcaultes the state the artifact divs should be in
  * Then calls the methods to rearrange the page accordingly
  */
-function updateArtifactDivs() {
+function updateArtifactDivs(/*artifactDivs*/) {
     // Create a new data structure to populate
     var _artifactDivs = [];
-
     populateArtifacts(_artifactDivs);
+    //populateArtifacts(_artifactDivs);
 
     refreshServerData(_artifactDivs);
 
@@ -182,6 +182,9 @@ function getRealWidth(artifactDiv) {
     return width;
 }
 
+/********************************
+**FUNCTIONS FOR CROPPING PHOTOS**
+*********************************
 /**
  * Once loadartifacts runs, a global is populated with server information
  * for each artifactDiv. This method merges the two data sets into one.
@@ -392,7 +395,8 @@ function checkPerfectCrop(overspill, threshold, width_accumulator) {
 	return 'False';
     }
 }
-
+/************************************
+************************************/
 
 /**
  * Given a fully populated list of artifactDivs, this method moves the divs to the appropriate
@@ -564,6 +568,66 @@ function loadViewportPhotos() {
             $("#"+artifact.id).children(".photo_container").html(imgdiv);
         }
     }
+}
+
+/**************************************
+ * Photo Drag Functions
+ * ***********************************/
+
+function updatePos() {
+    var newPositions = []
+    var addArtifact = getArtifactDivByID("add_artifact");
+    newPositions.push(addArtifact);
+
+    //create a new artifactDiv array
+    var rowCounter = 0;
+    $(".artifact_row").each(function() {
+	rowCounter ++;
+    });
+
+    $(".artifact_row").each(function() {
+	//get artifactDivs in each row
+	var rowCounter = 0;
+	var row = $(this).sortable('toArray');
+	if (row[0] == "new_artifacts") {
+	    //row.splice(0,1);
+	    var newArts = row[0];
+	}
+	var rowLength = row.length;
+	for (var i = 0; i < rowLength; i++) {
+	    //add each artifactDiv to newPositions
+	    //newPositions gives new, updated array
+	    var id = row[i]
+	    var artifactDiv = getArtifactDivByID(id);
+	    newPositions.push(artifactDiv);
+
+	    //OR
+	    //ui.item = current dragged element
+	    //get that artifact's (ui.item) index in original array
+	    //get a (new) neighbor's index in original array
+	    //splice that artifact div out
+	    //put that artifact div in the correct place in array
+		//next to its new neighbor
+
+	}
+    });
+    //window.artifactDivs = newPositions;
+    updateArtifactDivs(/*newPositions*/);
+    
+}
+
+
+function initPhotoDrag() {
+    $(".artifact_row").sortable({
+	connectWith: ".artifact_row",
+	items: "> div:not(#add_artifact)",
+	update: function() {
+		    if (window.artifactDivs) {
+		    	updatePos();
+		    }
+
+		}    
+    });
 }
 
 
@@ -1317,6 +1381,7 @@ function clearStaging() {
     }
 }
 
+
 /**
  * When we get an upload error we leave divs lying around.
  * This function cleans them up and is simply a copy and paste convenience
@@ -1329,6 +1394,7 @@ function clearUploadError(handler) {
         clearStaging();
     });
 }
+
 
 
 /****************************************
@@ -1612,7 +1678,12 @@ $(document).ready(function(){
     $("#alert_bar #hide_this").click(function() {
         $("#alert_bar").hide('fast');
     });
-
+    
+    /* ************************************************* *
+     * Control photo-dragging on artifact divs
+     * **************************************************/
+    //getArtifactDivByID($(artifact).attr("id"));
+    initPhotoDrag();
 
     /* ************************************************* *
      * Control Hover action on artifact divs
