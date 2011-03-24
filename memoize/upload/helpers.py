@@ -22,11 +22,6 @@ def create_memory():
   return m
 
 def upload_photo(mem_id=None):
-  """multi_seession is a randomly generated string made on the homepage
-     This is to associate multiple uploads from the home page before
-     A memory ID has been created.
-  """
-
   photo = request.files.get('photo', None)
 
   if not mem_id:

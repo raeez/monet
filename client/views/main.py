@@ -183,7 +183,7 @@ def photo():
     return p.to_json
 
   elif request.method == 'POST':
-    return upload_photo(request.form.get('memory_id', None), request.form.get("multi_session", None))
+    return upload_photo(request.form.get('memory_id', None))
 
   abort(400)
 
