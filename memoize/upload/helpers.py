@@ -57,7 +57,7 @@ def upload_photo(mem_id=None, multi_session=None):
       p.multi_session = multi_session
       p.memory = m._id
       p.save()
-      p.resize(filename, app.photos.path(filename)) # we have these values already, so save some computation and pass them explicitly
+      p.resize(filename, app.photos.path(filename), app.photos.url(filename), str(m._id))
       Memory.atomic_append({ "_id" : m._id },
                            { "artifacts" : p._id })
       width, height = p.dimensions
