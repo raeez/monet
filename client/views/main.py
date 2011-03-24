@@ -2,7 +2,7 @@
 
 from flask import Module, session, redirect, url_for, request, render_template, flash, abort
 from memoize.model import User, Memory, Photo
-from memoize.upload.helpers import create_memory, upload_photo, build_memory_stream, claimed, claim_memory, rand_photo, getArtifactsFromMemory
+from memoize.upload.helpers import upload_photo, build_memory_stream, claimed, claim_memory, rand_photo, getArtifactsFromMemory
 from lib.db.objectid import ObjectId
 import bcrypt
 import random
@@ -19,14 +19,15 @@ main_module = Module(__name__)
 @main_module.route('/')
 def index():
   log['request'].debug("request %s" % repr(request.path))
-
-  #if 'email' in session:
-  #  return redirect(url_for('stream'))
   return render_template('index.html')
 
 ###########
 ## USERS ##
 ###########
+
+@main_module.route('/new', methods=['GET'])
+def new():
+  return render_template('index.html')
 
 @main_module.route('/new_user', methods=['GET', 'POST'])
 def new_user():
@@ -112,22 +113,9 @@ def logout():
   session.pop('fix_email', None)
   return redirect(url_for('index'))
 
-###################
-## NOT LOGGED IN ##
-###################
-
-@main_module.route('/create', methods=['POST'])
-def create():
-  return upload_photo(request.form.get('memory_id', None), request.form.get("multi_session", None))
-
-@main_module.route('/new', methods=['GET'])
-def new():
-  return render_template('index.html')
-
-@main_module.route('/memory/<id>', methods=['GET'])
-def memory(id):
-  m = Memory.find_one({"_id" : id})
-
+@main_module.route('/mem/<id>', methods=['GET'])
+def mem(id):
+  m = Memory.find_one({ "_id" : id }) # TODO change from posting to getting with kwargs
   if not m:
     abort(404)
   else:
@@ -136,7 +124,6 @@ def memory(id):
       claim_memory(m)
 
     show_hidden = int(request.args.get('show_hidden', '0'))
-
     artifacts = getArtifactsFromMemory(m, 0, 100, show_hidden)
 
     # Split things into rows:
@@ -154,21 +141,51 @@ def memory(id):
         rows.append(current_row)
 
     return render_template('memory.html', memory={'claimed' : not (not m.user), 'id' : m._id, 'name' : m.name, 'rows' : rows, 'visible' : show_hidden})
+  
 
-@main_module.route('/get_artifacts/<id>', methods=['GET', 'POST'])
-def get_artifact_containers(id):
-  m = Memory.find_one({ "_id" : id })
+###################
+## NOT LOGGED IN ##
+###################
 
-  offset = int(request.form.get('offset', '0'))
-  numArtifacts = int(request.form.get('numArtifacts', '100'))
-  showHidden = int(request.form.get('show_hidden', '0'))
+@main_module.route('/memory', methods=['GET', 'POST'])
+def memory(id):
+  if request.method == 'GET':
+    m = Memory.find_one({ "_id" : id })
 
-  if not m:
-    abort(404)
-  else:
-    artifacts = getArtifactsFromMemory(m, offset, numArtifacts, showHidden)
+    offset = int(request.form.get('offset', '0'))
+    numArtifacts = int(request.form.get('numArtifacts', '100'))
+    showHidden = int(request.form.get('show_hidden', '0'))
 
-  return json.dumps(artifacts)
+    if not m:
+      abort(404)
+    else:
+      artifacts = getArtifactsFromMemory(m, offset, numArtifacts, showHidden)
+
+    return json.dumps(artifacts)
+
+  elif request.method == 'POST':
+    m = create_memory()
+    return m.to_json
+
+  abort(400)
+
+@main_module.route('/photo', methods=['GET', 'POST'])
+def photo():
+  if request.method == 'GET':
+    _id = request.args.get("_id", None)
+    if not _id:
+      abort(404)
+
+    p = Photo.find_one({ "_id" : _id })
+    if not p:
+      abort(404)
+
+    return p.to_json
+
+  elif request.method == 'POST':
+    return upload_photo(request.form.get('memory_id', None), request.form.get("multi_session", None))
+
+  abort(400)
 
 @main_module.route('/toggle_visibility', methods=['POST'])
 def toggle_visibility():

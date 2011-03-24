@@ -21,7 +21,7 @@ def create_memory():
   m.save()
   return m
 
-def upload_photo(mem_id=None, multi_session=None):
+def upload_photo(mem_id=None):
   """multi_seession is a randomly generated string made on the homepage
      This is to associate multiple uploads from the home page before
      A memory ID has been created.
@@ -30,13 +30,7 @@ def upload_photo(mem_id=None, multi_session=None):
   photo = request.files.get('photo', None)
 
   if not mem_id:
-    if multi_session:
-      p2 = Photo.find_one({ 'multi_session' : multi_session })
-    if not p2:
-      m = create_memory()
-    else:
-      mem_id = p2.memory
-      m = Memory.find_one({ "_id" : mem_id })
+    abort(400)
   else:
     m = Memory.find_one({ "_id" : mem_id })
 
@@ -54,7 +48,6 @@ def upload_photo(mem_id=None, multi_session=None):
       p.title = request.files.get('title', None)
       p.caption = request.files.get('caption', None)
       p.visible = 1 # TODO make this a boolean
-      p.multi_session = multi_session
       p.memory = m._id
       p.save()
       p.resize(filename, app.photos.path(filename), app.photos.url(filename), str(m._id))
@@ -72,7 +65,6 @@ def upload_photo(mem_id=None, multi_session=None):
                        'title' : p.title,
                        'caption' : p.caption,
                        'visible' : p.visible,
-                       'multi_session' : multi_session,
                        'type' : 'image/jpeg' })
 
 def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden=0):
