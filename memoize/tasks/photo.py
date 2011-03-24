@@ -22,4 +22,4 @@ def thumbnail(filename, path, url, photo_id, memory_id):
                      "filename" : filename })
 
   # notify the live server
-  live.notify_photo_update(photo_id, memory_id, url, url)
+  live.notify_photo_update(photo_id, memory_id, url, url, (width, height))

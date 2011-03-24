@@ -32,13 +32,13 @@ zmq.on('message', function (msg) {
     clients = subscriptions[update.memory_id] || []; 
     console.log("sending to all: " + clients);
     for (var i in clients) {
-    //for (var i in subscriptions['null']) {
-        //subscriptions['null'][i].send(JSON.stringify({ 'action' : 'update',
         clients[i].send(JSON.stringify({ 'action' : 'update',
                                                                'type' : 'photo',
                                                                '_id' : update.photo_id,
                                                                'thumb' : update.thumb,
-                                                               'full' : update.full }));
+                                                               'full' : update.full,
+                                                               'width' : update.width,
+                                                               'height' : update.height }));
     }
 });
 
@@ -80,7 +80,6 @@ socket.on('connection', function(client) {
     });
 
     client.on('disconnect', function() {
-        //delete global.subscriptions[request.memory].client;
         console.log('got a disconnect!');
         for (var i in subscriptions[client.memory]) {
             if (subscriptions[client.memory][i] === client) {
