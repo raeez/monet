@@ -248,12 +248,10 @@ def get_rand_photo():
     abort(400)
 
   m = Memory.find_one({ "_id" : request.args['mem_id'] })
-
-  if m:
-    photo = rand_photo(m)
-    if photo:
-      return photo
-    else:
-      abort(400)
-  else:
+  if not m:
     abort(404)
+
+  photo = rand_photo(m)
+  if not photo:
+    abort(400)
+  return photo
