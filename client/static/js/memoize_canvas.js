@@ -550,16 +550,6 @@ function moveArtifactDivs(artifactDivs) {
     for (var i=0; i < adivs_length; i++) {
         var artifactDiv = artifactDivs[i];
 
-        if (!$("#"+artifactDiv.id).length) {
-            /*
-             * This means the div does not exist yet. This is likely
-             * because our socket added it to the data structure
-             * before it was drawn. For now ignore it. We'll get it on
-             * the next refresh
-             */
-            continue;
-        }
-
         /*
          * Check to make sure add_artifact and new_artifacts are #1 and 2 respectively
          */
@@ -591,6 +581,47 @@ function moveArtifactDivs(artifactDivs) {
             // Don't move these special divs; If they need to be moved, the 
             // previous two methods will have taken care of that
             continue;
+        }
+
+        if (!$("#"+artifactDiv.id).length) {
+            /*
+             * This means the div does not exist yet. This is likely
+             * because our socket added it to the data structure
+             * before it was drawn.
+             */
+            
+            // If it's in window.stagingPhotos, we skip this since it will
+            // be automatically added to the main area by clearStaging
+            
+            if (inStagingPhotos(artifactDiv.id)) {
+                return;
+            }
+            if (artifactDiv.row <= 2) {
+                return;
+            }
+
+            /*
+             *
+             * The following code should ONLY be run when we are progressively
+             * loading!
+             *
+             */
+
+            var newArtifact = ''+
+            '       <div id="artifact_'+artifactDiv.id+'" class="artifact photo">'+
+            '           <div class="hide_photo"><a href="#">hide</a></div>'+
+            '           <div class="photo_container" style="width:'+artifactDiv.width+'px; height:'+artifactDiv.height+'px;">' + 
+            '               <img class="photo" src="'+artifactDiv.thumb_url+'" height="175"\/>'+
+            '           </div>' + 
+            '       <\/div>';
+            if ($("#row_"+artifactDiv.row).length) {
+                $("#row_"+artifactDiv.row).append(newArtifact);
+            } else {
+                // We need to make a new row first
+                new_row = "<div class='artifact_row' id='row_"+artifactDiv.row+"'></div>"
+                $("#"+artifactDiv.divArea).append(new_row);
+                $("#row_"+artifactDiv.row).append(newArtifact);
+            }
         }
 
         if (artifactDiv.row > window.numRows) {
@@ -689,7 +720,7 @@ function moveArtifactDivs(artifactDivs) {
  * ARTIFACT PROGRESSIVE LOADING
  *****************************************/
 
-/** loadartifacts([offset[, end]])
+/** loadartifacts([offset[, numartifacts]])
  * Loads the artifacts in json format for this memory
  * Stores it in the window.artifactServerData global
  *
@@ -1525,6 +1556,22 @@ function resizeHoldingWrappers() {
 
 
 /**
+ * Checks to see if the id is in staging Photos
+ * @param {string} id - The id of an artifact (without prefix)
+ * @return True if in, false if not
+ */
+function inStagingPhotos(id) {
+    for (artifact in window.stagingPhotos) {
+        if (id == artifact.id) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+
+/**
  * Grabs the divs inside of the upload staging area and adds them to the page
  * and calls updateArtifactDivs
  */
@@ -1953,7 +2000,11 @@ $(document).ready(function(){
         }
     });
     $(window).scroll(function(){
-        loadViewportPhotos();
+        if($(window).scrollTop() + $(window).height() >= 
+            $(document).height() - ARTIFACT_HEIGT ) {
+        } else {
+            loadViewportPhotos();
+        }
     });
 
     /* ************************************************* *
