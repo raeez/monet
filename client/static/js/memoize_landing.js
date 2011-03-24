@@ -1,6 +1,7 @@
 /*********************************
  * Javascript for the Landing Page
  *********************************/
+ window.Artifacts = {}; // Holds a dictionary of ids and urls
 
 /**
  * Re-centers the landing_page content in the middle of the page
@@ -34,6 +35,32 @@ function landingPageResize(adjustment) {
 function checkForEmptyArea() {
     if ($.trim($("#upload_area #files").html()) == "") {
         $(".example_fileholders").show();
+    }
+}
+/****************************************
+ * Socket IO Canvas Implementation
+ * *************************************/
+/**
+ * Replaces the thumbnail images with the thumb_url
+ * @param {json} message - The json return from the socket io module
+ * action : "ping"|"update"
+ * type : "photo"
+ * _id : "<id>"
+ * thumb : "<thumb_url>"
+ * full : "<full_url>"
+ */
+function updateArtifact(message) {
+    window.Artifacts[message._id] = message.thumb;
+    if ($("#artifact_" + message_id).length) {
+        // This means the div has already been placed
+        $("#artifact_" + message._id).find("img").remove();
+        imgDiv = "<img src='"+message.thumb+"'\/>";
+        $("#artifact_" + message._id).find(".file_upload_preview").append(imgDiv);
+    } else {
+        // Otherwise the best we can do is update the data structure.
+        // When it is created by the uploader it will find the proper
+        // url
+        return;
     }
 }
 
@@ -149,8 +176,11 @@ $('#file_upload').fileUploadUI({
         );
     },
     buildDownloadRow: function (file) {
+        if (window.Artifacts[file.id] !== undefined) {
+            file.thumb_url = window.Aritfacts[file.id];
+        }
         return $(
-        '       <div class="upload_file_div">'/*+
+        '       <div class="upload_file_div" id="artifact_'+file.id+'">'/*+
         '           <div class="file_upload_content">'+
             file.name + 
         '           <\/div>'*/+

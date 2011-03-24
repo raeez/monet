@@ -1,12 +1,14 @@
 // JavaScript Document
 
 var FILE_UPLOAD_LIMIT = 1000000; // Front-end upload limit
+window.socket = null;
 
 /*============================================================ 
  * On Startup
  *==========================================================*/
 $(document).ready(function(){
     BrowserDetect.init(); // See http://www.quirksmode.org/js/detect.html
+
 
     /* ************************************************* *
      * CANVAS & LANDING PAGE - Login Form Methods
@@ -64,7 +66,6 @@ $(document).ready(function(){
         }
     });
 });
-
 
 /* ************************************************* *
  * Login form Helpers

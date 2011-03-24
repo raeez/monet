@@ -5,6 +5,31 @@
 {% block head %}
   {{ super() }}
 
+<!--
+<script>
+    //WEB_SOCKET_SWF_LOCATION = "http://localhost:5000{{url_for('static', filename='WebSocketMain.swf')}}";
+    WEB_SOCKET_SWF_LOCATION = "http://localhost:7000/socket.io/lib/vendor/web-socket-js/WebSocketMain.swf";
+    var socket = new io.Socket(); // get this from conf
+    socket.options.port = 7000;
+    socket.connect();
+    socket.on('message', function(m) {
+        console.log('got a msg: ' + m);
+        m = JSON.parse(m);
+        switch (m.action) {
+            case "ping":
+                socket.send(JSON.stringify({ "action" : "pong",
+                "memory" :  ));
+                // FIXME This doesn't work on the home page
+                break;
+            case "update":
+                updateArtifact(m);
+                break;
+            break;
+        }
+    });
+</script>
+-->
+
 <link rel="stylesheet" href="{{url_for('static', filename='css/page_landing.css')}}">
 <script src="{{url_for('static', filename='js/memoize_landing.js')}}"></script>
 {% endblock %}

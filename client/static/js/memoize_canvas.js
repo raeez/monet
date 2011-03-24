@@ -7,8 +7,22 @@ var ARTIFACT_HEIGHT = 175; // The standard height of all artifacts
 var WRAPPER_WIDTH = 955;
 var THRESHOLD = 0.8 // Maximum crop amount
 var STAGING_SIZE = 6 // Number of photos staged before they're added to the page
+
 window.artifactServerData = [] // A global that holds json representations of all returned artifacts
+/*
+ * artifactServeData Object = {
+ *     id : "<id>",
+ *     image_url : "<image_url>",
+ *     thumb_url : "<thumb_url>",
+ *     visible : 1|0,
+ *     width : <width in px>,
+ *     height : <height in px>
+ * }
+ */
+
 window.artifactDivs; // A global used to keep track of the position of all artifact divs
+
+
 window.numRows = 0; // The total number of rows on the page
 window.zoomHeight; // A global that says how tall the center area of the page is
 window.scaleFactor = 1; // The factor that artifacts scale by when zoomed. Defaults to 1
@@ -64,6 +78,26 @@ function getArtifactDivByID(id) {
     }
     return false;
 }
+function getArtifactIndexByID(id) {
+    var adiv_length = window.artifactDivs.length;
+    for (var i = 0; i < adiv_length; i++) {
+        var artifactDiv = window.artifactDivs[i];
+        if (artifactDiv.id == id) {
+            return i;
+        }
+    }
+    return false;
+}
+function getFieldFromArtifactByID(id, field) {
+    var adiv_length = window.artifactDivs.length;
+    for (var i = 0; i < adiv_length; i++) {
+        var artifactDiv = window.artifactDivs[i];
+        if (artifactDiv.id == id) {
+            return artifactDiv[field];
+        }
+    }
+    return undefined;
+}
 function getArtifactDivByRowPos(row, posInRow) {
     var adiv_length = window.artifactDivs.length;
     for (var i = 0; i < adiv_length; i++) {
@@ -96,6 +130,26 @@ function getServerDataByID(id) {
         }
     }
     return false;
+}
+function getServerDataIndexByID(id) {
+    var serverData;
+    for (var i in window.artifactServerData) {
+        serverData = window.artifactServerData[i];
+        if (serverData.id == id) {
+            return i;
+        }
+    }
+    return false;
+}
+function getServerDataFieldByID(id, field) {
+    var serverData;
+    for (var i in window.artifactServerData) {
+        serverData = window.artifactServerData[i];
+        if (serverData.id == id) {
+            return serverData[field];
+        }
+    }
+    return undefined;
 }
 
 
@@ -182,6 +236,65 @@ function getRealWidth(artifactDiv) {
     return width;
 }
 
+/***********************************************
+  Socket IO Canvas Implementation
+***********************************************/
+/**
+ * Given a message of type update, this method modifies the global
+ * window.artifactDivs and also repalces the correpsonding image with
+ * the image indicated in the message object
+ * @param {json} message - The json return from the socket io module
+ * action : "ping"|"update"
+ * type : "photo"
+ * _id : "<id>"
+ * thumb : "<thumb_url>"
+ * full : "<full_url>"
+ */
+function updateArtifact(message) {
+    // Need to update both window.artifactDivs and window.artifactServerData
+    var j = getServerDataIndexByID("artifact_"+message._id);
+    if (j === false) {
+        // This means we need to make a new artifact.
+        var serverObj = new Object();
+        serverObj = {
+            id : message._id,
+            image_url : message.full,
+            thumb_url : message.thumb,
+            visible : 1,
+            // FIXME We need the dimensions to come from the message!
+            width : ARTIFACT_HEIGHT,
+            height : ARTIFACT_HEIGHT
+        };
+        window.artifactServerData.push(serverObj);
+
+        // We don't deal with window.artifactDivs because there's no div
+        // made for it yet and we'll let updateArtifacts() do that
+    } else {
+        window.artifactServerData[j].thumb_url = message.thumb;
+        window.artifactServerData[j].image_url = message.full;
+
+        // This following will try and put the thumb in place
+        // We need to check if it's in the staging area or if it's in
+        // the main canvas
+
+        if($("#artifact_"+message._id).length) {
+            // We found a div!
+            if ($("#artifact_"+message._id).find("img").attr("src") == message.thumb) {
+                // If the img doesn't exist, it will return 'undefined'
+                return;
+            }
+            var div_width = $("#artifact_"+message._id).width();
+            var photo_width = $("#artifact_"+message._id).children(".photo_container").width();
+            var centering = (photo_width - div_width) / -2;
+            $("#artifact_"+message._id).find("img").remove();
+            var imgdiv = "<img src="+message.thumb+" height='"+ARTIFACT_HEIGHT+"' width='"+window.artifactDivs[i].width+"' class='photo'/>"
+            $("#artifact_"+message._id).children(".photo_container").css('left', centering);
+            $("#artifact_"+message._id).children(".photo_container").html(imgdiv);
+        }
+        
+    }
+}
+
 /********************************
 **FUNCTIONS FOR CROPPING PHOTOS**
 *********************************
@@ -195,12 +308,12 @@ function getRealWidth(artifactDiv) {
 function refreshServerData(artifactDivs) {
     var serverData;
     var artifact;
-    var id
+    var id;
 
-    var a_divlength = artifactDivs.length
+    var a_divlength = artifactDivs.length;
     for (var j = 0; j < a_divlength; j ++ ) {
         serverData = getServerDataByID(parsePrefixToString(artifactDivs[j]["id"], "artifact_"));
-        if (serverData == false) {
+        if (serverData === false) {
             continue;
         } else {
             artifactDivs[j]["height"] = serverData.height;
@@ -208,6 +321,35 @@ function refreshServerData(artifactDivs) {
             artifactDivs[j]["image_url"] = serverData.image_url;
             artifactDivs[j]["thumb_url"] = serverData.thumb_url;
             artifactDivs[j]["visible"] = serverData.visible;
+        }
+    }
+
+    var sDataLength = window.artifactServerData.length;
+    for (var i = 0; i < sDataLength; i ++ ) {
+        var a_div = getArtifactDivByID("artifact_" + window.artifactServerData[i]["id"]);
+        if (a_div === false) {
+            /*
+             * This likely means there exsists a server data element
+             * because the server pushed one in before the actual div
+             * element was put on the page and updated. We should make
+             * an artifact div so it gets included in the next render
+             */
+            var sData = window.artifactServerData[i];
+            var artifactDiv = new ArtifactDiv();
+            artifactDiv['id'] = "artifact_" + sData.id;
+            artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
+            artifactDiv['realWidth'] = sData.width; // FIXME We need the width in the artifact
+            artifactDiv['display'] = true; // We want it to be displayed!
+            artifactDiv['divArea'] = "above_zoom_div" // Assuming new elements are always pu aboveZoom Div
+            artifactDiv["height"] = sData.height; // FIXME Need server dimensions
+            artifactDiv["width"] = sData.width;
+            artifactDiv["image_url"] = serverData.image_url;
+            artifactDiv["thumb_url"] = serverData.thumb_url;
+            artifactDiv["visible"] = serverData.visible;
+            artifactDivs.unshift(artifactDiv);
+        } else {
+            // No need to update anything in the serverData
+            continue;
         }
     }
 }
@@ -408,17 +550,56 @@ function moveArtifactDivs(artifactDivs) {
     for (var i=0; i < adivs_length; i++) {
         var artifactDiv = artifactDivs[i];
 
+        if (!$("#"+artifactDiv.id).length) {
+            /*
+             * This means the div does not exist yet. This is likely
+             * because our socket added it to the data structure
+             * before it was drawn. For now ignore it. We'll get it on
+             * the next refresh
+             */
+            continue;
+        }
+
+        /*
+         * Check to make sure add_artifact and new_artifacts are #1 and 2 respectively
+         */
+        if (artifactDiv.id == "add_artifact" && i != 0) {
+            // Fix data structure
+            var tmp = artifactDivs.splice(i,1);
+            artifactDivs.unshift(tmp[0]);
+            // Since we're always sure we're putting this before the current
+            // index, we don't have to update it.
+            
+            // Also move the physical div.
+            $("#add_artifact").parent(".artifact_row").prepend($("#add_artifact"));
+            continue;
+        }
+
+        if (artifactDiv.id == "new_artifacts" && i != 1) {
+            // Fix data structure
+            var tmp = artifactDivs.splice(i,1);
+            artifactDivs.splice(1,0,tmp[0]);
+            // Since we're always sure we're putting this before the current
+            // index, we don't have to update it.
+            
+            // Also move the physical div.
+            $("#new_artifacts").siblings("#add_artifact").after($("#new_artifacts"));
+            continue;
+        }
+
+        if (artifactDiv.id == "add_artifact" || artifactDiv.id == "new_artifacts") {
+            // Don't move these special divs; If they need to be moved, the 
+            // previous two methods will have taken care of that
+            continue;
+        }
+
         if (artifactDiv.row > window.numRows) {
             window.numRows = artifactDiv.row;
         }
 
         if (!artifactDiv.id || !artifactDiv.croppedWidth || !artifactDiv.divArea) {
-            if (artifactDiv.id == "add_artifact" || artifactDiv.id == "new_artifacts") {
-                // Ignore this problem
-            } else {
-                console.log("ERROR: artifactDiv has undefined terms");
-                console.log(artifactDiv);
-            }
+            console.log("ERROR: artifactDiv has undefined terms");
+            console.log(artifactDiv);
         }
 
         if (artifactDiv.croppedWidth && $("#"+artifactDiv.id).width() != artifactDiv.croppedWidth) {
@@ -1363,6 +1544,12 @@ function clearStaging() {
             var file = window.stagingPhotos[id];
             $("#artifact_"+file.id).remove(); // Should remove from the staging area
 
+            // Check to see if the Socket populated this photo first
+            var existingThumb = getServerDataFieldByID(file.id, "thumb_url");
+            if (existingThumb !== undefined) {
+                file.thumb_url = existingThumb;
+            }
+
             // Now we build it again prepending to row 1
             var newArtifact = ''+
             '       <div id="artifact_'+file.id+'" class="artifact photo">'+
@@ -1530,6 +1717,13 @@ $("#canvas_file_upload").fileUploadUI({
         },
         buildDownloadRow: function (file) {
             window.stagingPhotos[file.id] = file;
+
+            // Check to see if the Socket populated this photo first
+            var existingThumb = getServerDataFieldByID(file.id, "thumb_url");
+            if (existingThumb !== undefined) {
+                file.thumb_url = existingThumb;
+            }
+
             return $(
                 '<div id="artifact_'+file.id+'" class="canvas_upload_div" style="float:left">' +
                 '   <img class="photo" src="'+file.thumb_url+'" height="70"\/>'+

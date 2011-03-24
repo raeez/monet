@@ -99,6 +99,7 @@ def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden
 
       artifact = dict()
       artifact['id'] = str(p._id)
+      ## FIXME Need to be pulling the full url as well as the thumb
       artifact['image_url'] = app.photos.url(p.filename)
       artifact['thumb_url'] = app.photos.url(p.filename)
       artifact['visible'] = p.visible
