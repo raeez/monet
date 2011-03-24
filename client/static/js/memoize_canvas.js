@@ -80,7 +80,9 @@ function getArtifactDivRowLength(row) {
     for (var i = 0; i < adiv_length; i++) {
         var artifactDiv = window.artifactDivs[i];
         if (artifactDiv.row == row) {
-            row_length ++;
+            if (artifactDiv.id != "add_artifact" && artifactDiv.id != "new_artifacts") {
+                row_length ++;
+            }
         }
     }
     return row_length;
@@ -1070,27 +1072,6 @@ function doZoom(artifact) {
     window.previousZoomTarget = artifact;
 }
 
-function doBetterZoom(artifact) {
-    var artifactDiv = getArtifactDivByID($(artifact).attr("id"));
-    calculateScaleFactor(artifactDiv.realWidth, ARTIFACT_HEIGHT);
-
-    artifactPos = $(artifact).position();
-    var xOrigin = (artifactPos.left) / $("#in_zoom_div").width();
-    var yOrigin = (artifactPos.top) / $("#in_zoom_div").height();
-
-    var newPosY = $("#in_zoom_div").height() * (yOrigin);
-    var newPosX = $("#in_zoom_div").width() * (xOrigin);
-    $("#in_zoom_div").animate({
-        origin: [xOrigin+'%', yOrigin+'%'],
-        //origin: ["0%", "0%"],
-        scaleX: window.scaleFactor,
-        scaleY: window.scaleFactor,
-        left: - newPosX + 'px',
-        top: - newPosY + 'px',
-    },'slow');
-}
-
-
 /**
  * Zoom Transforms ================================
  * We need transform functions to interchange between the CSS top and left
@@ -1719,12 +1700,12 @@ $(document).ready(function(){
             if (window.zoomedIn == true) {
                 key.preventDefault();
                 var artifactDiv = getArtifactDivByID($(window.previousZoomTarget).attr("id"));
-                leftArtifact = getArtifactDivByRowPos(artifactDiv.row, artifactDiv.posInRow + 1);
+                leftArtifact = getArtifactDivByRowPos(artifactDiv.row, artifactDiv.posInRow - 1);
                 if (leftArtifact !== false) {
                     doZoom("#"+leftArtifact.id);
                 } else {
                     // Look at the next row up on the other end
-                    rowChange = getArtifactDivByRowPos(artifactDiv.row - 1, 0);
+                    rowChange = getArtifactDivByRowPos(artifactDiv.row - 1, getArtifactDivRowLength(artifactDiv.row-1) - 1);
                     if (rowChange !== false) {
                         doZoom("#"+rowChange.id);
                     }
@@ -1751,12 +1732,12 @@ $(document).ready(function(){
             if (window.zoomedIn == true) {
                 key.preventDefault();
                 var artifactDiv = getArtifactDivByID($(window.previousZoomTarget).attr("id"));
-                rightArtifact = getArtifactDivByRowPos(artifactDiv.row, artifactDiv.posInRow - 1);
+                rightArtifact = getArtifactDivByRowPos(artifactDiv.row, artifactDiv.posInRow + 1);
                 if (rightArtifact !== false) {
                     doZoom("#"+rightArtifact.id);
                 } else {
                     // Look at the next row down on the other end
-                    rowChange = getArtifactDivByRowPos(artifactDiv.row + 1, getArtifactDivRowLength(artifactDiv.row+1) - 1);
+                    rowChange = getArtifactDivByRowPos(artifactDiv.row + 1, 0);
                     if (rowChange !== false) {
                         doZoom("#"+rowChange.id);
                     }
