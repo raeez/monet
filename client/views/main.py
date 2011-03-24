@@ -2,7 +2,7 @@
 
 from flask import Module, session, redirect, url_for, request, render_template, flash, abort
 from memoize.model import User, Memory, Photo
-from memoize.upload.helpers import upload_photo, build_memory_stream, claimed, claim_memory, rand_photo, getArtifactsFromMemory
+from memoize.upload.helpers import create_memory, upload_photo, build_memory_stream, claimed, claim_memory, rand_photo, getArtifactsFromMemory
 from lib.db.objectid import ObjectId
 import bcrypt
 import random
