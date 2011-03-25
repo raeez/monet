@@ -5,6 +5,30 @@
  window.memoryId = undefined;
 
 /**
+ * Setup the socket connection to the server. Must happen after we get a memory id
+ * @param {string} memoryID - The ID of the memory that this socket streams
+ * artifacts from
+ */
+function setupSocket(memoryID) {
+    WEB_SOCKET_SWF_LOCATION = "http://localhost:7000/socket.io/lib/vendor/web-socket-js/WebSocketMain.swf";
+    var socket = new io.Socket(); // get this from conf
+    socket.options.port = 7000;
+    socket.connect();
+    socket.on('message', function(m) {
+        m = JSON.parse(m);
+        switch (m.action) {
+            case "ping":
+                socket.send(JSON.stringify({ "action" : "pong", "memory":memoryID}));
+                break;
+            case "update":
+                updateArtifact(m);
+                break;
+            break;
+        }
+    });
+}
+
+/**
  * Re-centers the landing_page content in the middle of the page
  * Takes an optional adjustment value that is used once we add
  * images to the page
@@ -52,7 +76,7 @@ function checkForEmptyArea() {
  */
 function updateArtifact(message) {
     window.Artifacts[message._id] = message.thumb;
-    if ($("#artifact_" + message_id).length) {
+    if ($("#artifact_" + message._id).length) {
         // This means the div has already been placed
         $("#artifact_" + message._id).find("img").remove();
         imgDiv = "<img src='"+message.thumb+"'\/>";
@@ -95,15 +119,15 @@ $('#file_upload').fileUploadUI({
                 success:function(memJSON) {
                     data = jsonParse(memJSON);
                     window.memoryId = data["_id"];
+                    setupSocket(data["_id"]);
                 }
             });
+        }
         var outObject = new Object();
         outObject.name = "memory_id";
         outObject.value = window.memoryId;
         var outForm = [outObject];
-        console.log(outForm);
         return outForm;
-        }
     },
     initProgressBar: function (node, value) {
         if (typeof node.progressbar === 'function') {
@@ -179,12 +203,6 @@ $('#file_upload').fileUploadUI({
 
         landingPageResize(heightAdjustment); // Re-center since the images added space to the upload area
 
-        /*setTimeout(function() {
-            // WARNING Does NOT work in IE
-            // #InternetExplorer
-            window.open(json.memory_url,'_newtab');
-            console.log("function!");
-        }, 1)*/
     },
     buildUploadRow: function (files, index) {
         return $(
@@ -198,7 +216,7 @@ $('#file_upload').fileUploadUI({
     },
     buildDownloadRow: function (file) {
         if (window.Artifacts[file.id] !== undefined) {
-            file.thumb_url = window.Aritfacts[file.id];
+            file.thumb_url = window.Artifacts[file.id];
         }
         return $(
         '       <div class="upload_file_div" id="artifact_'+file.id+'">'/*+

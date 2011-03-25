@@ -397,7 +397,7 @@ function refreshServerData(artifactDivs) {
 
     var sDataLength = window.artifactServerData.length;
     for (var i = 0; i < sDataLength; i ++ ) {
-        var a_div = ArtifactDivByID("artifact_" + window.artifactServerData[i]["id"]);
+        var a_div = getArtifactDivByID("artifact_" + window.artifactServerData[i]["id"]);
         if (a_div === false) {
             /*
              * This likely means there exsists a server data element
