@@ -13,7 +13,7 @@
     socket.options.port = 7000;
     socket.connect();
     socket.on('message', function(m) {
-        console.log('got a msg: ' + m);
+        //console.log('got a msg: ' + m);
         m = JSON.parse(m);
         switch (m.action) {
             case "ping":

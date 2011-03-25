@@ -30,6 +30,8 @@ window.updateQueue = [];
 
 window.enableLive = true; // A boolean flag that indicates whether or not we should be adding elements to the page
 
+window.enableZoomAnimation = false; // A flag to indicate whether or not to animate the zoom
+
 window.numRows = 0; // The total number of rows on the page
 window.zoomHeight; // A global that says how tall the center area of the page is
 window.scaleFactor = 1; // The factor that artifacts scale by when zoomed. Defaults to 1
@@ -337,7 +339,7 @@ function updateArtifact(message) {
         };
         window.artifactServerData.push(serverObj);
 
-        console.log("updating artifact divs because we got pushed a new artifact by the socket");
+        //console.log("updating artifact divs because we got pushed a new artifact by the socket");
         updateArtifactDivs();
 
         // We don't deal with window.artifactDivs because there's no div
@@ -689,7 +691,6 @@ function moveArtifactDivs(artifactDivs) {
             continue;
         } else {
             if (!$("#"+artifactDiv.id).length) {
-                console.log("Appending artifact from moveArtifact Divs");
                 var newArtifact = ''+
                 '       <div id="'+artifactDiv.id+'" class="artifact photo">'+
                 '           <div class="hide_photo"><a href="#">hide</a></div>'+
@@ -700,10 +701,7 @@ function moveArtifactDivs(artifactDivs) {
                 $("#new_artifacts").after(newArtifact);
                 /*
                 if ($("#row_"+artifactDiv.row).length) {
-                    console.log($("#row_" + artifactDiv.row));
-                    console.log(newArtifact);
                     $("#row_"+artifactDiv.row).prepend(newArtifact);
-                    console.log($("#row_" + artifactDiv.row));
                 } else {
                     // We need to make a new row first
                     new_row = "<div class='artifact_row' id='row_"+artifactDiv.row+"'></div>"
@@ -914,7 +912,7 @@ function updatePos() {
 	}
     });
     //window.artifactDivs = newPositions;
-    console.log("updating artifact divs because we dragged and dropped");
+    //console.log("updating artifact divs because we dragged and dropped");
     updateArtifactDivs(/*newPositions*/);
     
 }
@@ -1250,7 +1248,7 @@ function resizeCanvas() {
     }
     WRAPPER_WIDTH = $(".canvas_center").width(); // Update resize global
 
-    console.log("updating artifact divs because we resized the canvas");
+    //console.log("updating artifact divs because we resized the canvas");
     updateArtifactDivs();
 }
 
@@ -1398,16 +1396,28 @@ function doZoom(artifact) {
 
     if (window.zoomedIn == false) {
         $("#in_zoom_div").transform({origin:[xOrigin+'%', yOrigin+'%']});
-        $("#in_zoom_div").animate({
-            scaleX: window.scaleFactor,
-            scaleY: window.scaleFactor,
-            left: - xTranslate + 'px',
-            top: - yTranslate + 'px'
-        },'slow');
 
-        $("#canvas_footer").animate({
-            bottom:'-60px'
-        }, 'slow');
+        if (window.enableZoomAnimation == true ) {
+            $("#in_zoom_div").animate({
+                scaleX: window.scaleFactor,
+                scaleY: window.scaleFactor,
+                left: - xTranslate + 'px',
+                top: - yTranslate + 'px'
+            },'slow');
+
+            $("#canvas_footer").animate({
+                bottom:'-60px'
+            }, 'slow');
+        } else {
+            $("#in_zoom_div").transform({
+                scaleX: window.scaleFactor,
+                scaleY: window.scaleFactor
+            });
+            $("#in_zoom_div").css("left", -xTranslate + "px");
+            $("#in_zoom_div").css("top", -yTranslate + "px");
+
+            $("#canvas_footer").css("bottom", "-60px");
+        }
 
         window.zoomedIn = true;
     } else if (window.zoomedIn == true) {
@@ -1420,19 +1430,30 @@ function doZoom(artifact) {
             }
 
         }
-        $("#in_zoom_div").animate({
-            origin: ["0%", "0%"],
-            scaleX: window.scaleFactor,
-            scaleY: window.scaleFactor,
-            left: - xTranslate + 'px',
-            top: - yTranslate + 'px',
-        },'fast', function() {
-            // As soon as we're done panning, we need to see if we
-            // need to update #in_zoom_div. This will happen any time
-            // we pan up or down since we need to add or pop rows
-            // accordingly
+        if (window.enableZoomAnimation == true || window.enableZoomAnimation == false) {
+            $("#in_zoom_div").animate({
+                origin: ["0%", "0%"],
+                scaleX: window.scaleFactor,
+                scaleY: window.scaleFactor,
+                left: - xTranslate + 'px',
+                top: - yTranslate + 'px',
+            },'fast', function() {
+                // As soon as we're done panning, we need to see if we
+                // need to update #in_zoom_div. This will happen any time
+                // we pan up or down since we need to add or pop rows
+                // accordingly
+                updateInZoomDivPan(artifactDiv, previousArtifactDiv);
+            });
+        } else {
+            $("#in_zoom_div").transform({
+                origin: ["0%", "0%"],
+                scaleX: window.scaleFactor,
+                scaleY: window.scaleFactor
+            });
+            $("#in_zoom_div").css("left", -xTranslate + "px");
+            $("#in_zoom_div").css("top", -yTranslate + "px");
             updateInZoomDivPan(artifactDiv, previousArtifactDiv);
-        });
+        }
     }
 
     // Be sure we're looking at an expanded photo with no cruft on it
@@ -1603,20 +1624,38 @@ function doUnZoom() {
 
     $("#above_zoom_div").css("visibility", "visible");
     $("#below_zoom_div").css("visibility", "visible");
-    $("#canvas_footer").animate({
-        bottom:'0px'
-    }, 'slow');
-    $("#in_zoom_div").animate({
-        scaleX: 1,
-        scaleY: 1,
-        left: 0,
-        top: 0
-    },'slow', function() {
+    if (window.enableZoomAnimation == true) {
+        $("#in_zoom_div").animate({
+            scaleX: 1,
+            scaleY: 1,
+            left: 0,
+            top: 0
+        },'slow', function() {
+            $("#artifact_wrapper").height('auto');
+            window.enableLive = true;
+            //console.log("Updating divs after unzoom just in case we have more live photos");
+            updateArtifactDivs();
+        });
+        $("#canvas_footer").animate({
+            bottom:'0px'
+        }, 'slow');
+
+    } else {
+        $("#in_zoom_div").transform({
+            scaleX: 1,
+            scaleY: 1
+        });
+
+        $("#in_zoom_div").css("left", 0);
+        $("#in_zoom_div").css("top", 0);
+
+        $("#canvas_footer").css("bottom", "0px");
+
         $("#artifact_wrapper").height('auto');
         window.enableLive = true;
-        console.log("Updating divs after unzoom just in case we have more live photos");
+        //console.log("Updating divs after unzoom just in case we have more live photos");
         updateArtifactDivs();
-    });
+    }
 }
 
 
@@ -1687,8 +1726,6 @@ function clearStaging() {
                 continue;
             }
             var file = window.stagingPhotos[id];
-            console.log("============================");
-            console.log(file);
             $("#artifact_"+file.id).remove(); // Should remove from the staging area
 
             // Check to see if the Socket populated this photo first
@@ -1700,7 +1737,6 @@ function clearStaging() {
             // Now we build it again prepending to row 1
             if (!$("#artifact_"+file.id).length) {
                 // Only add the new artifact if it doesn't exist yet!
-                console.log("Appending artifact from clear Staging");
                 var newArtifact = ''+
                 '       <div id="artifact_'+file.id+'" class="artifact photo">'+
                 '           <div class="hide_photo"><a href="#">hide</a></div>'+
@@ -1714,7 +1750,7 @@ function clearStaging() {
             delete window.stagingPhotos[id];
         }
 
-        console.log("updating artifact divs because we're clearing the staging area");
+        //console.log("updating artifact divs because we're clearing the staging area");
         updateArtifactDivs();
 
     }
@@ -1790,7 +1826,7 @@ $("#canvas_file_upload").fileUploadUI({
                  * If we get here that means we're looking at the first upload */
                 $("#new_artifacts").show();
                 $("#uploadArea_title_div #total").html(files.length);
-                console.log("updating artifact divs because we just showed the new artifacts uploader pane");
+                //console.log("updating artifact divs because we just showed the new artifacts uploader pane");
                 updateArtifactDivs();
             } else {
                 files.uploadCounter += 1;
@@ -1856,7 +1892,7 @@ $("#canvas_file_upload").fileUploadUI({
 
                 if (window.uploadError == false) {
                     $("#new_artifacts").hide('fast', function() {
-                        console.log("updating artifact divs because we just hid the new_artifacts upload pane");
+                        //console.log("updating artifact divs because we just hid the new_artifacts upload pane");
                         updateArtifactDivs();
                     });
                 }
@@ -1954,7 +1990,7 @@ $(document).ready(function(){
                 $(this).parent(".artifact").hide();
                 $(this).parent(".artifact").remove();
                 
-                console.log("updating artifact divs because we just hid a photo");
+                //console.log("updating artifact divs because we just hid a photo");
                 updateArtifactDivs();
             }
         }
