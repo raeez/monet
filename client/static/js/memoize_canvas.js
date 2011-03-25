@@ -5,8 +5,9 @@ var MARGIN_WIDTH = 10; // set a global margin
 var BORDER_WIDTH = 4; // set a global margin
 var ARTIFACT_HEIGHT = 175; // The standard height of all artifacts
 var WRAPPER_WIDTH = 955;
-var THRESHOLD = 0.8 // Maximum crop amount
-var STAGING_SIZE = 6 // Number of photos staged before they're added to the page
+var THRESHOLD = 0.8; // Maximum crop amount
+var STAGING_SIZE = 6; // Number of photos staged before they're added to the page
+var is_iOS;
 
 window.artifactServerData = [] // A global that holds json representations of all returned artifacts
 /*
@@ -42,6 +43,24 @@ window.stagingPhotos.length = function () {
     var count = 0;
     for (var i in window.stagingPhotos) {count ++;}
     return count;
+}
+
+
+/***********************************************
+  Detect whether iOS is running
+ * *********************************************/
+function iOS_running() {
+    if((navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPad/i))) {
+    	is_iOS = true;
+	var visible = 0;
+	$.post("/toggle_visibility", {'visibility':visible, 'id':'add_artifact'});
+	$("#add_artifact").hide();
+    	$("#add_artifact").remove();
+    	updateArtifactDivs();
+
+	
+    }
+    is_iOS = false;
 }
 
 /***********************************************
@@ -378,7 +397,7 @@ function refreshServerData(artifactDivs) {
 
     var sDataLength = window.artifactServerData.length;
     for (var i = 0; i < sDataLength; i ++ ) {
-        var a_div = getArtifactDivByID("artifact_" + window.artifactServerData[i]["id"]);
+        var a_div = ArtifactDivByID("artifact_" + window.artifactServerData[i]["id"]);
         if (a_div === false) {
             /*
              * This likely means there exsists a server data element
@@ -613,7 +632,9 @@ function moveArtifactDivs(artifactDivs) {
             // index, we don't have to update it.
             
             // Also move the physical div.
-            $("#add_artifact").parent(".artifact_row").prepend($("#add_artifact"));
+	    if (is_iOS == false) {
+            	$("#add_artifact").parent(".artifact_row").prepend($("#add_artifact"));
+	    }
             continue;
         }
 
@@ -1836,6 +1857,7 @@ $("#canvas_file_upload").fileUploadUI({
 
 
 $(document).ready(function(){
+    iOS_running();
 
     loadartifacts(0,100);
 
@@ -1844,6 +1866,7 @@ $(document).ready(function(){
     /* ************************************************* *
      * CANVAS - Controls the hide button on artifacts
      * **************************************************/
+  if (is_iOS == false) {
     $(".hide_photo").hover(function(){
         $(this).parent(".artifact").addClass("opacity40");
         if ($(this).parent(".artifact").hasClass("artifact_hidden")) {
@@ -1863,6 +1886,7 @@ $(document).ready(function(){
             $(this).parent(".artifact").css("filter", "alpha(opacity=1)");
         }
     });
+  
     $(".hide_photo").click(function(){
         var visible;
 
@@ -1898,6 +1922,7 @@ $(document).ready(function(){
         }
 
     });
+  }
 
 
     /* ************************************************* *
@@ -1978,6 +2003,7 @@ $(document).ready(function(){
     /* ************************************************* *
      * Control Hover action on artifact divs
      * **************************************************/
+  if (is_iOS == false) {
     $("#add_artifact").hover(function(){
         $(".blue_hover").css("color", "#11b0aa");
     }, function(){
@@ -2019,6 +2045,7 @@ $(document).ready(function(){
         }
         zoomToArtifact($(this).parent(".artifact"));
     });
+  }
 
     /* ************************************************* *
      * Title renaming
