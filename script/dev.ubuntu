@@ -13,7 +13,7 @@ echo ""
 
 #mongodb snapshot sources
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
-sudo apt-add-repository 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen'
+sudo echo "deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen" >> /etc/apt/sources.list
 sudo apt-get -y update
 sudo apt-get -y upgrade
 
