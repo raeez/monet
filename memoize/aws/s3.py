@@ -1,4 +1,4 @@
-IMAGE_BUCKET = 'memoize-images'
+IMAGE_BUCKET = 'monet-images'
 SETTINGS_JSON = 'conf/aws.json'
 
 def load_settings():

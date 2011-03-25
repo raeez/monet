@@ -7,7 +7,7 @@ fi
 
 echo ""
 echo "************************************"
-echo "* Bootstrapping memoize Environment *"
+echo "* Bootstrapping monet Environment *"
 echo "************************************"
 echo ""
 

@@ -7,14 +7,14 @@ fi
 
 echo ""
 echo "***********************************"
-echo "* Configuring memoize Environment *"
+echo "* Configuring monet Environment *"
 echo "***********************************"
 echo ""
 
 chown -R ubuntu /home/ubuntu/
 
-ln -s $(pwd)/env/bin/python /usr/bin/memoize.python
-ln -s $(pwd)/env/bin/gunicorn /usr/bin/memoize.gunicorn
+ln -s $(pwd)/env/bin/python /usr/bin/monet.python
+ln -s $(pwd)/env/bin/gunicorn /usr/bin/monet.gunicorn
 
 # deploy nginx configuration
 cp nginx/nginx.conf /etc/nginx/nginx.conf
@@ -52,6 +52,6 @@ sh script/start
 
 echo ""
 echo "*****************"
-echo "* memoize::Done! *"
+echo "* monet::Done! *"
 echo "*****************"
 echo ""

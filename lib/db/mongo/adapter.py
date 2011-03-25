@@ -35,7 +35,7 @@ def map_id(params):
 class MongoAdapter(Adapter):
   """Abstraction and management of MongoDB instances"""
 
-  def __init__(self, db_name='memoize'):
+  def __init__(self, db_name='monet'):
     super(MongoAdapter, self).__init__()
 
     try:
@@ -44,7 +44,7 @@ class MongoAdapter(Adapter):
       syslog['db'].critical("Could not connect to MongoDB @ %s:%s" % (HOST[0], HOST[1]))
       raise AdapterConnectionError
 
-    syslog['db'].debug("Created a MongoDB connection to db:memoize")
+    syslog['db'].debug("Created a MongoDB connection to db:monet")
 
   def save(self, collection, document):
     super(MongoAdapter, self).insert(collection, document)

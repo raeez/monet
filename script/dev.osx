@@ -7,7 +7,7 @@ fi
 
 echo ""
 echo "**************************************"
-echo "* Setting up memoize-dev environment *"
+echo "* Setting up monet-dev environment *"
 echo "**************************************"
 echo ""
 
@@ -27,9 +27,9 @@ sudo python_select python27
 
 # load rabbitmq server
 sudo port load rabbitmq-server
-sudo rabbitmqctl add_user memoize memoize # user / pass
-sudo rabbitmqctl add_vhost memoizevhost 
-sudo rabbitmqctl set_permissions -p memoizevhost memoize ".*" ".*" ".*"
+sudo rabbitmqctl add_user monet monet # user / pass
+sudo rabbitmqctl add_vhost monetvhost 
+sudo rabbitmqctl set_permissions -p monetvhost monet ".*" ".*" ".*"
 
 # install node packages
 curl http://npmjs.org/install.sh | sudo sh
@@ -57,10 +57,10 @@ pip install Flask \
                 flask-uploads \
 
 # mimick an installation of the current source tree
-ln -s $(pwd) env/lib/python2.7/site-packages/memoize
+ln -s $(pwd) env/lib/python2.7/site-packages/monet
 
 echo ""
 echo "************************"
-echo "* memoize-dev::Done! *"
+echo "* monet-dev::Done! *"
 echo "************************"
 echo ""

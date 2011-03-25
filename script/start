@@ -7,15 +7,15 @@ fi
 
 initctl reload-configuration
 
-echo "*** memoize *** starting mongodb..."
-start mongodb.memoize
-echo "*** memoize *** starting rabbitmq..."
-start rabbitmq.memoize
-echo "*** memoize *** starting live..."
-start live.memoize
-echo "*** memoize *** starting celery..."
-start celery.memoize
-echo "*** memoize *** starting client..."
-start client.memoize
-echo "*** memoize *** starting nginx..."
-start nginx.memoize
+echo "*** monet *** starting mongodb..."
+start mongodb.monet
+echo "*** monet *** starting rabbitmq..."
+start rabbitmq.monet
+echo "*** monet *** starting live..."
+start live.monet
+echo "*** monet *** starting celery..."
+start celery.monet
+echo "*** monet *** starting client..."
+start client.monet
+echo "*** monet *** starting nginx..."
+start nginx.monet

@@ -1,5 +1,5 @@
 #location of tasks
-CELERY_IMPORTS = ("memoize.celerytasks", )
+CELERY_IMPORTS = ("monet.celerytasks", )
 
 #backend
 CELERY_RESULT_BACKEND = "amqp"
@@ -18,6 +18,6 @@ CELERY_RESULT_PERSISTENT = False # perhaps set to True? enables persistence afte
 #host
 BROKER_HOST = "localhost"
 BROKER_PORT = 5672
-BROKER_USER = "memoize"
-BROKER_PASSWORD = "memoize"
-BROKER_VHOST = "memoizevhost"
+BROKER_USER = "monet"
+BROKER_PASSWORD = "monet"
+BROKER_VHOST = "monetvhost"

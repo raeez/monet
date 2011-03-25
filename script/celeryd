@@ -5,4 +5,4 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-cp celery/production/celeryconfig.py /home/ubuntu/memoize/env/lib/python2.7/site-packages
+cp celery/production/celeryconfig.py /home/ubuntu/monet/env/lib/python2.7/site-packages

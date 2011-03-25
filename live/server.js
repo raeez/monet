@@ -48,9 +48,8 @@ zmq.on('error', function (e) {
 
 // create the server
 var server = http.createServer(function(request, result) {
-    result.writeHead(200, {'Content-Type' : 'text/html'});
-    client = "<script src=\"http://localhost:7000/socket.io/socket.io.js\"></script><script>var socket = new io.Socket();socket.options.port = 7000;socket.connect();socket.on('message', function(m) {console.log('got a msg: ' + m);m = JSON.parse(m);switch (m.action) {case \"ping\":socket.send(JSON.stringify({ \"action\" : \"pong\",\"memory\" : \"null\" }));break;}});</script>";
-    result.end(client);
+    result.writeHead(404, {'Content-Type' : 'text/html'});
+    result.end();
 });
 server.listen(7000);
 

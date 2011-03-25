@@ -16,6 +16,6 @@
     },
 
     "uploads" : { "path" : "/var/www/files",
-                  "base"  : "http://memoize.raeez.com/" }
+                  "base"  : "http://monet.raeez.com/" }
 
 }

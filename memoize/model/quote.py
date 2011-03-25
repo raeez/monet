@@ -2,7 +2,7 @@
 
 from lib.db.container import Container
 from lib.db.model import mandatory, optional, pointer
-from memoize.model import Memory
+from monet.model import Memory
 
 class Quote(Container):
 

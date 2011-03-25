@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(
-  name = 'memoize',
+  name = 'monet',
   version = '0.18',
   packages = find_packages(),
   include_package_data = True,
@@ -11,7 +11,7 @@ setup(
 
   author = 'Raeez Lorgat',
   author_email = 'raeez@mit.edu',
-  description = 'memoize photo sharing',
+  description = 'monet photo sharing',
 
   install_requires=['Flask>=0.6', 'pymongo', 'py-bcrypt', 'gunicorn', 'gevent', 'eventlet', 'celery', 'flask-uploads', 'pyzmq']
 )

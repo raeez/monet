@@ -6,31 +6,31 @@
  *****************************************/
 
 /* White */
-.memoize_white {
+.monet_white {
 	color: #ebebeb;
 }
 
 /* Grey */
-.memoize_grey_dark {
+.monet_grey_dark {
 	color: #222222;
 }
-.memoize_grey_medium {
+.monet_grey_medium {
 	color: #333333;
 }
-.memoize_grey_light {
+.monet_grey_light {
 	color: #aaaaaa;
 }
 
 /* Teal */
-.memoize_teal {
+.monet_teal {
 	color: #11b0aa;
 }
-.memoize_darker_teal {
+.monet_darker_teal {
 	color:#189792;
 }
 
 /* Warning Red */
-.memoize_red {
+.monet_red {
     color:#e3372d;
 }
 

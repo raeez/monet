@@ -18,9 +18,9 @@ function setupSocket(memoryID) {
         socket = new io.Socket();
         socket.options.port = 7000;
     } else {
-        WEB_SOCKET_SWF_LOCATION = "https://memoize.raeez.com/live/socket.io/lib/vendor/web-socket-js/WebSocketMain.swf";
-        socket = new io.Socket("memoize.raeez.com/live");
-        socket.options.port = 443;
+        WEB_SOCKET_SWF_LOCATION = "https://monet.raeez.com/live/socket.io/lib/vendor/web-socket-js/WebSocketMain.swf";
+        socket = new io.Socket("monet.raeez.com/live");
+        socket.options.port = 7000;
     }
     socket.connect();
     socket.on('message', function(m) {

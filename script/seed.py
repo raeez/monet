@@ -14,7 +14,7 @@ lib.config.CONF = {
              'auth' : ('ac53391', 'ezanqkp4gfzjbj') }
 }
 
-from memoize.model import User
+from monet.model import User
 import bcrypt
 
 u = User()

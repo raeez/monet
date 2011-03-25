@@ -18,6 +18,6 @@ CONF = {
              'auth' : ['ac53391', 'ezanqkp4gfzjbj']},
 
   'uploads' : { 'path' : '/var/www/files',
-                'base' : 'http://memoize.raeez.com/',
+                'base' : 'http://monet.raeez.com/',
                 'url' : 'thumb' }
 }

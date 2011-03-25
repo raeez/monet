@@ -5,11 +5,11 @@ from fabric.api import env, local, run, put, cd
 from paramiko.config import SSHConfig
 import json
 
-import memoize.test.run
+import monet.test.run
 
-DEPLOY_DIR = '/home/ubuntu/memoize'
-PYTHON = 'memoize.python'
-TEMP_DIR = '/tmp/memoize'
+DEPLOY_DIR = '/home/ubuntu/monet'
+PYTHON = 'monet.python'
+TEMP_DIR = '/tmp/monet'
 
 def load_hosts(filename='conf/hosts.json'):
   try:
@@ -61,7 +61,7 @@ def dev():
   local(script(dev_script[sys.platform]))
 
 def test():
-  memoize.test.run.test_recursive('.')
+  monet.test.run.test_recursive('.')
 
   # test them servlets
   from servlet.c import app
@@ -109,7 +109,7 @@ def bootstrap():
 
 def deploy():
 
-  ARCHIVE = 'memoize.tar.gz'
+  ARCHIVE = 'monet.tar.gz'
   DIST = local ('python setup.py --fullname', True).strip() # release name and version
   local("echo %s" % DIST)
 

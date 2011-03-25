@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-sys.path.append("/home/ubuntu/memoize/celery")
+sys.path.append("/home/ubuntu/monet/celery")
 import lib.config
 lib.config.CONF = {
   'debug' : False,
@@ -15,7 +15,7 @@ lib.config.CONF = {
              'auth' : ('ac53391', 'ezanqkp4gfzjbj') },
 
   'uploads' : { 'path' : '/var/www/files',
-                'base' : 'http://memoize.raeez.com/' }
+                'base' : 'http://monet.raeez.com/' }
 }
 
 from client.app import client as app

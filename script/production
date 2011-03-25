@@ -11,7 +11,7 @@ echo "* Restarting core services *"
 echo "****************************"
 echo ""
 
-restart celery.memoize
+restart celery.monet
 sh script/reload
 
 echo ""

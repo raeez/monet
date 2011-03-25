@@ -5,6 +5,6 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-rabbitmqctl add_user memoize memoize
-rabbitmqctl add_vhost memoizevhost
-rabbitmqctl set_permissions -p memoizevhost memoize ".*" ".*" ".*"
+rabbitmqctl add_user monet monet
+rabbitmqctl add_vhost monetvhost
+rabbitmqctl set_permissions -p monetvhost monet ".*" ".*" ".*"

@@ -3,10 +3,10 @@
 from lib.db.model import pointer
 from lib.model.key import Key
 
-import memoize.model.admin
+import monet.model.admin
 
 class AdminKey(Key):
   
-  @pointer(memoize.model.admin.Admin, admin=None)
+  @pointer(monet.model.admin.Admin, admin=None)
   def val_admin(self):
     pass

@@ -5,5 +5,5 @@ if [ `whoami` != root ]; then
 	exit
 fi
 
-echo "*** memoize *** reloading client..."
-kill -HUP $(cat /tmp/client.memoize.pid)
+echo "*** monet *** reloading client..."
+kill -HUP $(cat /tmp/client.monet.pid)

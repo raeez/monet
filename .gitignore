@@ -20,6 +20,7 @@ develop-eggs
 *.egg-info
 node
 zeromq-*
+npm
 
 # installer logs
 pip-log.txt

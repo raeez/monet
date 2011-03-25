@@ -2,8 +2,8 @@
 
 from celery.task import task
 from PIL import Image as PIL
-from memoize.model import Photo
-from memoize import live
+from monet.model import Photo
+from monet import live
 
 @task
 def thumbnail(filename, path, url, photo_id, memory_id):

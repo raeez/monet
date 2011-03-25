@@ -12,7 +12,7 @@ lib.config.CONF = {
              'auth' : ('ac53391', 'ezanqkp4gfzjbj') },
 
   'uploads' : { 'path' : '/var/www/files',
-                'base' : 'http://memoize.raeez.com/' }
+                'base' : 'http://monet.raeez.com/' }
 }
 
-from memoize.tasks import *
+from monet.tasks import *

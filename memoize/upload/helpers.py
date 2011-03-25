@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import session, url_for, request, flash, redirect, abort
-from memoize.model import User, Photo, Quote, Memory
+from monet.model import User, Photo, Quote, Memory
 from lib.db.objectid import ObjectId
 import json
 import datetime

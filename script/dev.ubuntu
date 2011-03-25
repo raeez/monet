@@ -7,7 +7,7 @@ fi
 
 echo ""
 echo "****************************************"
-echo "* Setting up memoize-dev environment *"
+echo "* Setting up monet-dev environment *"
 echo "****************************************"
 echo ""
 
@@ -36,9 +36,9 @@ sudo apt-get -y install git \
                         libfreetype6-dev \
 
 # set up rabbitmq
-sudo rabbitmqctl add_user memoize memoize
-sudo rabbitmqctl add_vhost memoizevhost 
-sudo rabbitmqctl set_permissions -p memoizevhost memoize ".*" ".*" ".*"
+sudo rabbitmqctl add_user monet monet
+sudo rabbitmqctl add_vhost monetvhost 
+sudo rabbitmqctl set_permissions -p monetvhost monet ".*" ".*" ".*"
 
 # set up zeromq
 curl http://download.zeromq.org/zeromq-2.1.3.tar.gz | tar xz && cd zeromq-*
@@ -85,7 +85,7 @@ pip install Flask \
                 py-bcrypt \
                 flask-uploads \
 
-ln -s $(pwd) env/lib/python2.7/site-packages/memoize
+ln -s $(pwd) env/lib/python2.7/site-packages/monet
 
 
 git clone git://fabfile.org/fabric.git fabric
@@ -95,6 +95,6 @@ sudo python setup.py install
 
 echo ""
 echo "***********************"
-echo "* memoize-dev::Done! *"
+echo "* monet-dev::Done! *"
 echo "***********************"
 echo ""

@@ -7,4 +7,4 @@ export PYTHONPATH=$(pwd)/celery/local:$PYTHONPATH
 python setup.py install
 
 # launch celery with the latest codebase
-celeryd --events --loglevel INFO --maxtasksperchild 10000 --pid /tmp/celery.memoize.pid --pool eventlet --concurrency=1000
+celeryd --events --loglevel INFO --maxtasksperchild 10000 --pid /tmp/celery.monet.pid --pool eventlet --concurrency=1000

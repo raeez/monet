@@ -2,7 +2,7 @@
 
 from lib.db.container import Container
 from lib.db.model import mandatory, optional, pointer, valid
-from memoize.model import Memory
+from monet.model import Memory
 
 class Photo(Container):
 
@@ -43,5 +43,5 @@ class Photo(Container):
   def resize(self, filename, path, url, memory_id):
     assert (not self.processed), "Image already resized!"
 
-    from memoize.tasks import thumbnail
+    from monet.tasks import thumbnail
     thumbnail.delay(filename, path, url, str(self._id), str(memory_id))
