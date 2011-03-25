@@ -154,7 +154,7 @@ def rand_photo(m):
     return None
 
 def claimed(m):
-  u = User.find_one({ "_id" : session["id"] })
+  u = User.find_one({ "_id" : session["_id"] })
   if not u:
     abort(400)
   return not (m._id in u.memories)

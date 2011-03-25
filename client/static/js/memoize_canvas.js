@@ -9,6 +9,10 @@ var THRESHOLD = 0.8; // Maximum crop amount
 var STAGING_SIZE = 6; // Number of photos staged before they're added to the page
 var is_iOS;
 
+// out update Queue
+window.updateQueue = [];
+
+
 window.artifactServerData = [] // A global that holds json representations of all returned artifacts
 /*
  * artifactServeData Object = {
@@ -226,6 +230,14 @@ function getServerDataFieldByID(id, field) {
 }
 
 
+function processOutstandingQueue() {
+    console.log(window.updateQueue);
+    window.uploading = false;
+    while (window.updateQueue.length) {
+        processMessage(window.updateQueue.shift());
+    }
+}
+
 /******************************************
  * UPDATING HORIZONTAL ARTIFACT LAYOUT
  * ***************************************/
@@ -324,7 +336,24 @@ function getRealWidth(artifactDiv) {
  * full : "<full_url>"
  */
 function updateArtifact(message) {
+    // if uploading:
+    //  add message to queue
+    // else
+    //  
     // Need to update both window.artifactDivs and window.artifactServerData
+    //
+    if (window.uploading) {
+        console.log("Queueing: ");
+        console.log(message);
+        window.updateQueue.unshift(message);
+        console.log(window.updateQueue);
+    } else {
+        processMessage(message);
+    }
+}
+function processMessage(message) {
+    console.log("Processing: ");
+    console.log(message);
     var j = getServerDataIndexByID("artifact_"+message._id);
     if (j === false) {
         // This means we need to make a new artifact.
@@ -1348,8 +1377,14 @@ function doZoom(artifact) {
     }
 
 
-    if ($("#alert_bar:visible").length > 0) {
-        $("#alert_bar").hide('fast');
+    if (window.enableZoomAnimation == true) {
+        if ($("#alert_bar:visible").length > 0) {
+            $("#alert_bar").hide('fast');
+        }
+    } else {
+        if ($("#alert_bar:visible").length > 0) {
+            $("#alert_bar").hide();
+        }
     }
 
     $("#artifact_wrapper").height($("#in_zoom_div").height()*window.scaleFactor);
@@ -1430,7 +1465,7 @@ function doZoom(artifact) {
             }
 
         }
-        if (window.enableZoomAnimation == true || window.enableZoomAnimation == false) {
+        if (window.enableZoomAnimation == true) {
             $("#in_zoom_div").animate({
                 origin: ["0%", "0%"],
                 scaleX: window.scaleFactor,
@@ -1457,7 +1492,11 @@ function doZoom(artifact) {
     }
 
     // Be sure we're looking at an expanded photo with no cruft on it
-    artifactExpand(artifact);
+    if (window.enableZoomAnimation == true) {
+        artifactExpand(artifact);
+    } else {
+        artifactExpand(artifact, true); // Instant mode
+    }
 
     window.previousZoomTarget = artifact;
 }
@@ -1716,10 +1755,12 @@ function clearStaging() {
     if (window.zoomedIn == false) {
         var id;
 
+    /*
         if (!$("#row_1").length) {
             var new_row = "<div class='artifact_row' id='row_1'></div>"
             $("#above_zoom_div").append(new_row);
         }
+        */
 
         for (id in window.stagingPhotos) {
             if (id == "length") {
@@ -1728,6 +1769,7 @@ function clearStaging() {
             var file = window.stagingPhotos[id];
             $("#artifact_"+file.id).remove(); // Should remove from the staging area
 
+/*
             // Check to see if the Socket populated this photo first
             var existingThumb = getServerDataFieldByID(file.id, "thumb_url");
             if (existingThumb !== undefined) {
@@ -1746,12 +1788,13 @@ function clearStaging() {
                 '       <\/div>';
                 $("#new_artifacts").after(newArtifact);
             }
+            */
 
             delete window.stagingPhotos[id];
         }
 
         //console.log("updating artifact divs because we're clearing the staging area");
-        updateArtifactDivs();
+        //updateArtifactDivs();
 
     }
 }
@@ -1819,6 +1862,7 @@ $("#canvas_file_upload").fileUploadUI({
             $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
         },
         beforeSend:function (event, files, index, xhr, handler, callBack) {
+            window.uploading = true;
             if (!files.uploadCounter) {
                 window.enableLive = false;
                 files.uploadCounter = 1;  
@@ -1884,6 +1928,8 @@ $("#canvas_file_upload").fileUploadUI({
         
             resizeHoldingWrappers();
 
+            console.log(files.uploadCounter);
+
             if (files.uploadCounter >= files.length) {
                 /* your code after all uplaods have completed */
                 if (window.stagingPhotos.length()) {
@@ -1897,6 +1943,8 @@ $("#canvas_file_upload").fileUploadUI({
                     });
                 }
                 window.enableLive = true;
+                console.log("Only should show up once");
+                processOutstandingQueue();
             }
         },
         buildUploadRow: function (files, index) {
@@ -2160,7 +2208,7 @@ $(document).ready(function(){
     /* ************************************************* *
      * Detect Arrow Keys
      * **************************************************/
-    $(window).keydown(function(key) {
+    $(document).keydown(function(key) {
         if (key.keyCode == 37) {
             // LEFT
             if (window.zoomedIn == true) {

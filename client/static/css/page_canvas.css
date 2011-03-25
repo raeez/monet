@@ -395,6 +395,7 @@
 .photo {
 	/*left:-10%;
 	position:relative;*/
+    cursor:pointer;
 }
 
 .photo:hover {
