@@ -13,7 +13,7 @@ def create_memory():
   m = Memory()
   m.user = None
   if 'email' in session:
-    m.user = session['id']
+    m.user = session['_id']
   else:
     m.user = None
   m.name = mem_name
@@ -121,7 +121,7 @@ def getVisibleArtifacts(artifacts):
   return visible_artifacts
 
 def build_memory_stream():
-  m = Memory.find({'user' : session['id']})
+  m = Memory.find({'user' : session['_id']})
   s = []
   for memory in m:
     visible_artifacts = getVisibleArtifacts(memory.artifacts)

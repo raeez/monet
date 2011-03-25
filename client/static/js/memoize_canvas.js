@@ -231,7 +231,6 @@ function getServerDataFieldByID(id, field) {
 
 
 function processOutstandingQueue() {
-    console.log(window.updateQueue);
     window.uploading = false;
     while (window.updateQueue.length) {
         processMessage(window.updateQueue.shift());
@@ -343,17 +342,12 @@ function updateArtifact(message) {
     // Need to update both window.artifactDivs and window.artifactServerData
     //
     if (window.uploading) {
-        console.log("Queueing: ");
-        console.log(message);
         window.updateQueue.unshift(message);
-        console.log(window.updateQueue);
     } else {
         processMessage(message);
     }
 }
 function processMessage(message) {
-    console.log("Processing: ");
-    console.log(message);
     var j = getServerDataIndexByID("artifact_"+message._id);
     if (j === false) {
         // This means we need to make a new artifact.
@@ -1928,7 +1922,6 @@ $("#canvas_file_upload").fileUploadUI({
         
             resizeHoldingWrappers();
 
-            console.log(files.uploadCounter);
 
             if (files.uploadCounter >= files.length) {
                 /* your code after all uplaods have completed */
@@ -1943,7 +1936,6 @@ $("#canvas_file_upload").fileUploadUI({
                     });
                 }
                 window.enableLive = true;
-                console.log("Only should show up once");
                 processOutstandingQueue();
             }
         },
@@ -1975,9 +1967,11 @@ $("#canvas_file_upload").fileUploadUI({
 
 
 
-
 $(document).ready(function(){
     iOS_running();
+
+    var memoryID = $("#memory_id").html();
+    setupSocket(memoryID);
 
     loadartifacts(0,100);
 

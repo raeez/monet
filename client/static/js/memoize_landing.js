@@ -5,30 +5,6 @@
  window.memoryId = undefined;
 
 /**
- * Setup the socket connection to the server. Must happen after we get a memory id
- * @param {string} memoryID - The ID of the memory that this socket streams
- * artifacts from
- */
-function setupSocket(memoryID) {
-    WEB_SOCKET_SWF_LOCATION = "http://localhost:7000/socket.io/lib/vendor/web-socket-js/WebSocketMain.swf";
-    var socket = new io.Socket(); // get this from conf
-    socket.options.port = 7000;
-    socket.connect();
-    socket.on('message', function(m) {
-        m = JSON.parse(m);
-        switch (m.action) {
-            case "ping":
-                socket.send(JSON.stringify({ "action" : "pong", "memory":memoryID}));
-                break;
-            case "update":
-                updateArtifact(m);
-                break;
-            break;
-        }
-    });
-}
-
-/**
  * Re-centers the landing_page content in the middle of the page
  * Takes an optional adjustment value that is used once we add
  * images to the page
