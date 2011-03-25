@@ -13,9 +13,17 @@ window.socket = null;
  * artifacts from
  */
 function setupSocket(memoryID) {
-    WEB_SOCKET_SWF_LOCATION = "http://localhost:7000/socket.io/lib/vendor/web-socket-js/WebSocketMain.swf";
+    if (window.location.hostname == "localhost") {
+        WEB_SOCKET_SWF_LOCATION = "http://localhost:7000/socket.io/lib/vendor/web-socket-js/WebSocketMain.swf";
+    } else {
+        WEB_SOCKET_SWF_LOCATION = "https://memoize.raeez.com/live/socket.io/lib/vendor/web-socket-js/WebSocketMain.swf";
+    }
     var socket = new io.Socket(); // get this from conf
-    socket.options.port = 7000;
+    if (window.location.hostname == "localhost") {
+        socket.options.port = 7000;
+    } else {
+        socket.options.port = 443;
+    }
     socket.connect();
     socket.on('message', function(m) {
         m = JSON.parse(m);
