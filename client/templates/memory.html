@@ -195,7 +195,7 @@
                     <div class="artifact_row" id="row_0">
                     <div id="add_artifact" class="artifact no_crop">
                         <div class="photo_container">
-                        <form id="canvas_file_upload" action="{{url_for('create')}}" method="POST" enctype="multipart/form-data">
+                        <form id="canvas_file_upload" action="{{url_for('photo')}}" method="POST" enctype="multipart/form-data">
                             <input type="file" name="photo" multiple>
                             <input type=hidden name=memory_id value="{{memory['id']}}"/>
                             <input type="hidden" name="submit" value="Add Photo" />

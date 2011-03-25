@@ -338,10 +338,10 @@ function refreshServerData(artifactDivs) {
             var artifactDiv = new ArtifactDiv();
             artifactDiv['id'] = "artifact_" + sData.id;
             artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
-            artifactDiv['realWidth'] = sData.width; // FIXME We need the width in the artifact
+            artifactDiv['realWidth'] = sData.width; // 
             artifactDiv['display'] = true; // We want it to be displayed!
             artifactDiv['divArea'] = "above_zoom_div" // Assuming new elements are always pu aboveZoom Div
-            artifactDiv["height"] = sData.height; // FIXME Need server dimensions
+            artifactDiv["height"] = sData.height; // 
             artifactDiv["width"] = sData.width;
             artifactDiv["image_url"] = serverData.image_url;
             artifactDiv["thumb_url"] = serverData.thumb_url;
@@ -737,7 +737,7 @@ function loadartifacts(offset, numartifacts) {
         var show_hidden = 1;
     } else { var show_hidden = 0;}
 
-    $.post("/get_artifacts/"+memory_id, {"offset":offset, "numartifacts":numartifacts, "show_hidden":show_hidden}, function(data) {
+    $.get("/memory", {"_id":memory_id, "offset":offset, "numartifacts":numartifacts, "show_hidden":show_hidden}, function(data) {
         window.artifactServerData = jsonParse(data);
         refreshServerData(window.artifactDivs);
         loadViewportPhotos();
@@ -2001,7 +2001,7 @@ $(document).ready(function(){
     });
     $(window).scroll(function(){
         if($(window).scrollTop() + $(window).height() >= 
-            $(document).height() - ARTIFACT_HEIGT ) {
+            $(document).height() - ARTIFACT_HEIGHT ) {
         } else {
             loadViewportPhotos();
         }
