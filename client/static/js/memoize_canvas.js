@@ -28,6 +28,7 @@ window.artifactDivs; // A global used to keep track of the position of all artif
  */
 window.updateQueue = [];
 
+window.enableLive = true; // A boolean flag that indicates whether or not we should be adding elements to the page
 
 window.numRows = 0; // The total number of rows on the page
 window.zoomHeight; // A global that says how tall the center area of the page is
@@ -349,7 +350,7 @@ function updateArtifact(message) {
         // We need to check if it's in the staging area or if it's in
         // the main canvas
 
-        if($("#artifact_"+message._id).length) {
+        if(window.enableLive == true && $("#artifact_"+message._id).length) {
             // We found a div!
             if ($("#artifact_"+message._id).find("img").attr("src") == message.thumb) {
                 // If the img doesn't exist, it will return 'undefined'
@@ -406,19 +407,23 @@ function refreshServerData(artifactDivs) {
              * element was put on the page and updated. We should make
              * an artifact div so it gets included in the next render
              */
-            var sData = window.artifactServerData[i];
-            var artifactDiv = new ArtifactDiv();
-            artifactDiv['id'] = "artifact_" + sData.id;
-            artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
-            artifactDiv['realWidth'] = sData.width; // 
-            artifactDiv['display'] = true; // We want it to be displayed!
-            artifactDiv['divArea'] = "above_zoom_div" // Assuming new elements are always pu aboveZoom Div
-            artifactDiv["height"] = sData.height; // 
-            artifactDiv["width"] = sData.width;
-            artifactDiv["image_url"] = sData.image_url;
-            artifactDiv["thumb_url"] = sData.thumb_url;
-            artifactDiv["visible"] = sData.visible;
-            artifactDivs.splice(2,0,artifactDiv);
+            if (window.enableLive == true) {
+                // We only want to make new divs like this if we're accepting
+                // pushed elements
+                var sData = window.artifactServerData[i];
+                var artifactDiv = new ArtifactDiv();
+                artifactDiv['id'] = "artifact_" + sData.id;
+                artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
+                artifactDiv['realWidth'] = sData.width; // 
+                artifactDiv['display'] = true; // We want it to be displayed!
+                artifactDiv['divArea'] = "above_zoom_div" // Assuming new elements are always pu aboveZoom Div
+                artifactDiv["height"] = sData.height; // 
+                artifactDiv["width"] = sData.width;
+                artifactDiv["image_url"] = sData.image_url;
+                artifactDiv["thumb_url"] = sData.thumb_url;
+                artifactDiv["visible"] = sData.visible;
+                artifactDivs.splice(2,0,artifactDiv);
+            }
         } else {
             // No need to update anything in the serverData
             continue;
@@ -1308,6 +1313,7 @@ function truncateTitle(enclosingSize) {
  * Zoom in on an artifact. Assume it's already in the #in_zoom_div
  */
 function doZoom(artifact) {
+    window.enableLive = false;
     var artifactDiv = getArtifactDivByID($(artifact).attr("id"));
 
     calculateScaleFactor(artifactDiv.realWidth, ARTIFACT_HEIGHT);
@@ -1606,6 +1612,7 @@ function doUnZoom() {
         top: 0
     },'slow', function() {
         $("#artifact_wrapper").height('auto');
+        window.enableLive = true;
     });
 }
 
@@ -1677,6 +1684,8 @@ function clearStaging() {
                 continue;
             }
             var file = window.stagingPhotos[id];
+            console.log("============================");
+            console.log(file);
             $("#artifact_"+file.id).remove(); // Should remove from the staging area
 
             // Check to see if the Socket populated this photo first
@@ -1772,6 +1781,7 @@ $("#canvas_file_upload").fileUploadUI({
         },
         beforeSend:function (event, files, index, xhr, handler, callBack) {
             if (!files.uploadCounter) {
+                window.enableLive = false;
                 files.uploadCounter = 1;  
                 /* files.uploadCounter is set the after the first upload 
                  * If we get here that means we're looking at the first upload */
@@ -1847,6 +1857,7 @@ $("#canvas_file_upload").fileUploadUI({
                         updateArtifactDivs();
                     });
                 }
+                window.enableLive = true;
             }
         },
         buildUploadRow: function (files, index) {
