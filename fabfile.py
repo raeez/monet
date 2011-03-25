@@ -140,6 +140,10 @@ def deploy():
 # - REMOTE -
 # ----------
 
+def rabbitmq():
+  with cd(DEPLOY_DIR):
+    run(script('rabbitmq'))
+
 def list():
   with cd(DEPLOY_DIR):
     run(script('list'))
