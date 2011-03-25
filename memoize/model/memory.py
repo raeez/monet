@@ -13,7 +13,3 @@ class Memory(Container):
   @mandatory(list, artifacts=[])
   def val_artifacts(self):
     assert isinstance(self.artifacts, list)
-
-  @pointer(User, user=None)
-  def val_user(self):
-    pass
