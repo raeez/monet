@@ -29,7 +29,7 @@
                     {% else %}
                     <span id="{{memory['id']}}" class="anchorLink">
                     {% endif %}
-                        <a href="{{url_for('memory', id=memory['id'])}}">{{memory['name']}}</a>
+                        <a href="{{url_for('mem', id=memory['id'])}}">{{memory['name']}}</a>
                     </span>
                 </div>
             </div>
@@ -73,7 +73,7 @@
                 <div class="forget" title="Click here to forget this memory. You can undo this later"><a href="#">X</a></div>
             </div>
 
-        <a class="mem_link" href="{{url_for('memory', id=memory['id'])}}" >
+        <a class="mem_link" href="{{url_for('mem', id=memory['id'])}}" >
             <div class="center">
                 <div class="artifact_previews">
                     {% for artifact in memory['rand_artifacts'] %}
@@ -85,7 +85,7 @@
             </div>
 
             <div class="footer">
-                <a href="{{url_for('memory', id=memory['id'])}}">{{url_for('memory', id=memory['id'])}}</a>
+                <a href="{{url_for('mem', id=memory['id'])}}">{{url_for('mem', id=memory['id'])}}</a>
             </div>
         </a>
         </div>
@@ -95,17 +95,4 @@
 </div>
 
 </div>
-
-<!--
-  <h1>Viewing memories from {{session['email']}} </h1>
-  <p>Log out <a href="{{ url_for('logout') }}">here</a>.</p>
-
-  <ul>
-  {% for memory in stream %}
-    <li>{{memory['name']}}&#151;<a href="{{url_for('memory', id=memory['id'])}}">open</a></li>
-  {% endfor %}
-  </ul>
-
-  <p><a href="{{url_for('stream')}}">Browse</a> your memory stream. Or, <a href="{{url_for('new')}}">create</a> a new memory.</p>
--->
 {% endblock %}

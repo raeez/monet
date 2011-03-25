@@ -141,31 +141,36 @@ def mem(id):
         rows.append(current_row)
 
     return render_template('memory.html', memory={'claimed' : not (not m.user), 'id' : m._id, 'name' : m.name, 'rows' : rows, 'visible' : show_hidden})
-  
+
 
 ###################
 ## NOT LOGGED IN ##
 ###################
 
 @main_module.route('/memory', methods=['GET', 'POST'])
-def memory(id):
+def memory():
   if request.method == 'GET':
-    m = Memory.find_one({ "_id" : id })
+    _id = request.args.get('_id', None)
+    if not _id:
+      abort(404)
 
-    offset = int(request.form.get('offset', '0'))
-    numArtifacts = int(request.form.get('numArtifacts', '100'))
-    showHidden = int(request.form.get('show_hidden', '0'))
+    m = Memory.find_one({ "_id" : _id })
+
+    offset = int(request.args.get('offset', '0'))
+    numArtifacts = int(request.args.get('numArtifacts', '100'))
+    showHidden = int(request.args.get('show_hidden', '0'))
 
     if not m:
       abort(404)
     else:
       artifacts = getArtifactsFromMemory(m, offset, numArtifacts, showHidden)
 
+
     return json.dumps(artifacts)
 
   elif request.method == 'POST':
     m = create_memory()
-    return m.to_json
+    return m.to_json()
 
   abort(400)
 
