@@ -113,7 +113,7 @@ def getVisibleArtifacts(artifacts):
     if p.visible == 1:
       visible_artifacts.append(photo)
 
-    return visible_artifacts
+  return visible_artifacts
 
 def build_memory_stream():
   m = Memory.find({'user' : session['id']})
@@ -149,7 +149,7 @@ def rand_photo(m):
     return None
 
 def claimed(m):
-  u = User.find_one({ "_id" : session["_id"] })
+  u = User.find_one({ "_id" : session["id"] })
   if not u:
     abort(400)
   return not (m._id in u.memories)

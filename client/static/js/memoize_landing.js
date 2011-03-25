@@ -2,6 +2,7 @@
  * Javascript for the Landing Page
  *********************************/
  window.Artifacts = {}; // Holds a dictionary of ids and urls
+ window.memoryId = undefined;
 
 /**
  * Re-centers the landing_page content in the middle of the page
@@ -85,23 +86,24 @@ $('#file_upload').fileUploadUI({
     downloadTable: $('#files'),
     progressSelector: $(".file_upload_progress"),
     formData: function(form) {
-        var data;
-        $.ajax({
-            url:"/memory",
-            type:"POST",
-            async:false,
-            success:function(memJSON) {
-                data = jsonParse(memJSON);
-                console.log("done");
-            }
-        });
-        var memoryId = new Object();
-        memoryId.name = "memory_id";
-        memoryId.value = data["_id"];
-        console.log(data["_id"]);
-        var outForm = [memoryId];
-        console.log(form);
-        return outForm
+        if (window.memoryId === undefined) {
+            var data;
+            $.ajax({
+                url:"/memory",
+                type:"POST",
+                async:false,
+                success:function(memJSON) {
+                    data = jsonParse(memJSON);
+                    window.memoryId = data["_id"];
+                }
+            });
+        var outObject = new Object();
+        outObject.name = "memory_id";
+        outObject.value = window.memoryId;
+        var outForm = [outObject];
+        console.log(outForm);
+        return outForm;
+        }
     },
     initProgressBar: function (node, value) {
         if (typeof node.progressbar === 'function') {
