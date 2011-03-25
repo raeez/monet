@@ -1,7 +1,7 @@
 // JavaScript Document
 
 var FILE_UPLOAD_LIMIT = 1250000; // Front-end upload limit
-window.socket = null;
+socket = null;
 
 /*============================================================ 
  * On Startup
@@ -15,13 +15,11 @@ window.socket = null;
 function setupSocket(memoryID) {
     if (window.location.hostname == "localhost") {
         WEB_SOCKET_SWF_LOCATION = "http://localhost:7000/socket.io/lib/vendor/web-socket-js/WebSocketMain.swf";
-    } else {
-        WEB_SOCKET_SWF_LOCATION = "https://memoize.raeez.com/live/socket.io/lib/vendor/web-socket-js/WebSocketMain.swf";
-    }
-    var socket = new io.Socket(); // get this from conf
-    if (window.location.hostname == "localhost") {
+        socket = new io.Socket();
         socket.options.port = 7000;
     } else {
+        WEB_SOCKET_SWF_LOCATION = "https://memoize.raeez.com/live/socket.io/lib/vendor/web-socket-js/WebSocketMain.swf";
+        socket = new io.Socket("memoize.raeez.com/live");
         socket.options.port = 443;
     }
     socket.connect();
@@ -34,7 +32,6 @@ function setupSocket(memoryID) {
             case "update":
                 updateArtifact(m);
                 break;
-            break;
         }
     });
 }
