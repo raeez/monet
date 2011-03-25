@@ -34,6 +34,7 @@ sudo apt-get -y install git \
                         build-essential \
                         rabbitmq-server \
                         libfreetype6-dev \
+                        python-setuptools \
 
 # set up rabbitmq
 sudo rabbitmqctl add_user monet monet
@@ -62,12 +63,8 @@ rm install.sh
 sudo npm install zeromq
 sudo npm install socket.io
 
-# dev env
-wget -c http://pypi.python.org/packages/2.7/s/setuptools/setuptools-0.6c11-py2.7.egg#md5=fe1f997bc722265116870bc7919059ea
-sudo sh setuptools-0.6c11-py2.7.egg
-
-sudo python2.7 /usr/local/bin/easy_install-2.7 pip
-sudo python2.7 /usr/local/bin/pip-2.7 install virtualenv
+# virtual env
+pip install virtualenv
 virtualenv -p python2.7 --no-site-packages --distribute --clear env
 . env/bin/activate
 
