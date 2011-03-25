@@ -1,10 +1,12 @@
-always label a container id "_id", both in dictionaries and in variables:
+* NO TABS ANYWHERE; only indent 2 spaces (python), or 4 spaces (javascript)
+
+* always label a container id "_id", both in dictionaries and in variables:
 
   def new_func(_id, some_data):
     Memory.find_one({ "_id" : _id })
 
-always use UNIX LF endings (as opposed to windows CRLF endings); fix this with:
+* always use UNIX LF endings (as opposed to windows CRLF endings); fix this with:
     find . -type f -exec perl -pi -e 's///g' {} /;
 
-always ensure that git's core.autocrlf is set to false:
+* always ensure that git's core.autocrlf is set to false:
     git config core.autocrlf false
