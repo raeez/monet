@@ -26,6 +26,10 @@ class User(Container):
   def val_settings(self):
     pass
 
+  @mandatory(list, memories=[])
+  def val_memories(self):
+    pass
+
   @optional(int, last_login=None)
   def val_last_login(self):
     assert self.last_login > 1286688330, "Ivalid time-stamp for member 'time'"

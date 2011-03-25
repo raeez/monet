@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import session, url_for, request, flash, redirect
+from flask import session, url_for, request, flash, redirect, abort
 from memoize.model import User, Photo, Quote, Memory
 from lib.db.objectid import ObjectId
 import json
@@ -149,13 +149,17 @@ def rand_photo(m):
     return None
 
 def claimed(m):
-  return not (not m.user)
+  u = User.find_one({ "_id" : session["_id"] })
+  if not u:
+    abort(400)
+  return not (m._id in u.memories)
 
 def claim_memory(m):
   assert isinstance(m, Memory)
   if 'email' in session:
-    m.user = session['id']
-    m.save()
+    if not claimed(m):
+      User.atomic_append({ '_id' : session['_id'] },
+                         { 'memories' : m._id })
     return(succeed())
   return(error(["not logged in!"]))
 
