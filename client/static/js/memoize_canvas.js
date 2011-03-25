@@ -331,11 +331,12 @@ function updateArtifact(message) {
             image_url : message.full,
             thumb_url : message.thumb,
             visible : 1,
-            // FIXME We need the dimensions to come from the message!
-            width : ARTIFACT_HEIGHT,
-            height : ARTIFACT_HEIGHT
+            width : message.width,
+            height : message.height
         };
         window.artifactServerData.push(serverObj);
+
+        console.log("updating artifact divs because we got pushed a new artifact by the socket");
         updateArtifactDivs();
 
         // We don't deal with window.artifactDivs because there's no div
@@ -407,7 +408,7 @@ function refreshServerData(artifactDivs) {
              */
             var sData = window.artifactServerData[i];
             var artifactDiv = new ArtifactDiv();
-            artifactDiv['id'] = sData.id;
+            artifactDiv['id'] = "artifact_" + sData.id;
             artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
             artifactDiv['realWidth'] = sData.width; // 
             artifactDiv['display'] = true; // We want it to be displayed!
@@ -447,6 +448,11 @@ function calculateCrop(artifactDivs) {
     var artifactDivs_length = artifactDivs.length;
     for (var i = 0; i < artifactDivs_length; i ++) {
         var artifactDiv = artifactDivs[i];
+        if (inStagingPhotos(artifactDiv.id)) {
+            // I don't want to include divs that are still in the staging
+            // area
+            continue;
+        }
         if (artifactDiv.display) {
             if (width_accumulator < max_width) {
 		        width_accumulator += artifactDiv.realWidth + MARGIN_WIDTH;
@@ -656,7 +662,6 @@ function moveArtifactDivs(artifactDivs) {
             continue;
         }
 
-        if (!$("#"+artifactDiv.id).length) {
             /*
              * This means the div does not exist yet. This is likely
              * because our socket added it to the data structure
@@ -666,9 +671,6 @@ function moveArtifactDivs(artifactDivs) {
             // If it's in window.stagingPhotos, we skip this since it will
             // be automatically added to the main area by clearStaging
             
-            if (inStagingPhotos(artifactDiv.id)) {
-                return;
-            }
 
             /*
              *
@@ -677,21 +679,33 @@ function moveArtifactDivs(artifactDivs) {
              *
              */
 
-            var newArtifact = ''+
-            '       <div id="artifact_'+artifactDiv.id+'" class="artifact photo">'+
-            '           <div class="hide_photo"><a href="#">hide</a></div>'+
-            '           <div class="photo_container" style="width:'+artifactDiv.width+'px; height:'+artifactDiv.height+'px;">' + 
-            '               <img class="photo" src="'+artifactDiv.thumb_url+'" height="175"\/>'+
-            '           </div>' + 
-            '       <\/div>';
-            if ($("#row_"+artifactDiv.row).length) {
-                $("#row_"+artifactDiv.row).append(newArtifact);
-            } else {
-                // We need to make a new row first
-                new_row = "<div class='artifact_row' id='row_"+artifactDiv.row+"'></div>"
-                $("#"+artifactDiv.divArea).append(new_row);
-                $("#row_"+artifactDiv.row).append(newArtifact);
-            }
+        if (inStagingPhotos(artifactDiv.id)) {
+            continue;
+        } else {
+            if (!$("#"+artifactDiv.id).length) {
+                console.log("Appending artifact from moveArtifact Divs");
+                var newArtifact = ''+
+                '       <div id="'+artifactDiv.id+'" class="artifact photo">'+
+                '           <div class="hide_photo"><a href="#">hide</a></div>'+
+                '           <div class="photo_container" style="width:'+artifactDiv.width+'px; height:'+artifactDiv.height+'px;">' + 
+                '               <img class="photo" src="'+artifactDiv.thumb_url+'" height="175"\/>'+
+                '           </div>' + 
+                '       <\/div>';
+                $("#new_artifacts").after(newArtifact);
+                /*
+                if ($("#row_"+artifactDiv.row).length) {
+                    console.log($("#row_" + artifactDiv.row));
+                    console.log(newArtifact);
+                    $("#row_"+artifactDiv.row).prepend(newArtifact);
+                    console.log($("#row_" + artifactDiv.row));
+                } else {
+                    // We need to make a new row first
+                    new_row = "<div class='artifact_row' id='row_"+artifactDiv.row+"'></div>"
+                    $("#"+artifactDiv.divArea).prepend(new_row);
+                    $("#row_"+artifactDiv.row).prepend(newArtifact);
+                }
+                */
+            } 
         }
 
         if (artifactDiv.row > window.numRows) {
@@ -894,6 +908,7 @@ function updatePos() {
 	}
     });
     //window.artifactDivs = newPositions;
+    console.log("updating artifact divs because we dragged and dropped");
     updateArtifactDivs(/*newPositions*/);
     
 }
@@ -1229,6 +1244,7 @@ function resizeCanvas() {
     }
     WRAPPER_WIDTH = $(".canvas_center").width(); // Update resize global
 
+    console.log("updating artifact divs because we resized the canvas");
     updateArtifactDivs();
 }
 
@@ -1630,20 +1646,22 @@ function resizeHoldingWrappers() {
  * @param {string} id - The id of an artifact (without prefix)
  * @return True if in, false if not
  */
-function inStagingPhotos(id) {
-    for (artifact in window.stagingPhotos) {
-        if (id == artifact.id) {
+function inStagingPhotos(artifactId) {
+    for (var id in window.stagingPhotos) {
+        var file = window.stagingPhotos[id]
+        if (artifactId == "artifact_" + file.id) {
             return true;
         } else {
-            return false;
+            continue;
         }
     }
+    return false;
 }
 
 
 /**
  * Grabs the divs inside of the upload staging area and adds them to the page
- * and calls updateArtifactDivs
+ * and calls update ArtifactDivs
  */
 function clearStaging() {
     if (window.zoomedIn == false) {
@@ -1668,18 +1686,23 @@ function clearStaging() {
             }
 
             // Now we build it again prepending to row 1
-            var newArtifact = ''+
-            '       <div id="artifact_'+file.id+'" class="artifact photo">'+
-            '           <div class="hide_photo"><a href="#">hide</a></div>'+
-            '           <div class="photo_container" style="width:'+file.width+'px; height:'+file.height+'px;">' + 
-            '               <img class="photo" src="'+file.thumb_url+'" height="175"\/>'+
-            '           </div>' + 
-            '       <\/div>';
-            $("#row_1").prepend(newArtifact);
+            if (!$("#artifact_"+file.id).length) {
+                // Only add the new artifact if it doesn't exist yet!
+                console.log("Appending artifact from clear Staging");
+                var newArtifact = ''+
+                '       <div id="artifact_'+file.id+'" class="artifact photo">'+
+                '           <div class="hide_photo"><a href="#">hide</a></div>'+
+                '           <div class="photo_container" style="width:'+file.width+'px; height:'+file.height+'px;">' + 
+                '               <img class="photo" src="'+file.thumb_url+'" height="175"\/>'+
+                '           </div>' + 
+                '       <\/div>';
+                $("#new_artifacts").after(newArtifact);
+            }
 
             delete window.stagingPhotos[id];
         }
 
+        console.log("updating artifact divs because we're clearing the staging area");
         updateArtifactDivs();
 
     }
@@ -1754,8 +1777,11 @@ $("#canvas_file_upload").fileUploadUI({
                  * If we get here that means we're looking at the first upload */
                 $("#new_artifacts").show();
                 $("#uploadArea_title_div #total").html(files.length);
+                console.log("updating artifact divs because we just showed the new artifacts uploader pane");
                 updateArtifactDivs();
-            } 
+            } else {
+                files.uploadCounter += 1;
+            }
             $("#uploadArea_title_div #current").html(files.uploadCounter);
             resizeHoldingWrappers();
 
@@ -1802,11 +1828,6 @@ $("#canvas_file_upload").fileUploadUI({
         onCompleteAll: function (files) {
             // The files array is a shared object between the instances of an upload selection.
             // We extend it with a uploadCounter to calculate when all uploads have completed:
-            if (!files.uploadCounter) {
-                files.uploadCounter = 1;  
-            } else {
-                files.uploadCounter = files.uploadCounter + 1;
-            }
 
             if (files.uploadCounter != 0 && files.uploadCounter % STAGING_SIZE == 0) {
                 clearStaging();
@@ -1814,7 +1835,7 @@ $("#canvas_file_upload").fileUploadUI({
         
             resizeHoldingWrappers();
 
-            if (files.uploadCounter === files.length) {
+            if (files.uploadCounter >= files.length) {
                 /* your code after all uplaods have completed */
                 if (window.stagingPhotos.length()) {
                     clearStaging();
@@ -1822,6 +1843,7 @@ $("#canvas_file_upload").fileUploadUI({
 
                 if (window.uploadError == false) {
                     $("#new_artifacts").hide('fast', function() {
+                        console.log("updating artifact divs because we just hid the new_artifacts upload pane");
                         updateArtifactDivs();
                     });
                 }
@@ -1917,6 +1939,8 @@ $(document).ready(function(){
             } else {
                 $(this).parent(".artifact").hide();
                 $(this).parent(".artifact").remove();
+                
+                console.log("updating artifact divs because we just hid a photo");
                 updateArtifactDivs();
             }
         }
@@ -2180,7 +2204,7 @@ $(document).ready(function(){
     truncateTitle($(".canvas_center").width() - $("#canvas_header #login").width());
     resizeCanvas();
     loadViewportPhotos();
-	// updateArtifactDivs() is run by resizeCanvas
+	// update ArtifactDivs() is run by resizeCanvas
 
 	$(window).resize(resizeCanvas);
 

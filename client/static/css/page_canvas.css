@@ -365,6 +365,7 @@
     border:1px dashed #666;
     margin:5px;
     float:right;
+    overflow:hidden;
 }
 
 
