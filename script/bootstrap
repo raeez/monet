@@ -12,7 +12,7 @@ echo "************************************"
 echo ""
 
 #mongodb snapshot sources
-apt-add-repository 'deb http://downloads.mongodb.org/distros/ubuntu 10.10 10gen'
+apt-add-repository 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen'
 apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
 apt-get -y update
 apt-get -y upgrade
@@ -21,7 +21,6 @@ apt-get -y upgrade
 apt-get -y install git \
                    curl \
                    nginx \
-                   mongodb \
                    openssl \
                    uuid-dev \
                    python2.7 \
@@ -30,6 +29,7 @@ apt-get -y install git \
                    python-pip \
                    libjpeg-dev \
                    libevent-dev \
+                   mongodb-10gen \
                    python2.7-dev \
                    build-essential \
                    rabbitmq-server \
