@@ -52,7 +52,7 @@ def upload_photo(mem_id=None):
 
       return succeed({ 'id' : str(p._id),
                        'memory' : str(m._id),
-                       'memory_url' : url_for('memory', id=m._id),
+                       'memory_url' : url_for('mem', id=m._id),
                        'thumb_url' : app.photos.url(p.filename), # TODO start building these
                        'image_url' : app.photos.url(p.filename),
                        'width': width,
