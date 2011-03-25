@@ -22,6 +22,11 @@ window.artifactServerData = [] // A global that holds json representations of al
 
 window.artifactDivs; // A global used to keep track of the position of all artifact divs
 
+/**
+ * A queue that dispatches all changes to the window.artifactDivs global
+ */
+window.updateQueue = [];
+
 
 window.numRows = 0; // The total number of rows on the page
 window.zoomHeight; // A global that says how tall the center area of the page is
@@ -41,12 +46,31 @@ window.stagingPhotos.length = function () {
 
 /***********************************************
   ARTIFACTDIV Data Structure Handling
- * *********************************************/
+ **********************************************/
 
-/* STRATEGY:
- * First compute the row, div area, and width of each element on the page
- * Then detect the elements that need to be moved
- * Move the elements to the correct locations.
+/*
+ * STRATEGY:
+ * I have a base object called ArtifactDiv
+ * add_artifact and new_artifact are no longer ArtifactDivs
+ * ArtifactDivList contains ArtifactDivs and has several methods that let us
+ * quickly get data in and out
+ *
+ * We no longer let anything directly manipulate artifacts on the page.
+ *
+ * All modifying actions must go through the ArtifactDivList methods.
+ *
+ * These methods add the corresponding request onto the queue and fires
+ * a queue handle event.
+ *
+ * If the queue isn't doing anything, it processes the item on top of the queue
+ * When finished processing, the queue processes remaining items on it until
+ * it's empty
+ *
+ * Flags on all the set methods indicate whether or not a redraw should occur
+ */
+
+/**
+ * Primary model class for all artifact elements on the page
  */
 function ArtifactDiv() {
     // These bits are populated from the populateArtifacts method
@@ -68,6 +92,33 @@ function ArtifactDiv() {
     this.thumb_url = undefined;
     this.visible = undefined;
 }
+/*
+function ArtifactDivList() {
+    this.addDivList = []
+    this.artifactDivList = []
+    this.deleteDivList = []
+
+    this.eventQueue = []
+    this.eventInProgress = false
+    this.processEvent = function()
+
+    this.get = function(id)
+    this.getField = function(id, field)
+    this.getIndex = function(index)
+    this.getByRowPos = function(row, posInRow)
+
+    this.add = function(ArtifactDiv, render)
+    this._add = function(ArtifactDiv, render)
+    this.edit = function(id, field, value, render)
+    this._edit = function(id, field, value, render)
+    this.delete = function(id, render)
+    this._delete = function(id, render)
+
+    this.render = function()
+    this._render = function()
+}
+*/
+
 function getArtifactDivByID(id) {
     var adiv_length = window.artifactDivs.length;
     for (var i = 0; i < adiv_length; i++) {
@@ -266,6 +317,7 @@ function updateArtifact(message) {
             height : ARTIFACT_HEIGHT
         };
         window.artifactServerData.push(serverObj);
+        updateArtifactDivs();
 
         // We don't deal with window.artifactDivs because there's no div
         // made for it yet and we'll let updateArtifacts() do that
@@ -336,17 +388,17 @@ function refreshServerData(artifactDivs) {
              */
             var sData = window.artifactServerData[i];
             var artifactDiv = new ArtifactDiv();
-            artifactDiv['id'] = "artifact_" + sData.id;
+            artifactDiv['id'] = sData.id;
             artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
             artifactDiv['realWidth'] = sData.width; // 
             artifactDiv['display'] = true; // We want it to be displayed!
             artifactDiv['divArea'] = "above_zoom_div" // Assuming new elements are always pu aboveZoom Div
             artifactDiv["height"] = sData.height; // 
             artifactDiv["width"] = sData.width;
-            artifactDiv["image_url"] = serverData.image_url;
-            artifactDiv["thumb_url"] = serverData.thumb_url;
-            artifactDiv["visible"] = serverData.visible;
-            artifactDivs.unshift(artifactDiv);
+            artifactDiv["image_url"] = sData.image_url;
+            artifactDiv["thumb_url"] = sData.thumb_url;
+            artifactDiv["visible"] = sData.visible;
+            artifactDivs.splice(2,0,artifactDiv);
         } else {
             // No need to update anything in the serverData
             continue;
@@ -594,9 +646,6 @@ function moveArtifactDivs(artifactDivs) {
             // be automatically added to the main area by clearStaging
             
             if (inStagingPhotos(artifactDiv.id)) {
-                return;
-            }
-            if (artifactDiv.row <= 2) {
                 return;
             }
 
