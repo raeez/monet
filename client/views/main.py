@@ -141,14 +141,14 @@ def mem(id):
         rows.append(current_row)
 
     return render_template('memory.html', memory={'claimed' : not (not m.user), 'id' : m._id, 'name' : m.name, 'rows' : rows, 'visible' : show_hidden})
-  
+
 
 ###################
 ## NOT LOGGED IN ##
 ###################
 
 @main_module.route('/memory', methods=['GET', 'POST'])
-def memory(id):
+def memory():
   if request.method == 'GET':
     m = Memory.find_one({ "_id" : id })
 
@@ -165,7 +165,7 @@ def memory(id):
 
   elif request.method == 'POST':
     m = create_memory()
-    return m.to_json
+    return m.to_json()
 
   abort(400)
 
