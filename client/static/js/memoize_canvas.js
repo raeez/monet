@@ -416,7 +416,8 @@ function refreshServerData(artifactDivs) {
                 artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
                 artifactDiv['realWidth'] = sData.width; // 
                 artifactDiv['display'] = true; // We want it to be displayed!
-                artifactDiv['divArea'] = "above_zoom_div" // Assuming new elements are always pu aboveZoom Div
+                zoomDiv = $("#new_artifacts").parents(".zoom_div").attr("id");
+                artifactDiv['divArea'] = zoomDiv // Assuming new elements are always pu aboveZoom Div)
                 artifactDiv["height"] = sData.height; // 
                 artifactDiv["width"] = sData.width;
                 artifactDiv["image_url"] = sData.image_url;
@@ -1613,6 +1614,8 @@ function doUnZoom() {
     },'slow', function() {
         $("#artifact_wrapper").height('auto');
         window.enableLive = true;
+        console.log("Updating divs after unzoom just in case we have more live photos");
+        updateArtifactDivs();
     });
 }
 
