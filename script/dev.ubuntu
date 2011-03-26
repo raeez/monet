@@ -37,9 +37,7 @@ sudo apt-get -y install git \
                         python-setuptools \
 
 # set up rabbitmq
-sudo rabbitmqctl add_user monet monet
-sudo rabbitmqctl add_vhost monetvhost 
-sudo rabbitmqctl set_permissions -p monetvhost monet ".*" ".*" ".*"
+sudo sh script/rabbitmq
 
 # set up zeromq
 curl http://download.zeromq.org/zeromq-2.1.3.tar.gz | tar xz && cd zeromq-*
