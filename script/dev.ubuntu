@@ -64,7 +64,7 @@ sudo npm install zeromq
 sudo npm install socket.io
 
 # virtual env
-pip install virtualenv
+sudo pip install virtualenv
 virtualenv -p python2.7 --no-site-packages --distribute --clear env
 . env/bin/activate
 
