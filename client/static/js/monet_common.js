@@ -19,7 +19,7 @@ function setupSocket(memoryID) {
         socket.options.port = 7000;
     } else {
         WEB_SOCKET_SWF_LOCATION = "https://monet.raeez.com/live/socket.io/lib/vendor/web-socket-js/WebSocketMain.swf";
-        socket = new io.Socket("monet.raeez.com/live");
+        socket = new io.Socket("monet.raeez.com");
         socket.options.port = 7000;
     }
     socket.connect();
