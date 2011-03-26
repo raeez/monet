@@ -50,11 +50,6 @@ def upload_photo(mem_id=None):
                            { "artifacts" : p._id })
       width, height = p.dimensions
 
-      print "DIMENSIONS ====================================="
-      print p.dimensions
-      print width
-      print height
-
       return succeed({ 'id' : str(p._id),
                        'memory' : str(m._id),
                        'memory_url' : url_for('mem', id=m._id),
