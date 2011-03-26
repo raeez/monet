@@ -118,32 +118,118 @@ function ArtifactDiv() {
     this.thumb_url = undefined;
     this.visible = undefined;
 }
-/*
+
+/**
+ * The primary class used to wrap the fundamental model of all Artifact
+ * elements on the page. This implements a queue to funnel several
+ * asynchronous requests. It also has methods to control the rendering
+ * of the page given the output of the model
+ */
 function ArtifactDivList() {
-    this.addDivList = []
-    this.artifactDivList = []
-    this.deleteDivList = []
 
-    this.eventQueue = []
-    this.eventInProgress = false
-    this.processEvent = function()
+    /**
+     * The classes primary data structure and the ordered container of
+     * ArtifactDiv objects
+     * @type {Array.<AritfactDiv>}
+     */
+    this.artifactDivList = [];
 
-    this.get = function(id)
-    this.getField = function(id, field)
-    this.getIndex = function(index)
-    this.getByRowPos = function(row, posInRow)
+    /**
+     * The add, edit, and delete lists keep track of all changes that
+     * have not yet been rendered. While we instantly update the
+     * artifactDivList, we only update the viewport when render is
+     * called
+     * @type {Array.<ArtifactDiv>}
+     */
+    this.addDivList = [];
+    this.editDivList = [];
+    this.deleteDivList = [];
 
-    this.add = function(ArtifactDiv, render)
-    this._add = function(ArtifactDiv, render)
-    this.edit = function(id, field, value, render)
-    this._edit = function(id, field, value, render)
-    this.delete = function(id, render)
-    this._delete = function(id, render)
+    /**
+     * The primary event queue that holds and proccesses all changes
+     * to the main artifactDivList
+     * @type {Array.<Object>}
+     */
+    this.eventQueue = [];
+    this.eventInProgress = false;
 
-    this.render = function()
-    this._render = function()
+    /**
+     * Pops the latest item off the queue and dispatches the appropriate
+     * method with the given args
+     * @param {function} method - a function object off the method to call
+     * @param {Object} args - a dictionary keyed by argument name with
+     *                        the corresponding value
+     */
+    this.processEvent = function(method, args) {}
+
+    /**
+     * Methods that return ArtifactDivs and properties of artifact divs
+     * retrieved through various mechanisms
+     */
+    this.get = function(id) {}
+    this.getField = function(id, field) {}
+    this.getIndex = function(index) {}
+    this.getByRowPos = function(row, posInRow) {}
+
+    /**
+     * Adds an add request to the event queue.
+     * @param {ArtifactDiv} - ArtifactDiv to add
+     */
+    this.add = function(ArtifactDiv) {}
+
+    /**
+     * Called by the event queue only, this adds a new ArtifactDiv
+     * to both the artifactDivList and the addDivList
+     * @param {ArtifactDiv} - ArtifactDiv to add
+     * @return false if something went wrong, true otherwise
+     */
+    this._add = function(ArtifactDiv) {}
+
+    /**
+     * Adds an edit request to the event queue.
+     * @param {string} - The id of an ArtifactDiv
+     * @param {string} - The field of the ArtifactDiv to edit
+     * @param {mixed} - The value to put in the field
+     */
+    this.edit = function(id, field, value) {}
+
+    /**
+     * Called by the event queue only, this edits an existing ArtifactDiv
+     * in the artifactDivList and adds an edit request to the editDivList.
+     * The method will not add new fields if it can not find one. It will
+     * merely return unsuccessfully. It will also not add new artifacts if
+     * it does not find one.
+     * @param {string} id - The id of an ArtifactDiv
+     * @param {string} field - The field of the ArtifactDiv to edit
+     * @param {mixed} value - The value to put in the field
+     * @return false if something went wrong, true otherwise
+     */
+    this._edit = function(id, field, value) {}
+
+    /**
+     * Adds a remove request to the event queue.
+     * @param {string} id - The id of an ArtifactDiv
+     */
+    this.remove = function(id) {}
+    /**
+     * Called by the event queue only, this removes an existing ArtifactDiv
+     * from the artifactDivList and adds a remove request to the removeDivList
+     * If it cannot find an ArtifactDiv with the id, it returns unsuccessfully
+     * @param {string} id - The id of an ArtifactDiv
+     * @return false if something went wrong, true otherwise
+     */
+    this._remove = function(id) {}
+
+    /**
+     * Main method that activates a rendering of the page. This will first
+     * check timing issues to control browser speed. It will then go through
+     * the add, edit, and remove lists and only change elements that need
+     * to be changed. As with other actionable methods, "render" adds this
+     * action to the event queue. "_render" actually does the work
+     */
+    this.render = function() {}
+    this._render = function() {}
 }
-*/
 
 function getArtifactDivByID(id) {
     var adiv_length = window.artifactDivs.length;
