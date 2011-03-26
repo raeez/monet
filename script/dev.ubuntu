@@ -79,15 +79,6 @@ pip install Flask \
                 pyflakes \
                 py-bcrypt \
                 flask-uploads \
-
-ln -s $(pwd) env/lib/python2.7/site-packages/monet
-
-
-git clone git://fabfile.org/fabric.git fabric
-cd fabric
-python setup.py build
-sudo python setup.py install
-
 echo ""
 echo "***********************"
 echo "* monet-dev::Done! *"
