@@ -147,7 +147,11 @@ function ArtifactDivList() {
 
     /**
      * The primary event queue that holds and proccesses all changes
-     * to the main artifactDivList
+     * to the main artifactDivList.
+     *
+     * The event queue is a tuple (Array) with the first element a string
+     * indicating the method to call and the second argument a 
+     * dictionary of arguments keyed by the name of the argument.
      * @type {Array.<Object>}
      */
     this.eventQueue = [];
@@ -156,11 +160,41 @@ function ArtifactDivList() {
     /**
      * Pops the latest item off the queue and dispatches the appropriate
      * method with the given args
-     * @param {function} method - a function object off the method to call
-     * @param {Object} args - a dictionary keyed by argument name with
-     *                        the corresponding value
      */
-    this.processEvent = function(method, args) {}
+    this.processEvent = function() {
+        if (this.eventInProgress === false) {
+            // Be sure to only process the event if no other thread is
+            this.eventInProgress = true;
+
+            var event = this.eventQueue.shift();
+            if (event === undefined) {
+                return
+            }
+
+            var method = event[0];
+            var args = event[1];
+
+            switch(method) {
+                case "add":
+                    this._add(args.ArtifactDiv);
+                    break;
+                case "edit":
+                    this._edit(args.id, args.field, args.value);
+                    break;
+                case "remove":
+                    this._remove(args.id);
+                    break;
+                case "render":
+                    this._render();
+                    break;
+                default:
+                    return;
+            }
+
+            this.eventInProgress = false;
+            this.processEvent(); // Keep plowing through the queue
+        }
+    }
 
     /**
      * Methods that return ArtifactDivs and properties of artifact divs
