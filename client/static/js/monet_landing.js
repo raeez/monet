@@ -52,7 +52,7 @@ function checkForEmptyArea() {
  */
 function updateArtifact(message) {
     window.Artifacts[message._id] = message.thumb;
-    if ($("#artifact_" + message._id).length) {
+    if ($("#artifact_" + message_id).length) {
         // This means the div has already been placed
         $("#artifact_" + message._id).find("img").remove();
         imgDiv = "<img src='"+message.thumb+"'\/>";
@@ -84,7 +84,7 @@ $('#file_upload').fileUploadUI({
     dropZone: $('html'),
     uploadTable: $('#files'),
     downloadTable: $('#files'),
-    progressSelector: $(".file_upload_progress"),
+    //progressSelector: $(".file_upload_progress"),
     formData: function(form) {
         if (window.memoryId === undefined) {
             var data;
@@ -95,29 +95,17 @@ $('#file_upload').fileUploadUI({
                 success:function(memJSON) {
                     data = jsonParse(memJSON);
                     window.memoryId = data["_id"];
-                    setupSocket(data["_id"]);
                 }
             });
-        }
         var outObject = new Object();
         outObject.name = "memory_id";
         outObject.value = window.memoryId;
         var outForm = [outObject];
+        console.log(outForm);
         return outForm;
-    },
-    initProgressBar: function (node, value) {
-        if (typeof node.progressbar === 'function') {
-            return node.progressbar({
-                value: value
-            });
-        } else {
-            var progressbar = $('<progress value="' + value + '" max="100"/>').appendTo(node);
-            progressbar.progressbar = function (key, value) {
-                progressbar.attr('value', value);
-            };
-            return progressbar;
         }
     },
+
     beforeSend:function (event, files, index, xhr, handler, callBack) {
         $(".example_fileholders").hide();
 
@@ -179,20 +167,33 @@ $('#file_upload').fileUploadUI({
 
         landingPageResize(heightAdjustment); // Re-center since the images added space to the upload area
 
+        /*setTimeout(function() {
+            // WARNING Does NOT work in IE
+            // #InternetExplorer
+            window.open(json.memory_url,'_newtab');
+            console.log("function!");
+        }, 1)*/
     },
     buildUploadRow: function (files, index) {
         return $(
         '       <div class="upload_file_div">'+
         '           <div class="file_upload_progress"></div>'+
         '           <div class="file_upload_content">'+
-        '               <div class="file_upload_message">uploading...</div>' +
+	'		<div class="progress_bar">'+
+        '               <div class="file_upload_message">uploading...</div>'+
+	'		<\/div>'+
         '           <\/div>'+
+	'	    <div class="file_upload_cancel">'+
+	'		<button class="ui-state-default ui-corner-all" title="Cancel">'+
+	'		    <span class="ui-icon ui-icon-cancel">Cancel</span>'+
+	'		<\/button>'+
+	'	    <\/div>' +
         '       <\/div>'
         );
     },
     buildDownloadRow: function (file) {
         if (window.Artifacts[file.id] !== undefined) {
-            file.thumb_url = window.Artifacts[file.id];
+            file.thumb_url = window.Aritfacts[file.id];
         }
         return $(
         '       <div class="upload_file_div" id="artifact_'+file.id+'">'/*+

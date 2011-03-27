@@ -290,21 +290,69 @@ input:focus {
  * Common File Upload Classes
  *****************************************/
 
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+  /*background: url("/static/images/ui-bg_glass_75_e6e6e6_1x400.png") repeat-x scroll 50% 50% #E6E6E6;*/
+/*  border: 1px solid #D3D3D3;*/
+  color: #555555;
+  font-weight: normal;
+}
+
+.file_upload_cancel button, .file_delete button, .file_upload_start button {
+  cursor: pointer;
+  margin: 2px;
+  padding: 4px 0;
+}
+
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+  font-family: Verdana,Arial,sans-serif;
+  font-size: 1em;
+}
+
+.ui-corner-all {
+  -moz-border-radius: 4px 4px 4px 4px;
+}
+
+.ui-state-default .ui-icon {
+  background-image: url("/static/images/ui-icons_888888_256x240.png");
+}
+
+.ui-icon {
+  margin: 0 4px;
+}
+
+.ui-icon-cancel {
+  background-position: 0 -128px;
+}
+
+.ui-icon {
+  height: 16px;
+  width: 16px;
+}
+
+.ui-icon {
+  background-repeat: no-repeat;
+  display: block;
+  overflow: hidden;
+  text-indent: -99999px;
+}
+
+
 .file_upload iframe, .file_upload button {
   display: none;
 }
 
-.file_upload_progress .ui-progressbar-value {
-  background: url(pbar-ani.gif);
-}
+/*.file_upload_progress {/*.ui-progressbar-value {*/
+/*  background: url(/static/js/sandbox_uploader/pbar-ani.gif) no-repeat;
+}*/
 
-.file_upload_progress div {
+.file_upload_progress /*div*/ {
   width: 80px;
   height: 80px;
 }
 
 .file_upload_cancel button {
   cursor: pointer;
+  display: inline;
 }
 
 /*****************************************

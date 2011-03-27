@@ -187,13 +187,24 @@
     font-size:0.8em;
 }
 
-.file_upload_content {
-    background:#222222;
+.file_upload_message {
+    text-align: center;
+    z-index: -2;
+}
+
+.file_upload_cancel {
+    float: right;
+    margin-top: -100%;
+}
+
+/*.file_upload_content {*/
+.progress_bar {
+    /*background:#222222;*/
     position:absolute;
     bottom:0;
     z-index:2;
-    width:90px;
-    padding:.6em 5px 5px .7em;
+    width:100%;/*90px;*/
+    /*padding:.6em 5px 5px .7em;*/
     opacity: .85;
     -ms-filter: 'alpha(opacity=.85)';
     filter: alpha(opacity=.85);
