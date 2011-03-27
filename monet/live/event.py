@@ -16,3 +16,5 @@ def notify_photo_update(photo_id, memory_id, thumb, full, size):
                      "height" : height })
   print "live notify [%r]" % msg
   socket.send(msg)
+  socket.close()
+  ctx.term()
