@@ -45,7 +45,8 @@ def upload_photo(mem_id=None):
       p.visible = 1 # TODO make this a boolean
       p.memory = m._id
       p.save()
-      p.resize(filename, app.photos.path(filename), app.photos.url(filename), str(m._id))
+      p.resize(filename, app.photos.path(filename), str(m._id))
+
       Memory.atomic_append({ "_id" : m._id },
                            { "artifacts" : p._id })
       width, height = p.dimensions
@@ -53,8 +54,8 @@ def upload_photo(mem_id=None):
       return succeed({ 'id' : str(p._id),
                        'memory' : str(m._id),
                        'memory_url' : url_for('mem', id=m._id),
-                       'thumb_url' : app.photos.url(p.filename), # TODO start building these
-                       'image_url' : app.photos.url(p.filename),
+                       'thumb_url' : p.thumb_url,
+                       'image_url' : p.full_url,
                        'width': width,
                        'height' : height,
                        'title' : p.title,

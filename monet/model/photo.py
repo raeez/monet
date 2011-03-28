@@ -8,7 +8,15 @@ class Photo(Container):
 
   @mandatory(str, filename="unprocessed.jpg")
   def val_user(self):
-    assert len(self.filename) < 255, "username must be less than 255 characters long"
+    assert len(self.filename) < 255, "filename must be less than 255 characters long"
+
+  @mandatory(str, full_url="http://monet-images.s3.amazonaws.com/unprocessed_full.jpg")
+  def val_user(self):
+    pass
+
+  @mandatory(str, thumb_url="http://monet-images.s3.amazonaws.com/unprocessed_thumb.jpg")
+  def val_user(self):
+    pass
 
   @mandatory(str, title=None)
   def val_title(self):
@@ -40,8 +48,8 @@ class Photo(Container):
     pass
 
   @valid # ensure we're working on a valid instance
-  def resize(self, filename, path, url, memory_id):
+  def resize(self, filename, path, memory_id):
     assert (not self.processed), "Image already resized!"
 
     from monet.tasks import thumbnail
-    thumbnail.delay(filename, path, url, str(self._id), str(memory_id))
+    thumbnail.delay(filename, path, str(self._id), str(memory_id))

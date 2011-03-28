@@ -7,7 +7,11 @@ from monet import live
 from monet import aws
 
 @task
-def thumbnail(filename, path, url, photo_id, memory_id):
+def thumbnail(filename, path, photo_id, memory_id):
+  # upload full to aws
+  full_content = open(path, 'r').read()
+  full_url = aws.s3.put_image(filename+'_full', full_content)
+
   # resize the image
   thumb_size = (1000000, 175)
   img = PIL.open(path)
@@ -16,15 +20,17 @@ def thumbnail(filename, path, url, photo_id, memory_id):
   width, height = img.size
   size = (width, height)
   
-  # upload to aws
-  content = open(path, 'r').read()
-  url = aws.s3.put_image(filename, content)
+  # upload thumb to aws
+  thumb_content = open(path, 'r').read()
+  thumb_url = aws.s3.put_image(filename+'_thumb', thumb_content)
 
   # update the db
   Photo.atomic_set({ "_id" : photo_id },
                    { "processed" : True,
                      "dimensions" : size,
-                     "filename" : filename })
+                     "filename" : filename,
+                     "full_url" : full_url,
+                     "thumb_url" : thumb_url })
 
   # notify the live server
-  live.notify_photo_update(photo_id, memory_id, url, url, (width, height))
+  live.notify_photo_update(photo_id, memory_id, thumb_url, full_url, (width, height))
