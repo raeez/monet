@@ -7,15 +7,15 @@ from monet.model import Memory
 class Photo(Container):
 
   @mandatory(str, filename="unprocessed.jpg")
-  def val_user(self):
+  def val_filename(self):
     assert len(self.filename) < 255, "filename must be less than 255 characters long"
 
   @mandatory(str, full_url="http://monet-images.s3.amazonaws.com/unprocessed_full.jpg")
-  def val_user(self):
+  def val_full_url(self):
     pass
 
   @mandatory(str, thumb_url="http://monet-images.s3.amazonaws.com/unprocessed_thumb.jpg")
-  def val_user(self):
+  def val_thumb_url(self):
     pass
 
   @mandatory(str, title=None)
