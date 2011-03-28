@@ -4,6 +4,7 @@ from celery.task import task
 from PIL import Image as PIL
 from monet.model import Photo
 from monet import live
+from monet import aws
 
 @task
 def thumbnail(filename, path, url, photo_id, memory_id):
@@ -14,6 +15,10 @@ def thumbnail(filename, path, url, photo_id, memory_id):
   img.save(path)
   width, height = img.size
   size = (width, height)
+  
+  # upload to aws
+  content = open(path, 'r').read()
+  aws.s3.put_image(filename, content)
 
   # update the db
   Photo.atomic_set({ "_id" : photo_id },
