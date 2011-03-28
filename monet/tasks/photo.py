@@ -18,7 +18,7 @@ def thumbnail(filename, path, url, photo_id, memory_id):
   
   # upload to aws
   content = open(path, 'r').read()
-  aws.s3.put_image(filename, content)
+  url = aws.s3.put_image(filename, content)
 
   # update the db
   Photo.atomic_set({ "_id" : photo_id },

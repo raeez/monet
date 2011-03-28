@@ -45,6 +45,7 @@ sudo /opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/pip-2.7 ins
 # python dependencies
 pip install Flask \
                 PIL \
+                boto \
                 pyzmq \
                 celery \
                 fabric \

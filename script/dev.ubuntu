@@ -72,7 +72,7 @@ sudo python2.7 /usr/local/bin/pip-2.7 install virtualenv
 /usr/local/bin/virtualenv -p python2.7 --no-site-packages --distribute --clear env
 . env/bin/activate
 
-pip install Flask PIL pyzmq celery fabric sphinx ipython pymongo eventlet pyflakes py-bcrypt flask-uploads
+pip install Flask boto PIL pyzmq celery fabric sphinx ipython pymongo eventlet pyflakes py-bcrypt flask-uploads
 
 echo ""
 echo "***********************"

@@ -19,3 +19,4 @@ def put_image(filename, content):
   k.set_metadata("Content-Type", 'images/jpeg')
   k.set_contents_from_string(content)
   k.set_acl("public-read") # fix, such that we don't expose everyone's photos
+  return ("http://monet-images.s3.amazonaws.com/" + filename)

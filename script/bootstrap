@@ -69,6 +69,7 @@ virtualenv -p python2.7 --no-site-packages --distribute --clear env
 
 # python dependencies
 pip install PIL \
+            boto \
             Flask \
             pyzmq \
             celery \
