@@ -49,6 +49,7 @@ pip install Flask \
                 celery \
                 fabric \
                 sphinx \
+                tornadio\
                 ipython \
                 pymongo \
                 eventlet \

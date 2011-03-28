@@ -75,6 +75,7 @@ pip install PIL \
             gevent \
             pymongo \
             eventlet \
+            tornadio \
             gunicorn \
             py-bcrypt \
             flask-uploads \
