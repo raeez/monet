@@ -30,6 +30,7 @@ def upload_photo(mem_id=None):
     m = Memory.find_one({ "_id" : mem_id })
 
   from client.app import client as app
+  from flaskext.uploads import UploadNotAllowed
   if not photo:
     return error(['missing photo'])
   else:
