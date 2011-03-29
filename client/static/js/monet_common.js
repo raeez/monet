@@ -1,6 +1,6 @@
 // JavaScript Document
 
-var FILE_UPLOAD_LIMIT = 1250000; // Front-end upload limit
+var FILE_UPLOAD_LIMIT = 1024 * 5120; // Front-end upload limit
 socket = null;
 
 /*============================================================ 
