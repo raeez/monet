@@ -291,6 +291,12 @@
     width:171px;
     height:171px;
     border: 2px dashed #aaa;
+	float:left;
+	-moz-box-shadow: 2px 2px 7px #111;
+	-webkit-box-shadow: 2px 2px 7px #111;
+	box-shadow: 2px 2px 7px #111;
+	margin:5px;
+	overflow:hidden;
 }
 #add_artifact:hover {
 	-moz-box-shadow: 2px 2px 11px #1e5957;
@@ -315,6 +321,11 @@
     height:171px;
     border: 2px dashed #aaa;
     overflow:hidden;
+	float:left;
+	-moz-box-shadow: 2px 2px 7px #111;
+	-webkit-box-shadow: 2px 2px 7px #111;
+	box-shadow: 2px 2px 7px #111;
+	margin:5px;
 }
 #uploadArea_title_div {
     width:85px;

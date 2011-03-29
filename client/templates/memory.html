@@ -195,7 +195,7 @@
                     <div id="above_zoom_div" class="zoom_div">
 
                     <div class="artifact_row" id="row_0">
-                    <div id="add_artifact" class="artifact no_crop">
+                    <div id="add_artifact" class="no_crop">
                         <div class="photo_container">
                         <form id="canvas_file_upload" action="{{url_for('photo')}}" method="POST" enctype="multipart/form-data">
                             <input type="file" name="photo" multiple>
@@ -216,7 +216,7 @@
                     </div>
                     </div>
 
-                    <div id="new_artifacts" class="artifact no_crop">
+                    <div id="new_artifacts" class="no_crop">
                         <div id="uploadArea_title_div">
                             Uploading...
                             <br/>
@@ -278,6 +278,7 @@
                     </div>
                     </div>
 
+                    <!--
                     {% for row in memory['rows'] %}
                     <div class="artifact_row" id="row_{{loop.index}}">
                     {% for artifact in row %}
@@ -297,6 +298,7 @@
                     {% endfor %}
                     </div>
                     {% endfor %}
+                    -->
 
                 </div> <!-- End above_zoom_div -->
                 <div id="in_zoom_div" class="zoom_div"></div>
