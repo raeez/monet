@@ -69,7 +69,6 @@ def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden
   offset and numArtifacts specify a selection of artifacts to return.
   If get_hidden is 1, we will also return hidden photos
   """
-  from client.app import client as app
   artifact_list = memory_object.artifacts[::-1]
   artifacts = []
   index = 0
@@ -88,8 +87,8 @@ def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden
       artifact = dict()
       artifact['id'] = str(p._id)
       ## FIXME Need to be pulling the full url as well as the thumb
-      artifact['image_url'] = app.photos.url(p.filename)
-      artifact['thumb_url'] = app.photos.url(p.filename)
+      artifact['image_url'] = p.full_url
+      artifact['thumb_url'] = p.thumb_url
       artifact['visible'] = p.visible
       artifact['width'] = width
       artifact['height'] = height
@@ -109,7 +108,7 @@ def getVisibleArtifacts(artifacts):
     p = Photo.find_one({ "_id" : artifact_id })
     photo = dict()
     photo['id'] = p._id
-    photo['thumb_url'] = app.photos.url(p.filename)
+    photo['thumb_url'] = p.thumb_url
 
     if p.visible == 1:
       visible_artifacts.append(photo)
