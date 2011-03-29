@@ -34,8 +34,13 @@ class Photo(Container):
   def val_processed(self):
     pass
 
-  @mandatory(tuple, dimensions=(175,175))
-  def val_dimensions(self):
+  @mandatory(tuple, full_dimensions=(175,768))
+  def val_full_dimensions(self):
+    width, height = self.dimensions
+    assert height == 768, "Invalid height of '%d' pixels; must be 768 pixels in size" % height
+
+  @mandatory(tuple, thumb_dimensions=(175,175))
+  def val_thumb_dimensions(self):
     width, height = self.dimensions
     assert height == 175, "Invalid height of '%d' pixels; must be 175 pixels in size" % height
 

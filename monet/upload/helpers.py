@@ -49,7 +49,7 @@ def upload_photo(mem_id=None):
 
       Memory.atomic_append({ "_id" : m._id },
                            { "artifacts" : p._id })
-      width, height = p.dimensions
+      width, height = p.thumb_dimensions
 
       return succeed({ 'id' : str(p._id),
                        'memory' : str(m._id),
@@ -83,7 +83,7 @@ def getArtifactsFromMemory(memory_object, offset=0, numArtifacts=100, get_hidden
         else:
           continue
 
-      width, height = p.dimensions
+      width, height = p.thumb_dimensions
 
       artifact = dict()
       artifact['id'] = str(p._id)
