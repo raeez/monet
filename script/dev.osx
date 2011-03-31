@@ -13,6 +13,7 @@ echo ""
 
 # system and python dependencies
 sudo port install zmq \
+                  jpeg \
                   nodejs \
                   python27 \
                   git-core +svn \
