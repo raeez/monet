@@ -13,10 +13,16 @@ var is_iOS;
 
 window.artifactDivList = new ArtifactDivList();
 window.firstRowUploadWidth = ARTIFACT_HEIGHT + MARGIN_WIDTH; // The space used for the upload button on the first row
+window.pendingRender = false;
 
+// A clock timer to slow down live update renders
+window.updateTimeout = false;
+
+window.lastScrollPos = 0; // The scrollbar position before we zoomed in
 
 // out update Queue
 window.updateQueue = [];
+
 
 
 window.artifactServerData = [] // A global that holds json representations of all returned artifacts
@@ -51,12 +57,6 @@ window.previousZoomTarget = undefined; // The last target that we were zoom focu
 window.canvasTitle = ""; // We store the canvas title as a global to get it back from the truncated version
 window.justChangedHidden = false; // Used to temporarily disable the hide button hover
 window.uploadError = false; // Keeps track if there's an upload error
-window.stagingPhotos = {} // A dictionay of jQuery upload File objects keyed by index
-window.stagingPhotos.length = function () {
-    var count = 0;
-    for (var i in window.stagingPhotos) {count ++;}
-    return count;
-}
 window.loadingMoreArtifacts = false // A Boolean to prevent the loading of more artifacts as we keep scrolling
 window.numPhotosLoaded = 0; // Number of photos on the page right now
 
@@ -129,6 +129,9 @@ function ArtifactDiv() {
     this.image_url = undefined;
     this.thumb_url = undefined;
     this.visible = undefined;
+
+    // A flag set by the live server to indicate it's ready
+    this.doneProcessing = undefined;
 }
 
 /**
@@ -184,6 +187,10 @@ function ArtifactDivList() {
         this.processEvent();
     }
     this.eventInProgress = false;
+
+    this.eventQueueSize = function() {
+        return this.eventQueue.length;
+    }
 
     /**
      * Pops the latest item off the queue and dispatches the appropriate
@@ -282,11 +289,37 @@ function ArtifactDivList() {
     }
 
     /**
+     */
+    this.numStaging = function() {
+        var numStaging = 0
+        var adiv_length = this.artifactDivList.length;
+        for (var i = 0; i < adiv_length; i++) {
+            if (this.artifactDivList[i]["divArea"] == "staging") {
+                numStaging ++;
+            };
+        }
+        return numStaging;
+    }
+    this.numUnprocessed = function() {
+        var unprocessed = 0
+        var adiv_length = this.artifactDivList.length;
+        for (var i = 0; i < adiv_length; i++) {
+            if (this.artifactDivList[i]["doneProcessing"] == false) {
+                unprocessed ++;
+            };
+        }
+        return unprocessed;
+    }
+
+    /**
      * Adds an add request to the event queue.
      * @param {ArtifactDiv} - ArtifactDiv to add
      */
     this.add = function(ArtifactDiv) {
         this.addToEventQueue(this._add, {"ArtifactDiv":ArtifactDiv});
+    }
+    this.addToTop = function(ArtifactDiv) {
+        this.addToEventQueue(this._addToTop, {"ArtifactDiv":ArtifactDiv});
     }
 
     /**
@@ -298,6 +331,21 @@ function ArtifactDivList() {
     this._add = function(args) {
         if (this.get(args.ArtifactDiv.id) === undefined) {
             this.artifactDivList.push(args.ArtifactDiv);
+            this.addDivList.push(args.ArtifactDiv);
+        } else {
+            console.warn("Trying to add the ArtifactDiv "+args.ArtifactDiv.id+" which already exists");
+        }
+    }
+
+    /**
+     * Called by the event queue only, this prepends a new ArtifactDiv
+     * to both the artifactDivList and the addDivList
+     * @param {ArtifactDiv} - ArtifactDiv to add
+     * @return false if something went wrong, true otherwise
+     */
+    this._addToTop = function(args) {
+        if (this.get(args.ArtifactDiv.id) === undefined) {
+            this.artifactDivList.unshift(args.ArtifactDiv);
             this.addDivList.push(args.ArtifactDiv);
         } else {
             console.warn("Trying to add the ArtifactDiv "+args.ArtifactDiv.id+" which already exists");
@@ -369,6 +417,7 @@ function ArtifactDivList() {
             }
         }
     }
+
     /**
      * Called by the event queue only, this edits an existing ArtifactDiv
      * in the artifactDivList and adds an edit request to the editDivList.
@@ -387,6 +436,14 @@ function ArtifactDivList() {
         var id = this.artifactDivList[index]["id"];
         this.editDivList.push({"index":index,"id":id,"field":field,"value":value});
     }
+
+    /**
+     * This gets called when we recalculate the crop so we only have the latest
+     * sets of edits before rendering.
+     */
+    this.resetEditList = function() {
+        this.editDivList = [];
+    } 
 
     /**
      * Adds a remove request to the event queue.
@@ -430,6 +487,16 @@ function ArtifactDivList() {
 
             var addArtifact = this.addDivList.shift();
 
+            if (addArtifact.divArea == "staging") {
+                var newStagingArtifact = '' +
+                '<div id="artifact_'+addArtifact.id+'" class="canvas_upload_div" style="float:left">' +
+                '   <img class="photo" src="'+addArtifact.thumb_url+'" height="70"\/>'+
+                '<\/div>'
+
+                $("#uploadArea_staging_div #staging_content").append(newStagingArtifact);
+                continue;
+            }
+
             if (addArtifact.croppedWidth === undefined ||
                 addArtifact.posInRow === undefined ||
                 addArtifact.row === undefined) {
@@ -443,16 +510,6 @@ function ArtifactDivList() {
                 continue;
             }
 
-            if (addArtifact.divArea == "staging") {
-                var newStagingArtifact = '' +
-                '<div id="artifact_'+addArtifact.id+'" class="canvas_upload_div" style="float:left">' +
-                '   <img class="photo" src="'+addArtifact.thumb_url+'" height="70"\/>'+
-                '<\/div>'
-
-                $("#uploadArea_staging_div #staging_content").append(newStagingArtifact);
-                continue;
-            }
-
             var newArtifact = ''+
             '       <div id="artifact_'+addArtifact.id+'" class="artifact photo">'+
             '           <div class="hide_photo"><a href="#">hide</a></div>'+
@@ -460,6 +517,13 @@ function ArtifactDivList() {
             '               <img class="photo" src="'+addArtifact.thumb_url+'" height="175"\/>'+
             '           </div>' + 
             '       <\/div>';
+
+            // See if it's the first one in the first row. This is the uploader
+            // area problem.
+            if (addArtifact.row == 0 && addArtifact.posInRow == 0) {
+                $("#new_artifacts").after(newArtifact);
+                continue;
+            }
             
             // See if there's one before
             var beforeArtifact = this.getByRowPos(addArtifact.row, addArtifact.posInRow - 1);
@@ -472,18 +536,34 @@ function ArtifactDivList() {
                     this.priorityEdit(addArtifact.id, "lastSeenRow", addArtifact.row);
                     continue;
                 } else {
-                    console.warn("Found a preceeding div that doesnt exist on the canvas yet");
-                    // Pass through so we go to other methods of placing this div
+                    var afterArtifact = this.getByRowPos(addArtifact.row, addArtifact.posInRow + 1);
+                    if (afterArtifact !== undefined) { 
+                        var afterDiv = $("artifact_"+afterArtifact.id);
+                        if (afterDiv.length > 0) {
+                            afterDiv.before(newArtifact);
+                            this.priorityEdit(addArtifact.id, "lastSeenPosInRow", addArtifact.posInRow);
+                            this.priorityEdit(addArtifact.id, "lastSeenRow", addArtifact.row);
+                            continue;
+                        } else {
+                            console.warn("Found a following div that doesnt exist on the canvas yet");
+                            // Pass through so we go to other methods of placing this div
+                        }
+                    }
                 }
             } 
 
-            // If we get here that means it's either in a new row, the only one
-            // in that row, or the preceeding div doesn't exist or is malformed
+            // If we get here that means it's either on the far left, in a new 
+            // row, the only one in that row, or the preceeding div doesn't 
+            // exist or is malformed
             var artifactRow = $("#row_"+addArtifact.row);
             if (artifactRow.length > 0) {
                 // This means there's already a row to put this in.
-                artifactRow.append(newArtifact);
-                this.priorityEdit(addArtifact.id, "lastSeenPosInRow", 0);
+                if (addArtifact.posInRow == 0) {
+                    artifactRow.prepend(newArtifact);
+                } else {
+                    artifactRow.append(newArtifact);
+                }
+                this.priorityEdit(addArtifact.id, "lastSeenPosInRow", addArtifact.posInRow);
                 this.priorityEdit(addArtifact.id, "lastSeenRow", addArtifact.row);
             } else {
                 // we need to make the row
@@ -552,6 +632,40 @@ function ArtifactDivList() {
                         continue;
                     }
 
+                    var closestRowDistance = 99999;
+                    var closestSign = "";
+                    var closestRow = null;
+
+                    divAreaDiv.children(".artifact_row").each(function() {
+                        var rownum = parsePrefixToNum($(this).attr("id"), "row_");
+                        if (rownum == artifactObject.row) {
+                            // looking at the row alread, keep going
+                            return
+                        }
+
+                        var d = artifactObject.row - rownum;
+                        if (Math.abs(d) < closestRowDistance) {
+                            closestRowDistance = Math.abs(d);
+                            d < 0 ? closestSign = "negative" : closestSign = "positive";
+                            closestRow = rownum;
+                        }
+                    });
+
+                    if (closestRow === null || closestSign == "") {
+                        // Nothing in the row we care about. I can just put it in
+                        divAreaDiv.append(row_div);
+                        continue
+                    }
+
+                    if (closestSign == "negative") {
+                        $("#row_"+closestRow).before(row_div);
+                    } else if (closestSign == "positive") {
+                        $("#row_"+closestRow).after(row_div);
+                    }
+
+                    break;
+
+                    /*
                     var prev_row = $("#row_"+artifactObject.row-1, divAreaDiv);
                     // Find a previous row in the given divarea
                     if (prev_row.length <= 0) {
@@ -569,8 +683,8 @@ function ArtifactDivList() {
                         prev_row.after(row_div);
                         continue;
                     }
+                    */
                     
-                    break;
                 case "display":
                     break;
                 case "croppedWidth":
@@ -622,70 +736,45 @@ function ArtifactDivList() {
                         continue;
                     }
 
-                    var placedAfter = false;
+                    var closestPosDistance = 99999;
+                    var closestSign = "";
+                    var closestDiv;
                     rowDiv.children(".artifact").each(function() {
                         var a_div = window.artifactDivList.get(parsePrefixToString($(this).attr("id"), "artifact_"));
-                        if (a_div.row == artifactObject.row && 
-                            edit.value > a_div.posInRow && 
-                            (edit.value - a_div.posInRow) <= 1) {
-                            $(this).after(editDiv);
-                            placedAfter = true;
-                            return;
+                        if (a_div.row == artifactObject.row) {
+                            if (edit.value == a_div.posInRow) {
+                                // Looks like I'm looking at myself for this pass
+                                // through the loop. Keep going..
+                                return
+                            }
+
+                            var d = edit.value - a_div.posInRow;
+                            if (Math.abs(d) < closestPosDistance) {
+                                closestPosDistance = Math.abs(d);
+                                d < 0 ? closestSign = "negative" : closestSign = "positive";
+                                closestDiv = $(this);
+                            }
                         }
                     });
-                    if (!placedAfter) {
+
+                    if (!closestDiv || closestSign == "") {
+                        // Nothing in the row we care about. I can just put it in
                         rowDiv.append(editDiv);
                         this.priorityEdit(artifactObject.id, "lastSeenPosInRow", artifactObject.posInRow);
                         this.priorityEdit(artifactObject.id, "lastSeenRow", artifactObject.row);
-                    } else {
-                        this.priorityEdit(artifactObject.id, "lastSeenPosInRow", artifactObject.posInRow);
-                        this.priorityEdit(artifactObject.id, "lastSeenRow", artifactObject.row);
+                        continue
                     }
-                    /*
-                    // Assuming the row we're trying to put the div in exists, now we need to find where in the row to put it.
-                    var prevArtifact = this.getByLastSeen(artifactObject.row, edit.value - 1);
-                    if (prevArtifact === undefined) {
-                        // There's nothing to the left of me, that means I'm at the beginning of the row and I should go at the beginning of the row
-                        rowDiv.prepend(editDiv);
-                        this.priorityEdit(artifactObject.id, "lastSeenPosInRow", 0);
-                        this.priorityEdit(artifactObject.id, "lastSeenRow", artifactObject.row);
-                        continue;
-                    } else {
-                        // There's somethign to the left of me, checking to see if it exists on the page yet
-                        var prevArtifactDiv = $("#artifact_"+prevArtifact.id);
-                        if (prevArtifactDiv.length <= 0) {
-                            // This means there's no item to the left of me.
-                            rowDiv.prepend(editDiv);
-                            this.priorityEdit(artifactObject.id, "lastSeenPosInRow", 0);
-                            this.priorityEdit(artifactObject.id, "lastSeenRow", artifactObject.row);
-                            continue;
-                        } else {
-                            // There is an item to the left of me, I should go after it
-                            prevArtifactDiv.after(editDiv);
-                            this.priorityEdit(artifactObject.id, "lastSeenPosInRow", prevArtifact.posInRow + 1);
-                            this.priorityEdit(artifactObject.id, "lastSeenRow", artifactObject.row);
-                            continue;
-                        } 
-                    }
-                    */
 
-                    /*
-                    nextArtifact = this.getByRowPos(artifactObject.row, edit.value + 1);
-                    if (nextArtifact === undefined) {
-                        // This means there's no item to the right of me
-                        rowDiv.append(editDiv);
-                        continue;
-                    } else {
-                        nextArtifactDiv = $("#artifact_"+nextArtifact.id);
-                        if (nextArtifactDiv.length <= 0) {
-                            // This means there's no item to the right of me
-                            rowDiv.append(editDiv);
-                            continue;
-                        }
+                    if (closestSign == "negative") {
+                        closestDiv.before(editDiv);
+                    } else if (closestSign == "positive") {
+                        closestDiv.after(editDiv);
                     }
-                    */
 
-                    break;
+                    this.priorityEdit(artifactObject.id, "lastSeenPosInRow", artifactObject.posInRow);
+                    this.priorityEdit(artifactObject.id, "lastSeenRow", artifactObject.row);
+                    continue
+                    break
                 case "lastSeenRow":
                     // Nothing to render
                     break;
@@ -725,6 +814,8 @@ function ArtifactDivList() {
         while (this.deleteDivList.length > 0) {
 
         }
+
+        window.pendingRender = false;
     }
 }
 /**
@@ -948,13 +1039,14 @@ function getRealWidth(artifactDiv) {
  * thumb : "<thumb_url>"
  * full : "<full_url>"
  */
-function updateArtifact(message) {
+function _updateArtifact(message) {
     // if uploading:
     //  add message to queue
     // else
     //  
     // Need to update both window.artifactDivs and window.artifactServerData
     
+
     var artifactDiv = window.artifactDivList.get(message._id);
     if (artifactDiv === undefined) {
         var artifactDiv = new ArtifactDiv();
@@ -970,14 +1062,48 @@ function updateArtifact(message) {
         artifactDiv["image_url"] = message.full;
         artifactDiv["thumb_url"] = message.thumb;
         artifactDiv["visible"] = 1;
+        artifactDiv["doneProcessing"] = true;
 
-        window.artifactDivList.add(artifactDiv); // Puts in on the queue
+        window.artifactDivList.addToTop(artifactDiv); // Puts in on the queue
     } else {
+        if (artifactDiv.divArea == "staging") {
+            window.artifactDivList.edit(message._id, "divArea", "above_zoom_div");
+            $("#staging_content #artifact_"+message._id).remove();
+            // Remove from the staging area
+        }
         window.artifactDivList.edit(message._id, "thumb_url", message.thumb);
+        window.artifactDivList.edit(message._id, "doneProcessing", true);
+            
+        /*
+        if (window.uploading == false) {
+            var numStaging = window.artifactDivList.numStaging();
+            var numUnprocessed = window.artifactDivList.numUnprocessed();
+            if (numStaging <= 0 &&
+                numUnprocessed <= 0 && 
+                window.uploadError == false &&
+                $("#new_artifacts:visible").length > 0) {
+                $("#new_artifacts").hide('fast', function() {
+                    //_calculateCrop();
+                    //window.artifactDivList.render();
+                });
+            }
+        }
+        */
     } 
 
     _calculateCrop();
-    window.artifactDivList.render();
+
+    if (window.uploading == true && window.enableLive == true) {
+        // If we're uploading, show them as soon as they come in
+        window.artifactDivList.render();
+    } else {
+        // If we're getting from live, only render every half second
+        if (!window.updateTimeout) {
+            window.artifactDivList.render();
+            window.updateTimeout = true;
+            setTimeout("window.updateTimeout = false", 500);
+        }
+    }
 
 }
 /********************************
@@ -1045,9 +1171,30 @@ function refreshServerData(artifactDivs) {
     }
 }
 
+function firstRowSpace() {
+    var firstRowUploadWidth = 0
+    if ($("#add_artifact:visible").length) {
+        firstRowUploadWidth += 175;
+        firstRowUploadWidth += 10; // Margin space
+    }
+
+    if ($("#new_artifacts:visible").length) {
+        firstRowUploadWidth += $("#new_artifacts").width();
+        firstRowUploadWidth += 10; // margin space
+        firstRowUploadWidth += 4; // border space
+    }
+
+    return firstRowUploadWidth;
+}
+
 /**
  */
 function _calculateCrop() {
+    if (window.pendingRender == true) {
+        // Only take the latest calculate crop until we re-render
+        window.artifactDivList.resetEditList();
+    }
+
     var max_width = WRAPPER_WIDTH;
     var row_accumulator = [];
     var width_accumulator = 0;
@@ -1055,19 +1202,21 @@ function _calculateCrop() {
     var rownum = 0;
 
     var artifactDivs_length = window.artifactDivList.length();
+    window.firstRowUploadWidth = firstRowSpace();
     for (var i = 0; i < artifactDivs_length; i ++) {
         var artifactDiv = window.artifactDivList.getByIndex(i);
         if (rownum == 0) {
-            max_width = WRAPPER_WIDTH - window.firstRowUploadWidth;
+            max_width = WRAPPER_WIDTH - firstRowSpace();
         } else {
             max_width = WRAPPER_WIDTH;
         }
+        if (max_width < 0) {max_width = 0;}
         if (artifactDiv.divArea == "staging") {
             // I don't want to include divs that are still in the staging area
             continue;
         }
         if (artifactDiv.display) {
-            if (width_accumulator < max_width) {
+            if (width_accumulator < max_width && max_width > 40) {
 		        width_accumulator += artifactDiv.width + MARGIN_WIDTH;
                 if (artifactDiv.noCrop) {
 		             width_accumulator += BORDER_WIDTH;
@@ -1090,7 +1239,11 @@ function _calculateCrop() {
         }
     }
 
+    window.numRows = rownum;
+
     _processRow(row_accumulator, width_accumulator);
+
+    window.pendingRender = true;
 }
 
 /**
@@ -1119,7 +1272,7 @@ function _processRow(row_accumulator, width_accumulator) {
         var artifactDiv = window.artifactDivList.getByIndex(row_accumulator[j]);
         if (artifactDiv.row == 0 && firstRowAdjusted === false) {
             // Be sure we clean out other things that may be on row 0
-            max_width = max_width - window.firstRowUploadWidth;
+            max_width = max_width - firstRowSpace();
             firstRowAdjusted = true;
         }
         if (artifactDiv.noCrop) {
@@ -1467,9 +1620,6 @@ function moveArtifactDivs(artifactDivs) {
              * before it was drawn.
              */
             
-            // If it's in window.stagingPhotos, we skip this since it will
-            // be automatically added to the main area by clearStaging
-            
 
             /*
              *
@@ -1624,6 +1774,7 @@ function _loadArtifacts(offset, numArtifacts) {
             artifactDiv["image_url"] = newPhoto.image_url;
             artifactDiv["thumb_url"] = newPhoto.thumb_url;
             artifactDiv["visible"] = newPhoto.visible;
+            artifactDiv["doneProcessing"] = false;
 
             window.artifactDivList.add(artifactDiv); // Puts in on the queue
         }
@@ -1964,7 +2115,7 @@ function _artifactUnExpand(artifact, instant) {
  * Calculates and updates the scaleFactor global based on the inputted image size
  * If no inputs are given, it uses ARTIFACT_HEIGHT as the default scale value
  */
-function calculateScaleFactor(a_width, a_height) {
+function _calculateScaleFactor(a_width, a_height) {
     window.previousScaleFactor = window.scaleFactor;
     a_height = a_height || ARTIFACT_HEIGHT;
     a_width = a_width || ARTIFACT_HEIGHT;
@@ -1990,11 +2141,13 @@ function calculateScaleFactor(a_width, a_height) {
  * It must be visible within the canvas area
  */
 function zoomToArtifact(artifact) {
+    /*
     if (window.zoomedIn == false) {
-        updateContainerDivs(artifact); // Modify the artifactDivs data structure
+        _updateContainerDivs(artifact); // Modify the artifactDivs data structure
         window.artifactDivList.render();
         //updateModifiedArtifactDivs(); // Move the divs to the appropriate spots
     }
+    */
     _doZoom(artifact); // Actually do the transform
 }
 
@@ -2002,8 +2155,7 @@ function zoomToArtifact(artifact) {
  * Updates the global window.artifactDivs data structure to indicate
  * where the various photos should go
  */
-function updateContainerDivs(artifact) {
-    // Create a local copy to perform updates on then update the global
+function _updateContainerDivs(artifact) {
     var scroll_top = $(window).scrollTop();
     var scroll_bottom = $(window).scrollTop() + $(window).height();
     var artifactTop = $(artifact).offset().top;
@@ -2048,7 +2200,7 @@ function updateContainerDivs(artifact) {
  * This is called from doUnZoom and adds some divs to the bottom
  * of #in_zoom_div so we don't get a wonky zoom out effect
  */
-function addBottomContainers() {
+function _addBottomContainers() {
     var scroll_top = $(window).scrollTop() + 70;
     var scroll_bottom = $(window).scrollTop() + $(window).height();
 
@@ -2079,7 +2231,7 @@ function _resizeCanvas() {
      * iPad: 768 x 1024
      */
 
-    calculateScaleFactor();
+    _calculateScaleFactor();
 
     var windowWidth = $(window).width();
     var sidemargins = 105; // The teal bars on the left and right
@@ -2092,7 +2244,6 @@ function _resizeCanvas() {
             $(".canvas_center").css("margin-left",MARGIN_WIDTH + "px");
             var loginWidth = 0;
             sidemargins = MARGIN_WIDTH *2;
-            window.firstRowUploadWidth = 0;
         } else {
             $("#canvas_header #login").show();
             $("#add_artifact").show();
@@ -2101,7 +2252,7 @@ function _resizeCanvas() {
             $(".canvas_center").css("margin-left",0);
             var loginWidth = $("#canvas_header #login").width();
             sidemargins = 105;
-            window.firstRowUploadWidth = ARTIFACT_HEIGHT + MARGIN_WIDTH;
+            $("#add_artifact")
         }
 
         $(".canvas_outer_wrapper").width(windowWidth);
@@ -2111,7 +2262,7 @@ function _resizeCanvas() {
         truncateTitle(windowWidth - sidemargins - loginWidth - 5);
 
         $("#new_artifacts").width($(".canvas_center").width() - 175 - 10 - 10);
-        window.firstRowUploadWidth = $("#new_artifacts").width() + ARTIFACT_HEIGHT + MARGIN_WIDTH;
+
 
         // This is to get a default padding of 113 px when it's > 1060px
         var alertbar_padding = windowWidth - 947;
@@ -2191,24 +2342,117 @@ function truncateTitle(enclosingSize) {
  */
 function _doZoom(artifact) {
     window.enableLive = false;
+
     var artifactDiv = window.artifactDivList.get(parsePrefixToString(artifact.attr("id"), "artifact_"));
 
-    var inZoomDiv = $("#in_zoom_div");
-
-    calculateScaleFactor(artifactDiv.width, ARTIFACT_HEIGHT);
+    if (window.previousZoomTarget) {
+        if (window.previousZoomTarget.attr("id") == artifact.attr("id") &&
+            window.zoomedIn == true) {
+            // This means we've clicked on the same thing
+            _doUnZoom();
+            return
+        } else {
+            _artifactUnExpand(window.previousZoomTarget, true);
+            var prevRow = parsePrefixToNum(window.previousZoomTarget.parent(".artifact_row").attr("id"),"row_");
+            if (prevRow > artifactDiv.row) {
+                // Pan up
+                window.lastScrollPos -= (ARTIFACT_HEIGHT + MARGIN_WIDTH);
+            } else if (prevRow < artifactDiv.row) {
+                // Pan down
+                window.lastScrollPos += ARTIFACT_HEIGHT + MARGIN_WIDTH;
+            } else if (prevRow == artifactDiv.row) {
+                // Same row
+            }
+        }
+    }
 
     if (window.zoomedIn == false) {
-        // If we're zooming in for the first time, quickly re-fix
-        // the width to be expanding. This will hide a glitch caused
-        // by updateModifiedArtifactDivs which undoes the expansion
-        // Note, that if we already expand it, we don't need to recalculate
-        // the expansion shift
-        _artifactExpand(artifact,true);
+        window.lastScrollPos = $(window).scrollTop();
+    }
+
+    var row = artifactDiv.row;
+    var rowAbove = row - 2;
+    var rowBelow = row + 2;
+    var rowAbove = Math.max(rowAbove, 0);
+    var rowBelow = Math.min(rowBelow, window.numRows);
+
+    var adiv_length = window.artifactDivList.length();
+    for (var i = 0; i < adiv_length; i++) {
+        var a_div = window.artifactDivList.getByIndex(i);
+        if (a_div.row >= rowAbove && a_div.row <= rowBelow) {
+            window.artifactDivList.editByIndex(i, "divArea", "in_zoom_div");
+        } else if (a_div.row < rowAbove){
+            window.artifactDivList.editByIndex(i, "divArea", "above_zoom_div");
+        } else if (a_div.row > rowBelow) {
+            window.artifactDivList.editByIndex(i, "divArea", "below_zoom_div");
+        } else {
+            continue;
+        }
+    }
+
+    var inZoomDiv = $("#in_zoom_div");
+    inZoomDiv.show();
+    window.artifactDivList.render();
+    $("#above_zoom_div").hide();
+    $("#below_zoom_div").hide();
+
+
+    if ($("#alert_bar:visible").length > 0) {
+        $("#alert_bar").hide();
+    }
+
+    _calculateScaleFactor(artifactDiv.width, ARTIFACT_HEIGHT);
+
+    _artifactExpand(artifact, true); // Instant mode
+    if (window.zoomedIn == false) {
         var xExpansionShift = 0;
     } else {
         var xExpansionShift = calculateArtifactExpansion(artifact);
     }
 
+    var artifactPos = artifact.position();
+    if (window.zoomedIn == false) {
+        artifactPos.left = artifactPos.left * window.scaleFactor;
+    } else {
+        if (BrowserDetect.browser == "Firefox") {
+            // See zoom notes above as to why we have to do this
+            artifactPos.left = (artifactPos.left + xExpansionShift) * window.scaleFactor;
+        } else {
+            artifactPos.left = artifactPos.left + (xExpansionShift * window.scaleFactor); // Shift because of image expansion
+        }
+    }
+
+    /* Figure out where to center on the page */
+    var rightMargin = $(window).width() - $("#artifact_wrapper").width() - $("#artifact_wrapper").offset().left;
+    var leftMargin = $("#artifact_wrapper").offset().left;
+    // Subtract 20 for the scrollbar
+    var symmetryBias = ( rightMargin - leftMargin ) / 2;
+    var centeringOffset = $("#artifact_wrapper").width() / 2 + symmetryBias - (artifactDiv.width / 2 * window.scaleFactor);
+    var newPosX = artifactPos.left - centeringOffset;
+
+
+    inZoomDiv.transform({
+        origin: [0,0],
+        scaleX: window.scaleFactor,
+        scaleY: window.scaleFactor
+    });
+    inZoomDiv.css("left", -newPosX + "px");
+
+    $("#canvas_footer").css("bottom", "-60px");
+
+    $("#artifact_wrapper").height(inZoomDiv.height()*window.scaleFactor);
+
+    var numRowsAbove = row - rowAbove;
+    var topCentering = numRowsAbove * (ARTIFACT_HEIGHT + MARGIN_WIDTH) * window.scaleFactor;
+    topCentering -= 1.5*MARGIN_WIDTH * window.scaleFactor;
+    $(window).scrollTop(topCentering);
+    window.previousZoomTarget = artifact;
+
+    window.zoomedIn = true;
+
+
+
+/*
     if (window.previousZoomTarget) {
         // Assuming there was a previous...
         if (window.zoomedIn == true) {
@@ -2238,7 +2482,6 @@ function _doZoom(artifact) {
         }
     }
 
-    $("#artifact_wrapper").height(inZoomDiv.height()*window.scaleFactor);
 
     var artifactPos = artifact.position();
     if (window.zoomedIn == false) {
@@ -2278,6 +2521,7 @@ function _doZoom(artifact) {
 
     artifact.children(".hide_photo").hide();
 
+
     if (window.zoomedIn == false) {
         inZoomDiv.transform({origin:[xOrigin+'%', yOrigin+'%']});
 
@@ -2314,6 +2558,7 @@ function _doZoom(artifact) {
             }
 
         }
+
         if (window.enableZoomAnimation == true) {
             inZoomDiv.animate({
                 origin: ["0%", "0%"],
@@ -2340,6 +2585,8 @@ function _doZoom(artifact) {
         }
     }
 
+    $("#artifact_wrapper").height(inZoomDiv.height()*window.scaleFactor);
+
     // Be sure we're looking at an expanded photo with no cruft on it
     if (window.enableZoomAnimation == true) {
         _artifactExpand(artifact);
@@ -2348,6 +2595,8 @@ function _doZoom(artifact) {
     }
 
     window.previousZoomTarget = artifact;
+
+*/
 }
 
 /**
@@ -2394,6 +2643,7 @@ function _updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
         var initialAboveHeight = $("#above_zoom_div").height();
         var initialPosition = inZoomDiv.position();
         var initialScrollTop = $(window).scrollTop();
+        var initialTop = parseCssPx(inZoomDiv.css("top"));
 
         var first_num = inZoomDiv.children(".artifact_row:first").attr("id");
         if (first_num) {
@@ -2406,6 +2656,8 @@ function _updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
             last_num = Number(last_num);
         }
 
+        var a_divLength = window.artifactDivList.length();
+
         if (previousRow > currentRow) {
             // PAN UP ------------------
             // This means we've clicked a photo above the last one we were just at.
@@ -2413,10 +2665,20 @@ function _updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
             // I want to make sure the row above me and two rows above me exists
             var cutOffRow = currentRow + 2;
             var includeUpToRow = currentRow - 2;
+            invludeUpToRow = Math.max(includeUpToRow, 0);
 
-            var a_divLength = window.artifactDivList.length();
             for (var i = 0; i < a_divLength; i++) {
                 var adiv = window.artifactDivList.getByIndex(i);
+                if (adiv.row > cutOffRow) {
+                    window.artifactDivList.edit(adiv.id, "divArea", "below_zoom_div");
+                } else if (adiv.row < includeUpToRow) {
+                    window.artifactDivList.edit(adiv.id, "divArea", "above_zoom_div");
+                } else if (adiv.row <= cutOffRow && adiv.row >= includeUpToRow) {
+                    window.artifactDivList.edit(adiv.id, "divArea", "in_zoom_div");
+                } else {
+                    continue;
+                }
+                /*
                 if (adiv.divArea == "in_zoom_div") {
                     if (adiv.row === undefined) {return;}
                     if (adiv.row > cutOffRow) {
@@ -2434,6 +2696,7 @@ function _updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
                         window.artifactDivList.edit(adiv.id, "divArea", "in_zoom_div");
                     }
                 }
+                */
             }
         } else if (previousRow < currentRow) {
             // PAN DOWN -----------
@@ -2443,12 +2706,24 @@ function _updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
             // me exist
             var cutOffRow = currentRow - 2;
             var includeUpToRow = currentRow + 2;
+            cutOffRow = Math.max(cutOffRow, 0);
 
             if (currentRow < window.numRows) {
                 // Don't change stuff if we've reached the last row
                 // This prevents a visual glitch related to the fact that scroll
                 // can't scroll beyond the bottom of the page
                 for (var i = 0; i < a_divLength; i++) {
+                    var adiv = window.artifactDivList.getByIndex(i);
+                    if (adiv.row < cutOffRow) {
+                        window.artifactDivList.edit(adiv.id, "divArea", "above_zoom_div");
+                    } else if (adiv.row > includeUpToRow) {
+                        window.artifactDivList.edit(adiv.id, "divArea", "below_zoom_div");
+                    } else if (adiv.row >= cutOffRow && adiv.row <= includeUpToRow) {
+                        window.artifactDivList.edit(adiv.id, "divArea", "in_zoom_div");
+                    } else {
+                        continue;
+                    }
+                    /*
                     var adiv = window.artifactDivList.getByIndex(i);
                     if (adiv.divArea == "in_zoom_div") {
                         if (adiv.row === undefined) {return;}
@@ -2467,14 +2742,19 @@ function _updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
                             window.artifactDivList.edit(adiv.id, "divArea", "in_zoom_div");
                         }
                     }
+                    */
                 }
             }
         }
 
+        var rowSpread = Math.abs(cutOffRow, includeUpToRow);
+
         window.artifactDivList.render();
         
+        /*
         var postAboveHeight = $("#above_zoom_div").height();
         var postPosition = inZoomDiv.position();
+        var postTop = parseCssPx(inZoomDiv.css("top"));
 
         // Now that the rows have been moved, we need to reposition the div and scroll accordingly
         var aboveHeightDiff = postAboveHeight - initialAboveHeight;
@@ -2483,10 +2763,12 @@ function _updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
 
         var newTop = parseCssPx(inZoomDiv.css("top")) + positionDiff;
 
-        inZoomDiv.css("top",newTop);
+        newTop = parseCssPx(inZoomDiv.css("top")) + (175 + 10) * window.scaleFactor;
 
-        $(window).scrollTop(initialScrollTop + aboveHeightDiff);
-        //var newTop = parseCssPx(inZoomDiv.css("top")) + positionDiff + aboveHeightDiff;
+        inZoomDiv.css("top",newTop);
+        */
+
+        //$(window).scrollTop(initialScrollTop + aboveHeightDiff);
 
     }
 
@@ -2497,12 +2779,39 @@ function _updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
  * Undoes the zoom. Updates the globals and resets the zoom parameters
  */
 function _doUnZoom() {
-    window.zoomedIn = false;
 
     // Need to add some from #below_zoom_div to #in_zoom_div before we zoom out
-    
-    addBottomContainers(); // Modify the artifactDivs data structure
+    var a_divLength = window.artifactDivList.length();
+    for (var i = 0; i < a_divLength; i++) {
+        var adiv = window.artifactDivList.getByIndex(i);
+        if (adiv.divArea == "in_zoom_div" || adiv.divArea == "below_zoom_div") {
+            if (adiv.row === undefined) {return;}
+            window.artifactDivList.edit(adiv.id, "divArea", "above_zoom_div");
+        }
+    }
 
+    $("#above_zoom_div").show();
+    $("#below_zoom_div").show();
+
+    $("#in_zoom_div").transform({
+        scaleX: 1,
+        scaleY: 1
+    });
+    $("#in_zoom_div").css("left", 0);
+    $("#in_zoom_div").hide();
+
+    $("#canvas_footer").css("bottom", "0px");
+    $("#artifact_wrapper").height('auto');
+
+    window.artifactDivList.render();
+    $(window).scrollTop(window.lastScrollPos);
+    
+    window.enableLive = true;
+    window.zoomedIn = false;
+
+    //_addBottomContainers(); // Modify the artifactDivs data structure
+
+/*
     $("#above_zoom_div").css("visibility", "visible");
     $("#below_zoom_div").css("visibility", "visible");
     if (window.enableZoomAnimation == true) {
@@ -2535,6 +2844,10 @@ function _doUnZoom() {
         $("#artifact_wrapper").height('auto');
         window.enableLive = true;
     }
+
+    window.artifactDivList.render();
+    $(window).scrollTop(window.lastScrollPos);
+*/
 }
 
 
@@ -2543,7 +2856,7 @@ function _doUnZoom() {
  * In the upload area, we need to resize the holding and staging
  * wrappers so the images tile properly and display correctly
  */
-function resizeHoldingWrappers() {
+function _resizeHoldingWrappers() {
     var numHolding = $("#uploadArea_holding_div").children(".canvas_upload_div").length
     var numStaging = $("#uploadArea_staging_div #staging_content").children(".canvas_upload_div").length
 
@@ -2586,37 +2899,17 @@ function inStagingPhotos(artifactId) {
     return false;
 }
 
-
-/**
- * Grabs the divs inside of the upload staging area and adds them to the page
- * and calls update ArtifactDivs
- */
-function _clearStaging() {
-    if (window.zoomedIn == false) {
-        var artifactDivs_length = window.artifactDivList.length();
-        for (var i = 0; i < artifactDivs_length; i ++) {
-            var artifactDiv = window.artifactDivList.getByIndex(i);
-            if (artifactDiv.divArea == "staging") {
-                window.artifactDivList.editByIndex(i,"divArea","above_zoom_div");
-            }
-        }
-    }
-    _calculateCrop();
-    window.artifactDivList.render();
-}
-
-
 /**
  * When we get an upload error we leave divs lying around.
  * This function cleans them up and is simply a copy and paste convenience
  */
-function clearUploadError(handler) {
+function _clearUploadError(handler) {
     handler.removeNode(handler.uploadRow);
     $(handler.uploadRow).remove();
     window.uploadError = false;
     $("#new_artifacts").hide('fast', function() {
-        _clearStaging();
-        window.firstRowUploadWidth -= $("#new_artifacts").width();
+        _calculateCrop();
+        window.artifactDivList.render();
     });
 }
 
@@ -2671,20 +2964,19 @@ $("#canvas_file_upload").fileUploadUI({
         beforeSend:function (event, files, index, xhr, handler, callBack) {
             window.uploading = true;
             if (!files.uploadCounter) {
-                window.enableLive = false;
                 files.uploadCounter = 1;  
                 /* files.uploadCounter is set the after the first upload 
                  * If we get here that means we're looking at the first upload */
                 $("#new_artifacts").show();
-                window.firstRowUploadWidth += $("#new_artifacts").width();
                 $("#uploadArea_title_div #total").html(files.length);
                 //console.log("updating artifact divs because we just showed the new artifacts uploader pane");
-                updateArtifactDivs();
+                _calculateCrop();
+                window.artifactDivList.render();
             } else {
                 files.uploadCounter += 1;
             }
             $("#uploadArea_title_div #current").html(files.uploadCounter);
-            resizeHoldingWrappers();
+            _resizeHoldingWrappers();
 
             var regexp = /\.(bmp)|(png)|(jpg)|(jpeg)|(gif)$/i;
             // Using the filename extension for our test,
@@ -2694,7 +2986,7 @@ $("#canvas_file_upload").fileUploadUI({
                 $(handler.uploadRow).css("border-color","#e3372d")
                 window.uploadError = true;
                 setTimeout(function () {
-                    clearUploadError(handler);
+                    _clearUploadError(handler);
                 }, 5000);
                 return;
             }
@@ -2704,7 +2996,7 @@ $("#canvas_file_upload").fileUploadUI({
                 $(handler.uploadRow).css("border-color","#e3372d")
                 window.uploadError = true;
                 setTimeout(function () {
-                    clearUploadError(handler);
+                    _clearUploadError(handler);
                 }, 5000);
                 return;
             }
@@ -2715,7 +3007,7 @@ $("#canvas_file_upload").fileUploadUI({
                 $(handler.uploadRow).css("border-color","#e3372d")
                 window.uploadError = true;
                 setTimeout(function () {
-                    clearUploadError(handler);
+                    _clearUploadError(handler);
                 }, 5000);
                 return;
             }
@@ -2731,28 +3023,36 @@ $("#canvas_file_upload").fileUploadUI({
             // We extend it with a uploadCounter to calculate when all uploads have completed:
 
             if (files.uploadCounter != 0 && files.uploadCounter % STAGING_SIZE == 0) {
-                _clearStaging();
+                //_clearStaging();
             }
         
-            resizeHoldingWrappers();
+            _resizeHoldingWrappers();
 
 
             if (files.uploadCounter >= files.length) {
                 /* your code after all uplaods have completed */
-                if (window.stagingPhotos.length()) {
-                    _clearStaging();
-                }
 
-                if (window.uploadError == false) {
+
+                /*
+                 * Live updates can finish entirely before this point
+                 * They can also (more likely) finish after this happens
+                 */
+
+                /*
+                var numStaging = window.artifactDivList.numStaging();
+                var numUnprocessed = window.artifactDivList.numUnprocessed();
+                if (numStaging <= 0 &&
+                    numUnprocessed <= 0 && 
+                    window.uploadError == false &&
+                    $("#new_artifacts:visible").length > 0) {
                     $("#new_artifacts").hide('fast', function() {
-                        //console.log("updating artifact divs because we just hid the new_artifacts upload pane");
-                        _calculateCrop();
-                        window.artifactDivList.render();
-                        window.firstRowUploadWidth -= $("#new_artifacts").width();
+                        //_calculateCrop();
+                        //window.artifactDivList.render();
                     });
                 }
-                window.enableLive = true;
-                processOutstandingQueue();
+                */
+
+                window.uploading = false;
             }
         },
         buildUploadRow: function (files, index) {
@@ -2761,25 +3061,36 @@ $("#canvas_file_upload").fileUploadUI({
             );
         },
         buildDownloadRow: function (file) {
-            console.log(file);
-            var artifactDiv = new ArtifactDiv();
-            artifactDiv['id'] = file.id;
-            artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
-            artifactDiv['divArea'] = "staging";
-            artifactDiv['display'] = true; // We want it to be displayed!
-            artifactDiv['croppedWidth'] = undefined;
-            artifactDiv['row'] = undefined;
-            artifactDiv['posInRow'] = undefined;
-            artifactDiv["height"] = ARTIFACT_HEIGHT; // 
-            artifactDiv["width"] = file.width;
-            artifactDiv["image_url"] = file.image_url;
-            artifactDiv["thumb_url"] = file.thumb_url;
-            artifactDiv["visible"] = file.visible;
+            var artifactDiv = window.artifactDivList.get(file.id);
+            if (artifactDiv === undefined) {
+                var artifactDiv = new ArtifactDiv();
+                artifactDiv['id'] = file.id;
+                artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
+                artifactDiv['divArea'] = "staging";
+                artifactDiv['display'] = true; // We want it to be displayed!
+                artifactDiv['croppedWidth'] = undefined;
+                artifactDiv['row'] = undefined;
+                artifactDiv['posInRow'] = undefined;
+                artifactDiv["height"] = ARTIFACT_HEIGHT; // 
+                artifactDiv["width"] = file.width;
+                artifactDiv["image_url"] = file.image_url;
+                artifactDiv["thumb_url"] = file.thumb_url;
+                artifactDiv["visible"] = file.visible;
+                artifactDiv["doneProcessing"] = false;
 
-            window.artifactDivList.add(artifactDiv); // Puts in on the queue
-            window.artifactDivList.render();
+                window.artifactDivList.addToTop(artifactDiv); // Puts in on the queue
+                window.artifactDivList.render();
+            } else {
+                // Wow, the live update server added the file in before we got
+                // here. That's one fast server! Check to see if the staging
+                // area is empty and then close it if it is
+                $("#staging_content #artifact_"+file._id).remove();
+                // Remove from the staging area
+            }
 
-            return $("");
+            return $(
+                '<div style="display:none"></div>'
+            );
         }
 
     });
@@ -2797,7 +3108,7 @@ $(document).ready(function(){
     iOS_running();
 
     var memoryID = $("#memory_id").html();
-    //setupSocket(memoryID);
+    setupSocket(memoryID);
 
     loadartifacts(0,LOAD_SIZE);
 

@@ -30,7 +30,7 @@ function setupSocket(memoryID) {
                 socket.send(JSON.stringify({ "action" : "pong", "memory":memoryID}));
                 break;
             case "update":
-                updateArtifact(m);
+                _updateArtifact(m);
                 break;
         }
     });
