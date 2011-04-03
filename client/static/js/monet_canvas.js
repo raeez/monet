@@ -2269,6 +2269,7 @@ $(document).ready(function(){
   
     $("#artifact_wrapper").delegate(".hide_photo", "click", function(){
         var visible;
+        window.lastScrollPos = $(window).scrollTop();
 
         // Note, IDs of artifacts are prefixed with 'artifact_'. We must strip this first
         id = parsePrefixToString($(this).parent().attr("id"),"_artifact");
@@ -2301,6 +2302,8 @@ $(document).ready(function(){
                 window.artifactDivList.render();
             }
         }
+
+        $(window).scrollTop(window.lastScrollPos);
 
     });
   }

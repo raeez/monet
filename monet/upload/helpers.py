@@ -116,9 +116,11 @@ def getVisibleArtifacts(artifacts):
   return visible_artifacts
 
 def build_memory_stream():
-  m = Memory.find({'user' : session['_id']})
+  #m = Memory.find({'user' : session['_id']})
+  u = User.find_one({ "_id" : session["_id"] })
   s = []
-  for memory in m:
+  for mID in u.memories:
+    memory = Memory.find_one({ "_id" : mID })
     visible_artifacts = getVisibleArtifacts(memory.artifacts)
     rand_artifacts = []
 
@@ -152,14 +154,16 @@ def claimed(m):
   u = User.find_one({ "_id" : session["_id"] })
   if not u:
     abort(400)
-  return not (m._id in u.memories)
+  return (m._id in u.memories)
 
 def claim_memory(m):
   assert isinstance(m, Memory)
   if 'email' in session:
     if not claimed(m):
+      print "NOT CLAIMED===================="
       User.atomic_append({ '_id' : session['_id'] },
                          { 'memories' : m._id })
+    print "SUCCESS!!!!!!!!!!!!!!!!!!!!!!!"
     return(succeed())
   return(error(["not logged in!"]))
 
