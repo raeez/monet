@@ -60,7 +60,11 @@
             <div class="canvas_center">
                 <div id="canvas_title_wrap">
                     <div id="canvas_title">
+                        {% if 'email' in session %}
                         <div class="click" id="{{memory['id']}}">{{memory['name']}}</div>
+                        {% else %}
+                        <div id="{{memory['id']}}">{{memory['name']}}</div>
+                        {% endif %}
                     </div>
                 </div>
                 <div id="login">
@@ -276,28 +280,6 @@
                     </div>
                     </div>
 
-                    <!--
-                    {% for row in memory['rows'] %}
-                    <div class="artifact_row" id="row_{{loop.index}}">
-                    {% for artifact in row %}
-                        {% if artifact['visible'] == 1 or artifact['visible'] == None %}
-                            <div id="artifact_{{artifact['id']}}" class="artifact photo">
-                                <div class="hide_photo"><a href="#">hide</a></div>
-                                <div class="photo_container" style="width:{{artifact['width']}}px; height:{{artifact['height']}}px"></div>
-                            </div>
-                        {% endif %}
-
-                        {% if artifact['visible'] == 0 %}
-                            <div id="artifact_{{artifact['id']}}" class="artifact artifact_hidden photo">
-                                <div class="hide_photo">hidden photo<br/><a href='#'>show</a></div>
-                                <div class="photo_container" style="width:{{artifact['width']}}px; height:{{artifact['height']}}px"></div>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                    </div>
-                    {% endfor %}
-                    -->
-
                 </div> <!-- End above_zoom_div -->
                 <div id="in_zoom_div" class="zoom_div"></div>
                 <div id="below_zoom_div" class="zoom_div"></div>
@@ -316,10 +298,10 @@
             <div class="canvas_left_of_wrapper">&nbsp;</div>
             <div class="canvas_center">
                 {% if memory['visible'] == 1 %}
-                <div id="hidden_prompt" class="showing_hidden"><a href="/memory/{{memory['id']}}?show_hidden=0">Do not show</a> hidden photos</div>
+                <div id="hidden_prompt" class="showing_hidden"><a href="/mem/{{memory['id']}}?show_hidden=0">Do not show</a> hidden photos</div>
                 {% endif %}
                 {% if memory['visible'] == 0 %}
-                <div id="hidden_prompt" class="not_showing_hidden"><a href="/memory/{{memory['id']}}?show_hidden=1">Show</a> hidden photos</div>
+                <div id="hidden_prompt" class="not_showing_hidden"><a href="/mem/{{memory['id']}}?show_hidden=1">Show</a> hidden photos</div>
                 {% endif %}
 
 

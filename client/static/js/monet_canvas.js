@@ -107,13 +107,11 @@ function iOS_running() {
  * Primary model class for all artifact elements on the page
  */
 function ArtifactDiv() {
-    // These bits are populated from the populateArtifacts method
     this.id = undefined;
     this.noCrop = undefined;
     this.divArea = undefined;
     this.display = undefined;
 
-    // These bits come from the calculateCrop method
     this.croppedWidth = undefined;
     this.row = undefined;
     this.posInRow = undefined;
@@ -123,7 +121,6 @@ function ArtifactDiv() {
     this.lastSeenRow = undefined;
     this.lastSeenPosInRow = undefined;
 
-    // These bits come from the server and are populated by refreshServerData
     this.height = undefined;
     this.width = undefined;
     this.image_url = undefined;
@@ -464,8 +461,10 @@ function ArtifactDivList() {
         var adiv_length = this.artifactDivList.length;
         for (var i = 0; i < adiv_length; i++) {
             if (this.artifactDivList[i].id == id) {
-                this.deleteDivList(id);
-                delete this.artifactDivList[i];
+                this.deleteDivList.push(id);
+                this.artifactDivList.splice(i,1);
+                i -= 1; // We just spliced.
+                adiv_length -= 1;
             }
         }
     }
@@ -480,6 +479,7 @@ function ArtifactDivList() {
     this.render = function() {
         this.addToEventQueue(this._render, {});
     }
+
     this._render = function(args) {
 
         //add
@@ -494,87 +494,20 @@ function ArtifactDivList() {
                 '<\/div>'
 
                 $("#uploadArea_staging_div #staging_content").append(newStagingArtifact);
+                _resizeHoldingWrappers();
                 continue;
             }
 
-            if (addArtifact.croppedWidth === undefined ||
-                addArtifact.posInRow === undefined ||
-                addArtifact.row === undefined) {
-                console.warn("Trying to add artifact "+addArtifact.id+" to the canvas before you have calculated where it's supposed to go!");
-            }
+            // If we don't need to add it to the staging area, we should add it to the main canvas
+            this._renderAddToMainCanvas(addArtifact);
+        }
 
-            if ($("#artifact_" + addArtifact.id).length != 0) {
-                // This means there's already one on the page. We shouldn't be
-                // adding a copy! Something went wrong.
-                console.warn("Trying to add artifact "+addArtifact.id+" to the canvas when it's already there");
-                continue;
-            }
-
-            var newArtifact = ''+
-            '       <div id="artifact_'+addArtifact.id+'" class="artifact photo">'+
-            '           <div class="hide_photo"><a href="#">hide</a></div>'+
-            '           <div class="photo_container" style="width:'+addArtifact.width+'px; height:'+addArtifact.height+'px;">' + 
-            '               <img class="photo" src="'+addArtifact.thumb_url+'" height="175"\/>'+
-            '           </div>' + 
-            '       <\/div>';
-
-            // See if it's the first one in the first row. This is the uploader
-            // area problem.
-            if (addArtifact.row == 0 && addArtifact.posInRow == 0) {
-                $("#new_artifacts").after(newArtifact);
-                continue;
-            }
+        //delete
+        while (this.deleteDivList.length > 0) {
+            var removeID = this.deleteDivList.shift();
             
-            // See if there's one before
-            var beforeArtifact = this.getByRowPos(addArtifact.row, addArtifact.posInRow - 1);
-            if (beforeArtifact !== undefined) {
-                // This means there's an artifact to place next to 
-                var beforeDiv = $("#artifact_"+beforeArtifact.id);
-                if (beforeDiv.length > 0 ) {
-                    beforeDiv.after(newArtifact);
-                    this.priorityEdit(addArtifact.id, "lastSeenPosInRow", addArtifact.posInRow);
-                    this.priorityEdit(addArtifact.id, "lastSeenRow", addArtifact.row);
-                    continue;
-                } else {
-                    var afterArtifact = this.getByRowPos(addArtifact.row, addArtifact.posInRow + 1);
-                    if (afterArtifact !== undefined) { 
-                        var afterDiv = $("artifact_"+afterArtifact.id);
-                        if (afterDiv.length > 0) {
-                            afterDiv.before(newArtifact);
-                            this.priorityEdit(addArtifact.id, "lastSeenPosInRow", addArtifact.posInRow);
-                            this.priorityEdit(addArtifact.id, "lastSeenRow", addArtifact.row);
-                            continue;
-                        } else {
-                            console.warn("Found a following div that doesnt exist on the canvas yet");
-                            // Pass through so we go to other methods of placing this div
-                        }
-                    }
-                }
-            } 
-
-            // If we get here that means it's either on the far left, in a new 
-            // row, the only one in that row, or the preceeding div doesn't 
-            // exist or is malformed
-            var artifactRow = $("#row_"+addArtifact.row);
-            if (artifactRow.length > 0) {
-                // This means there's already a row to put this in.
-                if (addArtifact.posInRow == 0) {
-                    artifactRow.prepend(newArtifact);
-                } else {
-                    artifactRow.append(newArtifact);
-                }
-                this.priorityEdit(addArtifact.id, "lastSeenPosInRow", addArtifact.posInRow);
-                this.priorityEdit(addArtifact.id, "lastSeenRow", addArtifact.row);
-            } else {
-                // we need to make the row
-
-                addAndPlaceNewRow(addArtifact.row, addArtifact.divArea);
-        
-                // Now add to the row we just made
-                $("#row_"+addArtifact.row).append(newArtifact);
-                this.priorityEdit(addArtifact.id, "lastSeenPosInRow", 0);
-                this.priorityEdit(addArtifact.id, "lastSeenRow", addArtifact.row);
-            }
+            var removeDiv = $("#artifact_"+removeID);
+            removeDiv.remove();
         }
 
         //edit
@@ -607,6 +540,15 @@ function ArtifactDivList() {
                     console.warn("Should not be changing the noCrop field");
                     break;
                 case "divArea":
+                    if (editDiv.parent().attr("id") == "staging_content") {
+                        // This means we're removing something from the staging div
+                        $("#staging_content #artifact_"+artifactObject.id).remove();
+                        _resizeHoldingWrappers();
+                        // Now I need to add it to the proper place
+                        this._renderAddToMainCanvas(artifactObject);
+                        continue;
+                    }
+
                     // First check to see if the div is already in the correct div area
                     var prevDivAreaId = editDiv.parents(".zoom_div").attr("id");
                     if (prevDivAreaId == edit.value) {
@@ -804,18 +746,110 @@ function ArtifactDivList() {
                         editDiv.show();
                     }
                     break;
+                case "doneProcessing":
+                    break;
                 default:
                     console.warn("Invalid field");
                     break;
             }
         }
 
-        //delete
-        while (this.deleteDivList.length > 0) {
-
-        }
 
         window.pendingRender = false;
+    }
+
+    /**
+     * Adds the corresponding artifact object to the main canvas
+     * This is broken out in its own funciton so it can be called from the edit
+     * list when we move an artifact from the staging area to the main canvas
+     */
+
+    this._renderAddToMainCanvas = function(addArtifact) {
+        if (addArtifact.croppedWidth === undefined ||
+            addArtifact.posInRow === undefined ||
+            addArtifact.row === undefined) {
+            console.warn("Trying to add artifact "+addArtifact.id+" to the canvas before you have calculated where it's supposed to go!");
+        }
+
+        if ($("#artifact_" + addArtifact.id).length != 0) {
+            // This means there's already one on the page. We shouldn't be
+            // adding a copy! Something went wrong.
+            console.warn("Trying to add artifact "+addArtifact.id+" to the canvas when it's already there");
+            return;
+        }
+
+        if (addArtifact.visible == '0') {
+            var artifact_hidden = "artifact_hidden";
+            var hide_text = "show";
+        } else {
+            var artifact_hidden = "";
+            var hide_text = "hide";
+        }
+
+        var newArtifact = ''+
+        '       <div id="artifact_'+addArtifact.id+'" class="artifact photo '+artifact_hidden+'">'+
+        '           <div class="hide_photo"><a href="#">'+hide_text+'</a></div>'+
+        '           <div class="photo_container" style="width:'+addArtifact.width+'px; height:'+addArtifact.height+'px;">' + 
+        '               <img class="photo" src="'+addArtifact.thumb_url+'" height="175"\/>'+
+        '           </div>' + 
+        '       <\/div>';
+
+        // See if it's the first one in the first row. This is the uploader
+        // area problem.
+        if (addArtifact.row == 0 && addArtifact.posInRow == 0) {
+            $("#new_artifacts").after(newArtifact);
+            return;
+        }
+        
+        var closestPosDistance = 99999;
+        var closestSign = "";
+        var closestDiv;
+
+        var rowDiv = $("#row_"+addArtifact.row);
+        if (rowDiv.length > 0) {
+            rowDiv.children(".artifact").each(function() {
+                var a_div = window.artifactDivList.get(parsePrefixToString($(this).attr("id"), "artifact_"));
+                if (a_div.row == addArtifact.row) {
+                    if (addArtifact.posInRow == a_div.posInRow) {
+                        // Looks like I'm looking at myself for this pass
+                        // through the loop. Keep going..
+                        return
+                    }
+
+                    var d = addArtifact.posInRow - a_div.posInRow;
+                    if (Math.abs(d) < closestPosDistance) {
+                        closestPosDistance = Math.abs(d);
+                        d < 0 ? closestSign = "negative" : closestSign = "positive";
+                        closestDiv = $(this);
+                    }
+                }
+            });
+
+            if (!closestDiv || closestSign == "") {
+                // Nothing in the row we care about. I can just put it in
+                rowDiv.append(newArtifact);
+                this.priorityEdit(addArtifact.id, "lastSeenPosInRow", addArtifact.posInRow);
+                this.priorityEdit(addArtifact.id, "lastSeenRow", addArtifact.row);
+                return;
+            }
+
+            if (closestSign == "negative") {
+                closestDiv.before(newArtifact);
+            } else if (closestSign == "positive") {
+                closestDiv.after(newArtifact);
+            }
+            this.priorityEdit(addArtifact.id, "lastSeenPosInRow", addArtifact.posInRow);
+            this.priorityEdit(addArtifact.id, "lastSeenRow", addArtifact.row);
+        } else {
+            // we need to make the row
+
+            addAndPlaceNewRow(addArtifact.row, addArtifact.divArea);
+    
+            // Now add to the row we just made
+            $("#row_"+addArtifact.row).append(newArtifact);
+            this.priorityEdit(addArtifact.id, "lastSeenPosInRow", 0);
+            this.priorityEdit(addArtifact.id, "lastSeenRow", addArtifact.row);
+        }
     }
 }
 /**
@@ -934,14 +968,6 @@ function getServerDataFieldByID(id, field) {
     return undefined;
 }
 
-
-function processOutstandingQueue() {
-    window.uploading = false;
-    while (window.updateQueue.length) {
-        processMessage(window.updateQueue.shift());
-    }
-}
-
 /******************************************
  * UPDATING HORIZONTAL ARTIFACT LAYOUT
  * ***************************************/
@@ -951,17 +977,6 @@ function processOutstandingQueue() {
  */
 function updateArtifactDivs(/*artifactDivs*/) {
     // Create a new data structure to populate
-    var _artifactDivs = [];
-    populateArtifacts(_artifactDivs);
-    //populateArtifacts(_artifactDivs);
-
-    refreshServerData(_artifactDivs);
-
-    calculateCrop(_artifactDivs);
-
-    moveArtifactDivs(_artifactDivs);
-
-    window.artifactDivs = _artifactDivs;
 }
 
 /**
@@ -972,31 +987,6 @@ function updateArtifactDivs(/*artifactDivs*/) {
  */
 function updateModifiedArtifactDivs() {
     // Create a local copy to perform updates on then update the global
-    var _artifactDivs = $.extend(true, [], window.artifactDivs);
-
-    refreshServerData(_artifactDivs);
-
-    calculateCrop(_artifactDivs);
-
-    moveArtifactDivs(_artifactDivs);
-
-    window.artifactDivs = _artifactDivs;
-}
-
-/**
- * Fills a list with artifactDiv objects that contain the state of all of
- * the artifacts on the current page
- */
-function populateArtifacts(_artifactDivs) {
-    $(".artifact").each(function() {
-        var artifactDiv = new ArtifactDiv();
-        artifactDiv['id'] = $(this).attr("id");
-        $(this).hasClass("no_crop") ? artifactDiv['noCrop'] = true : artifactDiv['noCrop'] = false;
-        artifactDiv['realWidth'] = getRealWidth($(this));
-        $(this).css('display') == "none" ? artifactDiv['display'] = false : artifactDiv['display'] = true;
-        artifactDiv['divArea'] = $(this).parents(".zoom_div").attr("id");
-        _artifactDivs.push(artifactDiv);
-    });
 }
 
 /** getRealWidth(artifactDiv)
@@ -1029,9 +1019,6 @@ function getRealWidth(artifactDiv) {
   Socket IO Canvas Implementation
 ***********************************************/
 /**
- * Given a message of type update, this method modifies the global
- * window.artifactDivs and also repalces the correpsonding image with
- * the image indicated in the message object
  * @param {json} message - The json return from the socket io module
  * action : "ping"|"update"
  * type : "photo"
@@ -1040,15 +1027,11 @@ function getRealWidth(artifactDiv) {
  * full : "<full_url>"
  */
 function _updateArtifact(message) {
-    // if uploading:
-    //  add message to queue
-    // else
-    //  
-    // Need to update both window.artifactDivs and window.artifactServerData
-    
-
+    console.log("\n!!!!!!!!!! LIVE START !!!!!!!!!!");
     var artifactDiv = window.artifactDivList.get(message._id);
     if (artifactDiv === undefined) {
+        console.log("MADE FIRST FROM LIVE");
+        var livemade = true;
         var artifactDiv = new ArtifactDiv();
         artifactDiv['id'] = message._id;
         artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
@@ -1066,31 +1049,44 @@ function _updateArtifact(message) {
 
         window.artifactDivList.addToTop(artifactDiv); // Puts in on the queue
     } else {
-        if (artifactDiv.divArea == "staging") {
-            window.artifactDivList.edit(message._id, "divArea", "above_zoom_div");
-            $("#staging_content #artifact_"+message._id).remove();
-            // Remove from the staging area
-        }
+        var livemade = false;
         window.artifactDivList.edit(message._id, "thumb_url", message.thumb);
         window.artifactDivList.edit(message._id, "doneProcessing", true);
-            
-        /*
-        if (window.uploading == false) {
-            var numStaging = window.artifactDivList.numStaging();
-            var numUnprocessed = window.artifactDivList.numUnprocessed();
-            if (numStaging <= 0 &&
-                numUnprocessed <= 0 && 
-                window.uploadError == false &&
-                $("#new_artifacts:visible").length > 0) {
-                $("#new_artifacts").hide('fast', function() {
-                    //_calculateCrop();
-                    //window.artifactDivList.render();
-                });
+
+        if (artifactDiv.divArea == "staging") {
+            window.artifactDivList.edit(message._id, "divArea", "above_zoom_div");
+
+            // See if we have to close the uploader div
+            if ($("#uploadArea_holding_div").children(".canvas_upload_div").length) {
+                // First see if there are any still uploading
+
+                // pass
+            } else {
+                // If there are no more uploading, we need to check the staging area
+                var numStaging = window.artifactDivList.numStaging();
+                var numUnprocessed = window.artifactDivList.numUnprocessed();
+                if (numStaging == 0 &&
+                    numUnprocessed == 0 && 
+                    window.uploadError == false &&
+                    $("#new_artifacts:visible").length > 0) {
+                    $("#new_artifacts").hide('fast', function() {
+                        console.log("LIVE: just hid new_artifacts because we moved an artifact from staging to above_zoom_div, and there are no more staging, and no more proccessed, and no more in the upload area");
+                        _calculateCrop();
+                        window.artifactDivList.render();
+                    });
+                    // Return because we'll already render once the new_artifacts
+                    // area closes
+                    return;
+                }
             }
         }
-        */
     } 
 
+    if (livemade == true) {
+        console.log("LIVEMADE: About to add another one to the page. ");
+    } else {
+        console.log("NOT LIVEMADE: About to move a div from staging to above_zoom_div");
+    }
     _calculateCrop();
 
     if (window.uploading == true && window.enableLive == true) {
@@ -1105,90 +1101,13 @@ function _updateArtifact(message) {
         }
     }
 
+    console.log("!!!!!!!!!! LIVE END !!!!!!!!!!\n");
+
 }
 /********************************
 **FUNCTIONS FOR CROPPING PHOTOS**
-*********************************
-/**
- * Once loadartifacts runs, a global is populated with server information
- * for each artifactDiv. This method merges the two data sets into one.
- *
- * The format of artifactServerData is determined by the server.
- * artifactDivs are full of ArtifactDiv objects
- */
-function refreshServerData(artifactDivs) {
-    var serverData;
-    var artifact;
-    var id;
+*********************************/
 
-    var a_divlength = artifactDivs.length;
-    for (var j = 0; j < a_divlength; j ++ ) {
-        serverData = getServerDataByID(parsePrefixToString(artifactDivs[j]["id"], "artifact_"));
-        if (serverData === false) {
-            continue;
-        } else {
-            artifactDivs[j]["height"] = serverData.height;
-            artifactDivs[j]["width"] = serverData.width;
-            artifactDivs[j]["image_url"] = serverData.image_url;
-            artifactDivs[j]["thumb_url"] = serverData.thumb_url;
-            artifactDivs[j]["visible"] = serverData.visible;
-        }
-    }
-
-    var sDataLength = window.artifactServerData.length;
-    for (var i = 0; i < sDataLength; i ++ ) {
-        var a_div = getArtifactDivByID("artifact_" + window.artifactServerData[i]["id"]);
-        if (a_div === false) {
-            /*
-             * This likely means there exsists a server data element
-             * because the server pushed one in before the actual div
-             * element was put on the page and updated. We should make
-             * an artifact div so it gets included in the next render
-             */
-            if (window.enableLive == true) {
-                // We only want to make new divs like this if we're accepting
-                // pushed elements
-                var sData = window.artifactServerData[i];
-                var artifactDiv = new ArtifactDiv();
-                artifactDiv['id'] = "artifact_" + sData.id;
-                artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
-                artifactDiv['realWidth'] = sData.width; // 
-                artifactDiv['display'] = true; // We want it to be displayed!
-                zoomDiv = $("#new_artifacts").parents(".zoom_div").attr("id");
-                artifactDiv['divArea'] = zoomDiv // Assuming new elements are always pu aboveZoom Div)
-                artifactDiv["height"] = sData.height; // 
-                artifactDiv["width"] = sData.width;
-                artifactDiv["image_url"] = sData.image_url;
-                artifactDiv["thumb_url"] = sData.thumb_url;
-                artifactDiv["visible"] = sData.visible;
-
-                artifactDivs.splice(2,0,artifactDiv);
-            }
-        } else {
-            // No need to update anything in the serverData
-            continue;
-        }
-    }
-}
-
-function firstRowSpace() {
-    var firstRowUploadWidth = 0
-    if ($("#add_artifact:visible").length) {
-        firstRowUploadWidth += 175;
-        firstRowUploadWidth += 10; // Margin space
-    }
-
-    if ($("#new_artifacts:visible").length) {
-        firstRowUploadWidth += $("#new_artifacts").width();
-        firstRowUploadWidth += 10; // margin space
-        firstRowUploadWidth += 4; // border space
-    }
-
-    return firstRowUploadWidth;
-}
-
-/**
- */
 function _calculateCrop() {
     if (window.pendingRender == true) {
         // Only take the latest calculate crop until we re-render
@@ -1248,7 +1167,6 @@ function _calculateCrop() {
 
 /**
  * Determines crop amount for a given row and updates the div object
- * Called an used exclusively from calculateCrop
  * does a greedy cropping
  * does not crop pictures past a certain threshold
  * bigger pictures are cropped more than smaller pics
@@ -1379,183 +1297,6 @@ function _processRow(row_accumulator, width_accumulator) {
     }
 }
 
-/**
- * This function should expect that the artifactDiv list
- * has nocrop, id, and realWidth filled in for each element
- *
- * This function calculates and fills in the croppedWidth
- * row, and div_area for each object in the list.
- *
- * It modifies the list objects in place
- *
- * Returns a copy of the artifactDivs
- */
-function calculateCrop(artifactDivs) {
-    var max_width = WRAPPER_WIDTH;
-    var row_accumulator = [];
-    var width_accumulator = 0;
-
-    var rownum = 0;
-
-    var artifactDivs_length = artifactDivs.length;
-    for (var i = 0; i < artifactDivs_length; i ++) {
-        var artifactDiv = artifactDivs[i];
-        if (inStagingPhotos(artifactDiv.id)) {
-            // I don't want to include divs that are still in the staging
-            // area
-            continue;
-        }
-        if (artifactDiv.display) {
-            if (width_accumulator < max_width) {
-		        width_accumulator += artifactDiv.realWidth + MARGIN_WIDTH;
-                if (artifactDiv.noCrop) {
-		             width_accumulator += BORDER_WIDTH;
-		        }
-                row_accumulator.push(i);
-                artifactDivs[i].row = rownum;
-            } else {
-                processRow(row_accumulator, width_accumulator, artifactDivs);
-                width_accumulator = 0 + artifactDiv.realWidth + MARGIN_WIDTH;
-	    
-                if (artifactDiv.noCrop) {
-                    width_accumulator += BORDER_WIDTH;
-                }
-
-                row_accumulator = [];
-                rownum ++;
-                row_accumulator.push(i);
-                artifactDivs[i].row = rownum;
-            }
-        }
-    }
-
-    processRow(row_accumulator, width_accumulator, artifactDivs);
-}
-
-/**
- * Determines crop amount for a given row and updates the div object
- * Called an used exclusively from calculateCrop
- * does a greedy cropping
- * does not crop pictures past a certain threshold
- * bigger pictures are cropped more than smaller pics
- */
-function processRow(row_accumulator, width_accumulator, artifactDivs) {
-    
-    var max_width = WRAPPER_WIDTH;
-    var overspill;
-    var crop;
-    var threshold = THRESHOLD;
-
-    /*
-     * We first need to remove all objects that we don't want to crop
-     * This pops it off of the row and adjusts the total width thresholds we use
-     */
-    var rowacc_length = row_accumulator.length
-    for (var j = 0; j < row_accumulator.length; j++) {
-        // we need to recalculate row_accumulator.length each time since we
-        // modify the data structure in place with this loop
-        if (artifactDivs[row_accumulator[j]].noCrop) {
-            rowacc_length -= 1;
-            max_width = max_width - artifactDivs[row_accumulator[j]].realWidth - MARGIN_WIDTH - BORDER_WIDTH;
-            width_accumulator = width_accumulator - artifactDivs[row_accumulator[j]].realWidth - MARGIN_WIDTH - BORDER_WIDTH;
-            artifactDivs[row_accumulator[j]].croppedWidth = artifactDivs[row_accumulator[j]].realWidth;
-            row_accumulator.splice(j,1);
-            j -= 1; // Need to decrement the index we because we're removing the artifacts in place
-        }
-    }
-
-    /*
-     * Now we greedily crop the rest such that, pics not cropped past threshold
-     *
-     * We first bin the divs in the rows into buckets based on size.
-     * We then decide how much to crop each size category
-     * We then go through and bin, by bin, apply the crop to the photo's data structure
-     * The last photo in the row then takes up the slack to prevent us from accumulating rouding errors
-     */
-    if (width_accumulator >= max_width && width_accumulator > 0 && max_width > 0) {
-	//create a size map: size--->location(s)
-	//
-        overspill = width_accumulator - max_width;
-        crop = Math.floor(overspill / rowacc_length);
-	var row_width_accumulator = 0;
-	var amtLeft = overspill;
-	var sizeDict = new Array();
-	var posDict = new Array();
-	var sizeList = []
-	// does size include margin size?????
-
-	// creates sizeDict. maps: size ---> list(indices)
-	// creates posDict. maps: artifact_id ---> position
-	for (var j = 0; j < rowacc_length; j++) {
-	    var index = row_accumulator[j];
-	    var size = artifactDivs[index].realWidth;
-	    posDict[index] = j;
-	    if (size in sizeDict) {
-		sizeDict[size].push(index);
-	    } else {
-		var indexList = [index];
-		sizeDict[size] = indexList;
-		sizeList.push(size);
-	    }
-	}
-	sizeList.sort();
-	sizeList.reverse();
-
-	var isPerfect = checkPerfectCrop(overspill, threshold, width_accumulator);
-
-	// if there is no way to crop w/out going past threshold, lightly relax threshold
-	while(isPerfect == 'False') {
-		threshold = 0.9*threshold;
-		isPerfect = checkPerfectCrop(overspill, threshold, width_accumulator);
-	}
-	
-	var sizeListLength = sizeList.length;
-	for (var k = 0; k < sizeListLength; k++) {
-	    var sizeIndex = sizeList[k]; //<--a pic size
-	    var toCropList = sizeDict[sizeIndex];
-	    var newSize;
-	
-	    for (var z = 0; z < toCropList.length; z++) {
-            var artifact_id = toCropList[z];
-            var maxRemove = Math.ceil((1-threshold)*sizeIndex);
-
-            if (amtLeft > 0 && amtLeft <= maxRemove) {
-                //cropping this pic will finish it off
-                newSize = sizeIndex - amtLeft;
-                amtLeft = 0;
-            } 
-            else if (amtLeft > maxRemove) {
-                if (k == sizeListLength - 1 && z == toCropList.length - 1) {
-                    // This means we're cropping the last one in the row.
-                    // We should be sure it takes up the remaining slack because
-                    // rounding errors could leave a couple pixel-wide jagged edge
-                    // otherwise
-                    newSize = max_width - row_width_accumulator - MARGIN_WIDTH;
-                    amtLeft = 0;
-                } else {
-                    newSize = sizeIndex - maxRemove;
-                    amtLeft = amtLeft - maxRemove;
-                }
-            } else {
-                newSize = artifactDivs[artifact_id].realWidth;
-            }
-
-            artifactDivs[artifact_id].croppedWidth = newSize;
-            artifactDivs[artifact_id].posInRow = posDict[artifact_id];
-            row_width_accumulator += artifactDivs[artifact_id].croppedWidth + MARGIN_WIDTH;
-	    }
-	}
-    } else {
-        // This means the row doesn't fill up the width. We simply need
-        // to give each element it's appropriate row * pos
-        for (var m = 0; m < rowacc_length; m++) {
-            var index = row_accumulator[m];
-            artifactDivs[index].croppedWidth = artifactDivs[index].realWidth;
-            artifactDivs[index].posInRow = m;
-        }
-    }
-}
-
 /* checks if there is a perfect crop
  * that is, we dont have to crop all pics past threshold
  */
@@ -1566,183 +1307,21 @@ function checkPerfectCrop(overspill, threshold, width_accumulator) {
 	return 'False';
     }
 }
-/************************************
-************************************/
 
-/**
- * Given a fully populated list of artifactDivs, this method moves the divs to the appropriate
- * location on the page. It, however first checks to see if the div is already in the
- * correct location. If it is, it does not move it
- */
-function moveArtifactDivs(artifactDivs) {
-    var adivs_length = artifactDivs.length;
-    for (var i=0; i < adivs_length; i++) {
-        var artifactDiv = artifactDivs[i];
-
-        /*
-         * Check to make sure add_artifact and new_artifacts are #1 and 2 respectively
-         */
-        if (artifactDiv.id == "add_artifact" && i != 0) {
-            // Fix data structure
-            var tmp = artifactDivs.splice(i,1);
-            artifactDivs.unshift(tmp[0]);
-            // Since we're always sure we're putting this before the current
-            // index, we don't have to update it.
-            
-            // Also move the physical div.
-	    if (is_iOS == false) {
-            	$("#add_artifact").parent(".artifact_row").prepend($("#add_artifact"));
-	    }
-            continue;
-        }
-
-        if (artifactDiv.id == "new_artifacts" && i != 1) {
-            // Fix data structure
-            var tmp = artifactDivs.splice(i,1);
-            artifactDivs.splice(1,0,tmp[0]);
-            // Since we're always sure we're putting this before the current
-            // index, we don't have to update it.
-            
-            // Also move the physical div.
-            $("#new_artifacts").siblings("#add_artifact").after($("#new_artifacts"));
-            continue;
-        }
-
-        if (artifactDiv.id == "add_artifact" || artifactDiv.id == "new_artifacts") {
-            // Don't move these special divs; If they need to be moved, the 
-            // previous two methods will have taken care of that
-            continue;
-        }
-
-            /*
-             * This means the div does not exist yet. This is likely
-             * because our socket added it to the data structure
-             * before it was drawn.
-             */
-            
-
-            /*
-             *
-             * The following code should ONLY be run when we are progressively
-             * loading!
-             *
-             */
-
-        if (inStagingPhotos(artifactDiv.id)) {
-            continue;
-        } else {
-            if (!$("#"+artifactDiv.id).length) {
-                var newArtifact = ''+
-                '       <div id="'+artifactDiv.id+'" class="artifact photo">'+
-                '           <div class="hide_photo"><a href="#">hide</a></div>'+
-                '           <div class="photo_container" style="width:'+artifactDiv.width+'px; height:'+artifactDiv.height+'px;">' + 
-                '               <img class="photo" src="'+artifactDiv.thumb_url+'" height="175"\/>'+
-                '           </div>' + 
-                '       <\/div>';
-                $("#new_artifacts").after(newArtifact);
-                /*
-                if ($("#row_"+artifactDiv.row).length) {
-                    $("#row_"+artifactDiv.row).prepend(newArtifact);
-                } else {
-                    // We need to make a new row first
-                    new_row = "<div class='artifact_row' id='row_"+artifactDiv.row+"'></div>"
-                    $("#"+artifactDiv.divArea).prepend(new_row);
-                    $("#row_"+artifactDiv.row).prepend(newArtifact);
-                }
-                */
-            } 
-        }
-
-        if (artifactDiv.row > window.numRows) {
-            window.numRows = artifactDiv.row;
-        }
-
-        if (!artifactDiv.id || !artifactDiv.croppedWidth || !artifactDiv.divArea) {
-            console.log("ERROR: artifactDiv has undefined terms");
-            console.log(artifactDiv);
-        }
-
-        if (artifactDiv.croppedWidth && $("#"+artifactDiv.id).width() != artifactDiv.croppedWidth) {
-            $("#"+artifactDiv.id).width(artifactDiv.croppedWidth);
-        }
-        
-
-        // Be sure the images are centered properly
-        var photoContainer = $("#"+artifactDiv.id).children(".photo_container");
-        if (photoContainer.length > 0) {
-            var centering = (artifactDiv.realWidth - artifactDiv.croppedWidth) / -2;
-            var oldCenteringPos = photoContainer.css("left");
-            if (centering != parseCssPx(oldCenteringPos)) {
-                $("#"+artifactDiv.id).children(".photo_container").css('left', centering+"px");
-            }
-        }
-        
-        var row_num = $("#"+artifactDiv.id).parents(".artifact_row").attr("id");
-        row_num = row_num.slice(4,row_num.length); // Take off the "row_" prefix
-        row_num = Number(row_num);
-
-        if (artifactDiv.row > row_num) {
-            if ($("#row_"+artifactDiv.row).length) {
-                $("#row_"+artifactDiv.row).prepend($("#"+artifactDiv.id));
-            } else {
-                // We need to make a new row first
-                new_row = "<div class='artifact_row' id='row_"+artifactDiv.row+"'></div>"
-                $("#"+artifactDiv.divArea).append(new_row);
-                $("#row_"+artifactDiv.row).prepend($("#"+artifactDiv.id));
-            }
-        } else if (artifactDiv.row < row_num) {
-            $("#row_"+artifactDiv.row).append($("#"+artifactDiv.id));
-        } else {
-            // Do nothing. leave it where it is.
-        }
-
-        // Move the rows to be in the correct div area
-        
-        var zoom_div = $("#"+artifactDiv.id).parents(".zoom_div").attr("id");
-        if (artifactDiv.divArea != zoom_div) {
-            // If we're not in the correct area, we should move the row
-            var first_num = $("#"+artifactDiv.divArea).children(".artifact_row:first").attr("id");
-            var last_num = $("#"+artifactDiv.divArea).children(".artifact_row:last").attr("id");
-            if (first_num) {
-                first_num = first_num.slice(4,first_num.length); // Take off the "row_" prefix
-                first_num = Number(first_num);
-            } else {first_num = -1;}
-            if (last_num) {
-                last_num = last_num.slice(4,last_num.length); // Take off the "row_" prefix
-                last_num = Number(last_num);
-            } else {last_num = 999999;}
-
-            if (first_num == -1) {
-                // This means the row doesn't have any divs in it yet. Doesn't matter whether
-                // or not I append or prepend
-                $("#"+artifactDiv.divArea).append($("#"+artifactDiv.id).parents(".artifact_row"));
-            } else if (row_num < first_num) {
-                $("#"+artifactDiv.divArea).prepend($("#"+artifactDiv.id).parents(".artifact_row"));
-            } else if (row_num > last_num) {
-                $("#"+artifactDiv.divArea).append($("#"+artifactDiv.id).parents(".artifact_row"));
-            } else if (row_num == first_num) {
-                // This shouldn't happen. Why do we have a duplicate row!
-                console.warn("Warning: Duplicate rows when trying to move rows in between divs");
-                $("#"+artifactDiv.divArea+" row_"+row_num).remove();
-                $("#"+artifactDiv.divArea).prepend($("#"+artifactDiv.id).parents(".artifact_row"));
-            } else if (row_num == last_num) {
-                // This shouldn't happen. Why do we have a duplicate row!
-                console.warn("Warning: Duplicate rows when trying to move rows in between divs");
-                $("#"+artifactDiv.divArea+" row_"+row_num).remove();
-                $("#"+artifactDiv.divArea).append($("#"+artifactDiv.id).parents(".artifact_row"));
-            } else if (row_num > first_num && row_num < last_num){
-                $("#"+artifactDiv.divArea).children(".artifact_row").each(function() {
-                    var iter_row_num = $(this).attr("id");
-                    iter_row_num = iter_row_num.slice(4,iter_row_num.length);
-                    iter_row_num = Number(iter_row_num);
-                    if (artifactDiv.row >= iter_row_num) {
-                        $("#"+artifactDiv.id).parents(".artifact_row").insertAfter($(this));
-                    }
-                })
-            }
-        }
+function firstRowSpace() {
+    var firstRowUploadWidth = 0
+    if ($("#add_artifact:visible").length) {
+        firstRowUploadWidth += 175;
+        firstRowUploadWidth += 10; // Margin space
     }
-    DOCUMENT_HEIGHT = $(document).height(); // so we don't need to look this up every time
+
+    if ($("#new_artifacts:visible").length) {
+        firstRowUploadWidth += $("#new_artifacts").width();
+        firstRowUploadWidth += 10; // margin space
+        firstRowUploadWidth += 4; // border space
+    }
+
+    return firstRowUploadWidth;
 }
 
 
@@ -1774,10 +1353,11 @@ function _loadArtifacts(offset, numArtifacts) {
             artifactDiv["image_url"] = newPhoto.image_url;
             artifactDiv["thumb_url"] = newPhoto.thumb_url;
             artifactDiv["visible"] = newPhoto.visible;
-            artifactDiv["doneProcessing"] = false;
+            artifactDiv["doneProcessing"] = true;
 
             window.artifactDivList.add(artifactDiv); // Puts in on the queue
         }
+        console.log("Just loading artifacts on the page");
         _calculateCrop();
         window.artifactDivList.render();
     });
@@ -1812,45 +1392,6 @@ function loadartifacts(offset, numartifacts, postLoad) {
         window.numPhotosLoaded = window.artifactServerData.length;
         window.loadingMoreArtifacts = false;
     });
-}
-
-/**
- * Very similar to refreshServerData except called exclusively from the
- * loadartifacts function. This is designed to put new divs on the bottom
- * of the page and is an exception to divs always being placed by the live
- * updater
- */
-function addNewlyLoadedPhotos(newPhotos) {
-    var newPhotosLength = newPhotos.length;
-    for (var j = 0; j < newPhotosLength; j ++) {
-        // Add to add to artifactServerData
-        // Add to artifactDivs
-        // Add to canvas
-        var newPhoto = newPhotos[j];
-        window.artifactServerData.push(newPhoto);
-        var artifactDiv = new ArtifactDiv();
-        artifactDiv['id'] = "artifact_" + newPhoto.id;
-        artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
-        artifactDiv['realWidth'] = newPhoto.width; // 
-        artifactDiv['display'] = true; // We want it to be displayed!
-        zoomDiv = "below_zoom_div";
-        artifactDiv['divArea'] = zoomDiv // Assuming new elements are always pu aboveZoom Div)
-        artifactDiv["height"] = newPhoto.height; // 
-        artifactDiv["width"] = newPhoto.width;
-        artifactDiv["image_url"] = newPhoto.image_url;
-        artifactDiv["thumb_url"] = newPhoto.thumb_url;
-        artifactDiv["visible"] = newPhoto.visible;
-        window.artifactDivs.push(artifactDiv);
-
-        var newArtifact = ''+
-        '       <div id="'+artifactDiv.id+'" class="artifact photo">'+
-        '           <div class="hide_photo"><a href="#">hide</a></div>'+
-        '           <div class="photo_container" style="width:'+newPhoto.width+'px; height:'+newPhoto.height+'px;">' + 
-        '           </div>' + 
-        '       <\/div>';
-        $("#new_artifacts").after(newArtifact);
-    }
-    updateArtifactDivs();
 }
 
 /**
@@ -1932,7 +1473,6 @@ function updatePos() {
 
 	}
     });
-    //window.artifactDivs = newPositions;
     //console.log("updating artifact divs because we dragged and dropped");
     updateArtifactDivs(/*newPositions*/);
     
@@ -2134,92 +1674,6 @@ function _calculateScaleFactor(a_width, a_height) {
 
 }
 
-
-/**
- * Takes a jquery element as the zoom target.
- * The zoom target must have the class 'artifact'
- * It must be visible within the canvas area
- */
-function zoomToArtifact(artifact) {
-    /*
-    if (window.zoomedIn == false) {
-        _updateContainerDivs(artifact); // Modify the artifactDivs data structure
-        window.artifactDivList.render();
-        //updateModifiedArtifactDivs(); // Move the divs to the appropriate spots
-    }
-    */
-    _doZoom(artifact); // Actually do the transform
-}
-
-/**
- * Updates the global window.artifactDivs data structure to indicate
- * where the various photos should go
- */
-function _updateContainerDivs(artifact) {
-    var scroll_top = $(window).scrollTop();
-    var scroll_bottom = $(window).scrollTop() + $(window).height();
-    var artifactTop = $(artifact).offset().top;
-
-    var zoom_top;
-    var zoom_bottom;
-
-    if ((artifactTop - MARGIN_WIDTH - ARTIFACT_HEIGHT) <= scroll_top) {
-        // This means we need to add an extra row to the zoom_top
-        zoom_top = artifactTop - MARGIN_WIDTH - ARTIFACT_HEIGHT;
-    } else {
-        zoom_top = scroll_top - (ARTIFACT_HEIGHT - 60);
-    }
-
-    if ((artifactTop + ARTIFACT_HEIGHT + MARGIN_WIDTH) >= scroll_bottom) {
-        // This means we need to add an extra row to the zoom_bottom
-        zoom_bottom = scroll_bottom + MARGIN_WIDTH + ARTIFACT_HEIGHT;
-    } else {
-        zoom_bottom = scroll_bottom + (ARTIFACT_HEIGHT - 60);
-    }
-
-    var adiv_length = window.artifactDivList.length();
-    for (var i = 0; i < adiv_length; i++) {
-        var a_div = window.artifactDivList.getByIndex(i);
-        var a_top = $("#artifact_"+a_div.id).offset().top;
-        if (a_top < zoom_top) {
-            // This should be above the zoom div
-            window.artifactDivList.editByIndex(i, "divArea", "above_zoom_div");
-        } else if (a_top >= zoom_top && a_top <= zoom_bottom) {
-            // This should be in our zoom div
-            window.artifactDivList.editByIndex(i, "divArea", "in_zoom_div");
-        } else if (a_top > zoom_bottom) {
-            // This should be below the zoom div
-            window.artifactDivList.editByIndex(i, "divArea", "below_zoom_div");
-        } else {
-            // We've got a problem
-        }
-    }
-}
-
-/**
- * This is called from doUnZoom and adds some divs to the bottom
- * of #in_zoom_div so we don't get a wonky zoom out effect
- */
-function _addBottomContainers() {
-    var scroll_top = $(window).scrollTop() + 70;
-    var scroll_bottom = $(window).scrollTop() + $(window).height();
-
-    var a_divLength = window.artifactDivList.length();
-    for (var i = 0; i < a_divLength; i++) {
-        var adiv = window.artifactDivList.getByIndex(i);
-        if (adiv.divArea == "below_zoom_div") {
-            var a_top = $("#artifact_"+adiv.id).offset().top;
-            if (a_top <= scroll_bottom && a_top >= scroll_top) {
-                // This should be above the zoom div
-                window.artifactDivList.edit(adiv.id, "divArea", "in_zoom_div");
-            } 
-        }
-    }
-
-    window.artifactDivList.render();
-}
-
-
 /**
  * When the canvas is resized, make sure our all of our elements fit properly
  */
@@ -2276,7 +1730,7 @@ function _resizeCanvas() {
     }
     WRAPPER_WIDTH = $(".canvas_center").width(); // Update resize global
 
-    //console.log("updating artifact divs because we resized the canvas");
+    console.log("updating artifact divs because we resized the canvas");
     _calculateCrop();
     window.artifactDivList.render();
 }
@@ -2449,331 +1903,7 @@ function _doZoom(artifact) {
     window.previousZoomTarget = artifact;
 
     window.zoomedIn = true;
-
-
-
-/*
-    if (window.previousZoomTarget) {
-        // Assuming there was a previous...
-        if (window.zoomedIn == true) {
-            var previousZoomDiv = window.artifactDivList.get(parsePrefixToString(window.previousZoomTarget.attr("id"), "artifact_"));
-            // Return the previous photo to its normal cropped state
-            // We need to do this so we can more easily calculate the appropriate
-            // offset to move the divs when we're zoomed in.
-            // It's easier to just move the divs (which we have to do anyways)
-            // than to recalculate the whole thing
-            if (previousZoomDiv.id != artifactDiv.id) {
-                // Only do this, of course, if we haven't clicked on the same image
-                // If so, we're actually just zooming out
-                _artifactUnExpand(window.previousZoomTarget, true);
-            }
-
-        }
-    }
-
-
-    if (window.enableZoomAnimation == true) {
-        if ($("#alert_bar:visible").length > 0) {
-            $("#alert_bar").hide('fast');
-        }
-    } else {
-        if ($("#alert_bar:visible").length > 0) {
-            $("#alert_bar").hide();
-        }
-    }
-
-
-    var artifactPos = artifact.position();
-    if (window.zoomedIn == false) {
-        artifactPos.left = artifactPos.left + 0; // Shift because of image expansion
-    } else {
-        if (BrowserDetect.browser == "Firefox") {
-            // See zoom notes above as to why we have to do this
-            artifactPos.left = (artifactPos.left + xExpansionShift) * window.scaleFactor;
-            artifactPos.top = artifactPos.top * window.scaleFactor;
-        } else {
-            artifactPos.left = artifactPos.left + (xExpansionShift * window.scaleFactor); // Shift because of image expansion
-        }
-    }
-
-    var xOrigin = (artifactPos.left) / inZoomDiv.width() * 100;
-    var yOrigin = (artifactPos.top) / inZoomDiv.height() * 100;
-
-    var topOffset = ($(window).height() - 70 - ( artifact.height() + 10 ) * window.scaleFactor) / 2;
-    var scrollOffset = $(window).scrollTop();
-
-    var rightMargin = $(window).width() - $("#artifact_wrapper").width() - $("#artifact_wrapper").offset().left;
-    var leftMargin = $("#artifact_wrapper").offset().left;
-    // Subtract 20 for the scrollbar
-    var symmetryBias = ( rightMargin - leftMargin ) / 2 - 20;
-    var centeringOffset = $("#artifact_wrapper").width() / 2 + symmetryBias - (artifactDiv.width / 2 * window.scaleFactor);
-
-    $("#above_zoom_div").css("visibility", "hidden");
-    $("#below_zoom_div").css("visibility", "hidden");
-
-    var aboveZoomDivHeight = $("#above_zoom_div").height();
-
-    var newPosX = inZoomDiv.width() * (xOrigin/100) - centeringOffset;
-    var newPosY = inZoomDiv.height() * (yOrigin/100) - scrollOffset - topOffset + aboveZoomDivHeight;
-
-    var xTranslate = newPosX;
-    var yTranslate = newPosY;
-
-    artifact.children(".hide_photo").hide();
-
-
-    if (window.zoomedIn == false) {
-        inZoomDiv.transform({origin:[xOrigin+'%', yOrigin+'%']});
-
-        if (window.enableZoomAnimation == true ) {
-            inZoomDiv.animate({
-                scaleX: window.scaleFactor,
-                scaleY: window.scaleFactor,
-                left: - xTranslate + 'px',
-                top: - yTranslate + 'px'
-            },'slow');
-
-            $("#canvas_footer").animate({
-                bottom:'-60px'
-            }, 'slow');
-        } else {
-            inZoomDiv.transform({
-                scaleX: window.scaleFactor,
-                scaleY: window.scaleFactor
-            });
-            inZoomDiv.css("left", -xTranslate + "px");
-            inZoomDiv.css("top", -yTranslate + "px");
-
-            $("#canvas_footer").css("bottom", "-60px");
-        }
-
-        window.zoomedIn = true;
-    } else if (window.zoomedIn == true) {
-
-        if (window.previousZoomTarget) {
-            if (window.previousZoomTarget.attr("id") == artifact.attr("id")) {
-                // This means we've clicked on the same thing
-                _doUnZoom();
-                return
-            }
-
-        }
-
-        if (window.enableZoomAnimation == true) {
-            inZoomDiv.animate({
-                origin: ["0%", "0%"],
-                scaleX: window.scaleFactor,
-                scaleY: window.scaleFactor,
-                left: - xTranslate + 'px',
-                top: - yTranslate + 'px',
-            },'fast', function() {
-                // As soon as we're done panning, we need to see if we
-                // need to update #in_zoom_div. This will happen any time
-                // we pan up or down since we need to add or pop rows
-                // accordingly
-                _updateInZoomDivPan(artifactDiv, previousZoomDiv);
-            });
-        } else {
-            inZoomDiv.transform({
-                origin: ["0%", "0%"],
-                scaleX: window.scaleFactor,
-                scaleY: window.scaleFactor
-            });
-            inZoomDiv.css("left", -xTranslate + "px");
-            inZoomDiv.css("top", -yTranslate + "px");
-            _updateInZoomDivPan(artifactDiv, previousZoomDiv);
-        }
-    }
-
-    $("#artifact_wrapper").height(inZoomDiv.height()*window.scaleFactor);
-
-    // Be sure we're looking at an expanded photo with no cruft on it
-    if (window.enableZoomAnimation == true) {
-        _artifactExpand(artifact);
-    } else {
-        _artifactExpand(artifact, true); // Instant mode
-    }
-
-    window.previousZoomTarget = artifact;
-
-*/
 }
-
-/**
- * Zoom Transforms ================================
- * We need transform functions to interchange between the CSS top and left
- * values we get out of our divs and the position properties that is returned
- * by jQuery. Position is relative to the enclosing container. Top and Left are
- * the relative offset positions of the divs before the transform is applied.
- *
- * The transform needs to take into account the scale origins as well since that
- * affects the positioning of the elements.
- *
- * This has been tested to be true in Chrome and Firefox
- */
-function posYToTop(posY, height, scale, yOrigin, aboveHeight) {
-    return posY + (height * scale * yOrigin)/200 - aboveHeight;
-}
-function topToPosY(div_top, height, scale, yOrigin, aboveHeight) {
-    return (div_top + aboveHeight) - (height * scale * yOrigin)/200;
-}
-function posXToLeft(posX, width, scale, xOrigin) {
-    return posX + (width * scale * xOrigin)/200;
-}
-function leftToPosX(div_left, width, scale, xOrigin) {
-    return div_left - (width * scale * xOrigin)/200;
-}
-
-/**
- * After a pan has been completed when looking at zoomed-in photos, we may have to update
- * the #in_zoom_div to add or remove rows. This detects whether or not this has
- * to happen and then moves the rows in place without changing the relative viewport
- * 
- * artifactDiv and previousArtifactDiv are ArtifactDiv objects
- */
-function _updateInZoomDivPan(artifactDiv, previousArtifactDiv) {
-    // Now we need to see if we're navigating up or down. If so, we need to try and grab another row to add to the #in_zoom_div
-    var previousRow = previousArtifactDiv.row;
-    var currentRow = artifactDiv.row;
-    var inZoomDiv = $("#in_zoom_div");
-
-    if (previousRow != currentRow) {
-        // First see what the first and last rows of #in_zoom_div are so we can grab the correct row
-        
-        var initialAboveHeight = $("#above_zoom_div").height();
-        var initialPosition = inZoomDiv.position();
-        var initialScrollTop = $(window).scrollTop();
-        var initialTop = parseCssPx(inZoomDiv.css("top"));
-
-        var first_num = inZoomDiv.children(".artifact_row:first").attr("id");
-        if (first_num) {
-            first_num = first_num.slice(4,first_num.length); // Take off the "row_" prefix
-            first_num = Number(first_num);
-        }
-        var last_num = inZoomDiv.children(".artifact_row:last").attr("id");
-        if (last_num) {
-            last_num = last_num.slice(4,last_num.length); // Take off the "row_" prefix
-            last_num = Number(last_num);
-        }
-
-        var a_divLength = window.artifactDivList.length();
-
-        if (previousRow > currentRow) {
-            // PAN UP ------------------
-            // This means we've clicked a photo above the last one we were just at.
-            // I want to pop off everything plus 2 rows (inclusive) below me
-            // I want to make sure the row above me and two rows above me exists
-            var cutOffRow = currentRow + 2;
-            var includeUpToRow = currentRow - 2;
-            invludeUpToRow = Math.max(includeUpToRow, 0);
-
-            for (var i = 0; i < a_divLength; i++) {
-                var adiv = window.artifactDivList.getByIndex(i);
-                if (adiv.row > cutOffRow) {
-                    window.artifactDivList.edit(adiv.id, "divArea", "below_zoom_div");
-                } else if (adiv.row < includeUpToRow) {
-                    window.artifactDivList.edit(adiv.id, "divArea", "above_zoom_div");
-                } else if (adiv.row <= cutOffRow && adiv.row >= includeUpToRow) {
-                    window.artifactDivList.edit(adiv.id, "divArea", "in_zoom_div");
-                } else {
-                    continue;
-                }
-                /*
-                if (adiv.divArea == "in_zoom_div") {
-                    if (adiv.row === undefined) {return;}
-                    if (adiv.row > cutOffRow) {
-                        // Any row too far below gets moved into #below_zoom_div
-                        window.artifactDivList.edit(adiv.id, "divArea", "below_zoom_div");
-                    }
-                    if (adiv.row < includeUpToRow) {
-                        // Any row too far above gets moved into #above_zoom_div
-                        window.artifactDivList.edit(adiv.id, "divArea", "above_zoom_div");
-                    } 
-                } else if (adiv.divArea == "above_zoom_div") {
-                    if (adiv.row === undefined) {return;}
-                    if (adiv.row >= includeUpToRow) {
-                        // Any row that's above me that's supposed to be in #in_zoom_div gets moved in
-                        window.artifactDivList.edit(adiv.id, "divArea", "in_zoom_div");
-                    }
-                }
-                */
-            }
-        } else if (previousRow < currentRow) {
-            // PAN DOWN -----------
-            // This means we've clicked an artifact below the last one we were just at.
-            // I want to pop off everything minus 2 rows (inclusive) and above of me.
-            // I want to try and make sure that the row below me and two rows below
-            // me exist
-            var cutOffRow = currentRow - 2;
-            var includeUpToRow = currentRow + 2;
-            cutOffRow = Math.max(cutOffRow, 0);
-
-            if (currentRow < window.numRows) {
-                // Don't change stuff if we've reached the last row
-                // This prevents a visual glitch related to the fact that scroll
-                // can't scroll beyond the bottom of the page
-                for (var i = 0; i < a_divLength; i++) {
-                    var adiv = window.artifactDivList.getByIndex(i);
-                    if (adiv.row < cutOffRow) {
-                        window.artifactDivList.edit(adiv.id, "divArea", "above_zoom_div");
-                    } else if (adiv.row > includeUpToRow) {
-                        window.artifactDivList.edit(adiv.id, "divArea", "below_zoom_div");
-                    } else if (adiv.row >= cutOffRow && adiv.row <= includeUpToRow) {
-                        window.artifactDivList.edit(adiv.id, "divArea", "in_zoom_div");
-                    } else {
-                        continue;
-                    }
-                    /*
-                    var adiv = window.artifactDivList.getByIndex(i);
-                    if (adiv.divArea == "in_zoom_div") {
-                        if (adiv.row === undefined) {return;}
-                        if (adiv.row < cutOffRow) {
-                            // Any row too far above gets moved into #above_zoom_div
-                            window.artifactDivList.edit(adiv.id, "divArea", "above_zoom_div");
-                        }
-                        if (adiv.row > includeUpToRow) {
-                            // Any row too far below gets moved into #below_zoom_div
-                            window.artifactDivList.edit(adiv.id, "divArea", "below_zoom_div");
-                        } 
-                    } else if (adiv.divArea == "below_zoom_div") {
-                        if (adiv.row === undefined) {return;}
-                        if (adiv.row <= includeUpToRow) {
-                            // Any row that's below me that's supposed to be in #in_zoom_div gets moved in
-                            window.artifactDivList.edit(adiv.id, "divArea", "in_zoom_div");
-                        }
-                    }
-                    */
-                }
-            }
-        }
-
-        var rowSpread = Math.abs(cutOffRow, includeUpToRow);
-
-        window.artifactDivList.render();
-        
-        /*
-        var postAboveHeight = $("#above_zoom_div").height();
-        var postPosition = inZoomDiv.position();
-        var postTop = parseCssPx(inZoomDiv.css("top"));
-
-        // Now that the rows have been moved, we need to reposition the div and scroll accordingly
-        var aboveHeightDiff = postAboveHeight - initialAboveHeight;
-        var positionDiff = postPosition.top - initialPosition.top ;
-        positionDiff = positionDiff * window.scaleFactor;
-
-        var newTop = parseCssPx(inZoomDiv.css("top")) + positionDiff;
-
-        newTop = parseCssPx(inZoomDiv.css("top")) + (175 + 10) * window.scaleFactor;
-
-        inZoomDiv.css("top",newTop);
-        */
-
-        //$(window).scrollTop(initialScrollTop + aboveHeightDiff);
-
-    }
-
-}
-
 
 /**
  * Undoes the zoom. Updates the globals and resets the zoom parameters
@@ -2808,49 +1938,7 @@ function _doUnZoom() {
     
     window.enableLive = true;
     window.zoomedIn = false;
-
-    //_addBottomContainers(); // Modify the artifactDivs data structure
-
-/*
-    $("#above_zoom_div").css("visibility", "visible");
-    $("#below_zoom_div").css("visibility", "visible");
-    if (window.enableZoomAnimation == true) {
-        $("#in_zoom_div").animate({
-            scaleX: 1,
-            scaleY: 1,
-            left: 0,
-            top: 0
-        },'slow', function() {
-            $("#artifact_wrapper").height('auto');
-            window.enableLive = true;
-            //console.log("Updating divs after unzoom just in case we have more live photos");
-            updateArtifactDivs();
-        });
-        $("#canvas_footer").animate({
-            bottom:'0px'
-        }, 'slow');
-
-    } else {
-        $("#in_zoom_div").transform({
-            scaleX: 1,
-            scaleY: 1
-        });
-
-        $("#in_zoom_div").css("left", 0);
-        $("#in_zoom_div").css("top", 0);
-
-        $("#canvas_footer").css("bottom", "0px");
-
-        $("#artifact_wrapper").height('auto');
-        window.enableLive = true;
-    }
-
-    window.artifactDivList.render();
-    $(window).scrollTop(window.lastScrollPos);
-*/
 }
-
-
 
 /**
  * In the upload area, we need to resize the holding and staging
@@ -2907,10 +1995,13 @@ function _clearUploadError(handler) {
     handler.removeNode(handler.uploadRow);
     $(handler.uploadRow).remove();
     window.uploadError = false;
-    $("#new_artifacts").hide('fast', function() {
-        _calculateCrop();
-        window.artifactDivList.render();
-    });
+    if (window.uploading == false) {
+        $("#new_artifacts").hide('fast', function() {
+            console.log("Just cleared the upload errors");
+            _calculateCrop();
+            window.artifactDivList.render();
+        });
+    }
 }
 
 
@@ -2949,6 +2040,7 @@ $("#canvas_file_upload").fileUploadUI({
             $("#add_artifact").css("-webkit-box-shadow", "2px 2px 7px #111");
             $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
             handler.removeNode(handler.uploadRow);
+            files.uploadSequence[index] = null;
             handler.onCompleteAll(files);
         },
         onDragLeave: function(event) {
@@ -2962,20 +2054,29 @@ $("#canvas_file_upload").fileUploadUI({
             $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
         },
         beforeSend:function (event, files, index, xhr, handler, callBack) {
-            window.uploading = true;
-            if (!files.uploadCounter) {
-                files.uploadCounter = 1;  
-                /* files.uploadCounter is set the after the first upload 
+            console.log("\n>>>>>>>>>> BEFORE SEND START <<<<<<<<<<");
+            if (index == 0) {
+                window.uploading = true;
+                files.uploadSequence = [];
+                files.uploadSequence.start = function(index) {
+                    var next = this[index];
+                    if (next) {
+                        next.apply(null, Array.prototype.slice.call(arguments, 1));
+                        this[index] = null;
+                    }
+                }
+
+                /* files.startCounter is set the after the first upload 
                  * If we get here that means we're looking at the first upload */
                 $("#new_artifacts").show();
                 $("#uploadArea_title_div #total").html(files.length);
+                files.numError = 0;
                 //console.log("updating artifact divs because we just showed the new artifacts uploader pane");
+                console.log("Just showed the new_artifacts area");
                 _calculateCrop();
                 window.artifactDivList.render();
-            } else {
-                files.uploadCounter += 1;
-            }
-            $("#uploadArea_title_div #current").html(files.uploadCounter);
+            } 
+
             _resizeHoldingWrappers();
 
             var regexp = /\.(bmp)|(png)|(jpg)|(jpeg)|(gif)$/i;
@@ -2985,9 +2086,15 @@ $("#canvas_file_upload").fileUploadUI({
                 $(handler.uploadRow).html("MUST BE IMAGE (BMP PNG JPG JPEG GIF)");
                 $(handler.uploadRow).css("border-color","#e3372d")
                 window.uploadError = true;
+                files.numError += 1;
+                $("#uploadArea_title_div #total").html(files.length - files.numError);
                 setTimeout(function () {
                     _clearUploadError(handler);
                 }, 5000);
+                files.uploadSequence.push(callBack);
+                if (index + 1 === files.length) {
+                    files.uploadSequence.start(0);
+                }
                 return;
             }
 
@@ -2995,9 +2102,15 @@ $("#canvas_file_upload").fileUploadUI({
                 $(handler.uploadRow).html('FILE IS EMPTY!');
                 $(handler.uploadRow).css("border-color","#e3372d")
                 window.uploadError = true;
+                files.numError += 1;
+                $("#uploadArea_title_div #total").html(files.length - files.numError);
                 setTimeout(function () {
                     _clearUploadError(handler);
                 }, 5000);
+                files.uploadSequence.push(callBack);
+                if (index + 1 === files.length) {
+                    files.uploadSequence.start(0);
+                }
                 return;
             }
 
@@ -3006,39 +2119,46 @@ $("#canvas_file_upload").fileUploadUI({
                 $(handler.uploadRow).html('FILE TOO BIG! Max: '+maxSizeMB+"MB");
                 $(handler.uploadRow).css("border-color","#e3372d")
                 window.uploadError = true;
+                files.numError += 1;
+                $("#uploadArea_title_div #total").html(files.length - files.numError);
                 setTimeout(function () {
                     _clearUploadError(handler);
                 }, 5000);
+                files.uploadSequence.push(callBack);
+                if (index + 1 === files.length) {
+                    files.uploadSequence.start(0);
+                }
                 return;
             }
 
 
-            callBack();
+            files.uploadSequence.push(callBack);
+            if (index + 1 === files.length) {
+                files.uploadSequence.start(0);
+            }
+            console.log(">>>>>>>>>> BEFORE SEND END <<<<<<<<<<\n");
         },
         onComplete: function (event, files, index, xhr, handler) {
             handler.onCompleteAll(files);
+            files.uploadSequence.start(index + 1);
         },
         onCompleteAll: function (files) {
-            // The files array is a shared object between the instances of an upload selection.
-            // We extend it with a uploadCounter to calculate when all uploads have completed:
+            console.log("\n---------- ON COMPLETE START ----------");
 
-            if (files.uploadCounter != 0 && files.uploadCounter % STAGING_SIZE == 0) {
-                //_clearStaging();
+            if (!files.uploadCounter) {
+                files.uploadCounter = 1;
+            } else {
+                files.uploadCounter += 1;
             }
-        
-            _resizeHoldingWrappers();
+            $("#uploadArea_title_div #current").html(files.uploadCounter);
 
-
-            if (files.uploadCounter >= files.length) {
-                /* your code after all uplaods have completed */
-
-
+            console.log("onCompleteAll: " + files.uploadCounter);
+            if (files.uploadCounter >= (files.length - files.numError)) {
+                /* your code after all uploads have completed */
                 /*
                  * Live updates can finish entirely before this point
                  * They can also (more likely) finish after this happens
                  */
-
-                /*
                 var numStaging = window.artifactDivList.numStaging();
                 var numUnprocessed = window.artifactDivList.numUnprocessed();
                 if (numStaging <= 0 &&
@@ -3046,14 +2166,16 @@ $("#canvas_file_upload").fileUploadUI({
                     window.uploadError == false &&
                     $("#new_artifacts:visible").length > 0) {
                     $("#new_artifacts").hide('fast', function() {
-                        //_calculateCrop();
-                        //window.artifactDivList.render();
+                        console.log("Hid new artifacts because onCompleteAll decided all uploads had finished. This also means there are no more staging, or proccessing items");
+                        _calculateCrop();
+                        window.artifactDivList.render();
                     });
                 }
-                */
-
                 window.uploading = false;
+
             }
+
+            console.log("---------- ON COMPLETE END ----------\n");
         },
         buildUploadRow: function (files, index) {
             return $(
@@ -3061,8 +2183,10 @@ $("#canvas_file_upload").fileUploadUI({
             );
         },
         buildDownloadRow: function (file) {
+            console.log("\n========== BUILD DOWNLOAD ROW START ==========");
             var artifactDiv = window.artifactDivList.get(file.id);
             if (artifactDiv === undefined) {
+                console.log("MADE FIRST FROM BUILD DOWNLOAD ROW");
                 var artifactDiv = new ArtifactDiv();
                 artifactDiv['id'] = file.id;
                 artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
@@ -3085,10 +2209,14 @@ $("#canvas_file_upload").fileUploadUI({
                 // here. That's one fast server! Check to see if the staging
                 // area is empty and then close it if it is
                 $("#staging_content #artifact_"+file._id).remove();
+                _resizeHoldingWrappers();
                 // Remove from the staging area
             }
 
+            console.log("========== BUILD DOWNLOAD ROW END ==========\n");
+
             return $(
+                // We need to return something silly otherwise, it won't continue
                 '<div style="display:none"></div>'
             );
         }
@@ -3118,7 +2246,7 @@ $(document).ready(function(){
      * CANVAS - Controls the hide button on artifacts
      * **************************************************/
   if (is_iOS == false) {
-    $(".hide_photo").hover(function(){
+    $("#artifact_wrapper").delegate(".hide_photo", "mouseenter", function(){
         $(this).parent(".artifact").addClass("opacity40");
         if ($(this).parent(".artifact").hasClass("artifact_hidden")) {
             // Don't do anything, keep it lit.
@@ -3127,7 +2255,8 @@ $(document).ready(function(){
             $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=.5)");
             $(this).parent(".artifact").css("filter", "alpha(opacity=.5)");
         }
-    }, function(){
+    });
+    $("#artifact_wrapper").delegate(".hide_photo", "mouseleave", function(){
         $(this).parent(".artifact").removeClass("opacity40");
         if($(this).parent(".artifact").hasClass("artifact_hidden")) {
             // Do nothing
@@ -3138,12 +2267,11 @@ $(document).ready(function(){
         }
     });
   
-    $(".hide_photo").click(function(){
+    $("#artifact_wrapper").delegate(".hide_photo", "click", function(){
         var visible;
 
         // Note, IDs of artifacts are prefixed with 'artifact_'. We must strip this first
-        id = $(this).parent().attr("id");
-        id = id.slice(9,id.length);
+        id = parsePrefixToString($(this).parent().attr("id"),"_artifact");
 
         if ($(this).parent().hasClass("artifact_hidden")) {
             visible = 0;
@@ -3166,11 +2294,11 @@ $(document).ready(function(){
                 $(this).html("hidden photo<br/><a href='#'>show</a>");
                 window.justChangedHidden = true;
             } else {
-                $(this).parent(".artifact").hide();
-                $(this).parent(".artifact").remove();
+                window.artifactDivList.remove(id);
                 
                 //console.log("updating artifact divs because we just hid a photo");
-                updateArtifactDivs();
+                _calculateCrop();
+                window.artifactDivList.render();
             }
         }
 
@@ -3269,7 +2397,7 @@ $(document).ready(function(){
     })
 
     $(".artifact").live("mouseenter", function() {
-        if (window.zoomedIn == false) {
+        if (window.zoomedIn == false && window.pendingRender == false) {
             $(this).children(".hide_photo").show();
 
             $(this).css("opacity", "1");
@@ -3279,7 +2407,7 @@ $(document).ready(function(){
             _artifactExpand($(this));
         }
     }).live("mouseleave", function() {
-        if (window.zoomedIn == false) {
+        if (window.zoomedIn == false && window.pendingRender == false) {
             $(this).children(".hide_photo").hide();
 
             if($(this).hasClass("artifact_hidden")) {
@@ -3296,7 +2424,7 @@ $(document).ready(function(){
         if ($(this).parents(".artifact").hasClass("no_crop")) {
             return;
         }
-        zoomToArtifact($(this).parent(".artifact"));
+        _doZoom($(this).parent(".artifact"));
     });
   }
 
@@ -3307,7 +2435,7 @@ $(document).ready(function(){
         data : function(value, settings) {
             return window.canvasTitle;
         },
-        indicator : "<img src='{{url_for('static', filename='images/indicator.gif')}}'>",
+        indicator : " saving... ",
         tooltip   : "Click to edit. Push enter to save.",
         style  : "inherit",
         id: "id",

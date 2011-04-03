@@ -223,12 +223,14 @@ def rename():
   m = Memory.find_one({ "_id" : request.form['id'] })
   if m:
     if claimed(m):
-      if ('email' in session) and (m.user == session['_id']):
-        m.name = request.form['new_name']
-        m.save()
-        return m.name
-    else:
       m.name = request.form['new_name']
+      print m.name
+      m.save()
+      return m.name
+    else:
+      print ">>>>>>>>>>>>>>>> NOT CLAIMED"
+      m.name = request.form['new_name']
+      print m.name
       m.save()
       return m.name
 
