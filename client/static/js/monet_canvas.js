@@ -8,7 +8,7 @@ var WRAPPER_WIDTH = 955;
 var THRESHOLD = 0.8; // Maximum crop amount
 var STAGING_SIZE = 6; // Number of photos staged before they're added to the page
 var LOAD_SIZE = 100; // Number of photos to load when you reach the bottom
-var DOCUMENT_HEIGHT; // so we don't need to look this up every time
+var DOCUMENT_HEIGHT = 99999; // so we don't need to look this up every time
 var is_iOS;
 
 window.artifactDivList = new ArtifactDivList();
@@ -23,6 +23,7 @@ window.lastScrollPos = 0; // The scrollbar position before we zoomed in
 // out update Queue
 window.updateQueue = [];
 
+window.loadOffset = 0;
 
 
 window.artifactServerData = [] // A global that holds json representations of all returned artifacts
@@ -1027,10 +1028,8 @@ function getRealWidth(artifactDiv) {
  * full : "<full_url>"
  */
 function _updateArtifact(message) {
-    console.log("\n!!!!!!!!!! LIVE START !!!!!!!!!!");
     var artifactDiv = window.artifactDivList.get(message._id);
     if (artifactDiv === undefined) {
-        console.log("MADE FIRST FROM LIVE");
         var livemade = true;
         var artifactDiv = new ArtifactDiv();
         artifactDiv['id'] = message._id;
@@ -1070,7 +1069,6 @@ function _updateArtifact(message) {
                     window.uploadError == false &&
                     $("#new_artifacts:visible").length > 0) {
                     $("#new_artifacts").hide('fast', function() {
-                        console.log("LIVE: just hid new_artifacts because we moved an artifact from staging to above_zoom_div, and there are no more staging, and no more proccessed, and no more in the upload area");
                         _calculateCrop();
                         window.artifactDivList.render();
                     });
@@ -1082,11 +1080,6 @@ function _updateArtifact(message) {
         }
     } 
 
-    if (livemade == true) {
-        console.log("LIVEMADE: About to add another one to the page. ");
-    } else {
-        console.log("NOT LIVEMADE: About to move a div from staging to above_zoom_div");
-    }
     _calculateCrop();
 
     if (window.uploading == true && window.enableLive == true) {
@@ -1100,8 +1093,6 @@ function _updateArtifact(message) {
             setTimeout("window.updateTimeout = false", 500);
         }
     }
-
-    console.log("!!!!!!!!!! LIVE END !!!!!!!!!!\n");
 
 }
 /********************************
@@ -1330,6 +1321,9 @@ function firstRowSpace() {
  *****************************************/
 
 function _loadArtifacts(offset, numArtifacts) {
+    // FIXME We're very, naievely loading artifacts. Please fix
+    //console.log("Loading " + numArtifacts + " artifacts starting at " + offset);
+    window.loadingMoreArtifacts = true;
     var memory_id = $("#memory_id").html();
     if ($("#hidden_prompt").hasClass("showing_hidden")) {
         var show_hidden = 1;
@@ -1338,6 +1332,10 @@ function _loadArtifacts(offset, numArtifacts) {
     $.get("/memory", {"_id":memory_id, "offset":offset, "numartifacts":numArtifacts, "show_hidden":show_hidden}, function(data) {
         data = jsonParse(data);
         var newPhotosLength = data.length;
+        if (newPhotosLength) {
+            window.numPhotosLoaded += numArtifacts;
+            window.loadOffset += (offset + numArtifacts);
+        }
         for (var j = 0; j < newPhotosLength; j ++) {
             var newPhoto = data[j];
             var artifactDiv = new ArtifactDiv();
@@ -1357,41 +1355,12 @@ function _loadArtifacts(offset, numArtifacts) {
 
             window.artifactDivList.add(artifactDiv); // Puts in on the queue
         }
-        console.log("Just loading artifacts on the page");
         _calculateCrop();
         window.artifactDivList.render();
-    });
-
-}
-
-/** loadartifacts([offset[, numartifacts]])
- * Loads the artifacts in json format for this memory
- * Stores it in the window.artifactServerData global
- *
- * @param offset - The photo index to start loading from
- * @param numartifacts - The number of artifacts to pull
- *
- * @returns Void
- *
- */
-function loadartifacts(offset, numartifacts, postLoad) {
-    postLoad = postLoad || false;
-    console.log("LOADING ARTIFACTS =========================");
-    window.loadingMoreArtifacts = true;
-    var loaded_artifacts = null;
-    var memory_id = $("#memory_id").html();
-    if ($("#hidden_prompt").hasClass("showing_hidden")) {
-        var show_hidden = 1;
-    } else { var show_hidden = 0;}
-
-    $.get("/memory", {"_id":memory_id, "offset":offset, "numartifacts":numartifacts, "show_hidden":show_hidden}, function(data) {
-        if (postLoad) {
-            addNewlyLoadedPhotos(data);
-        }
-        //loadViewportPhotos();
-        window.numPhotosLoaded = window.artifactServerData.length;
         window.loadingMoreArtifacts = false;
+        DOCUMENT_HEIGHT = $(document).height();
     });
+
 }
 
 /**
@@ -1473,8 +1442,6 @@ function updatePos() {
 
 	}
     });
-    //console.log("updating artifact divs because we dragged and dropped");
-    updateArtifactDivs(/*newPositions*/);
     
 }
 
@@ -1730,7 +1697,6 @@ function _resizeCanvas() {
     }
     WRAPPER_WIDTH = $(".canvas_center").width(); // Update resize global
 
-    console.log("updating artifact divs because we resized the canvas");
     _calculateCrop();
     window.artifactDivList.render();
 }
@@ -1796,6 +1762,7 @@ function truncateTitle(enclosingSize) {
  */
 function _doZoom(artifact) {
     window.enableLive = false;
+    artifact.children(".hide_photo").hide();
 
     var artifactDiv = window.artifactDivList.get(parsePrefixToString(artifact.attr("id"), "artifact_"));
 
@@ -1997,7 +1964,6 @@ function _clearUploadError(handler) {
     window.uploadError = false;
     if (window.uploading == false) {
         $("#new_artifacts").hide('fast', function() {
-            console.log("Just cleared the upload errors");
             _calculateCrop();
             window.artifactDivList.render();
         });
@@ -2054,7 +2020,6 @@ $("#canvas_file_upload").fileUploadUI({
             $("#add_artifact").css("box-shadow", "2px 2px 7px #111");
         },
         beforeSend:function (event, files, index, xhr, handler, callBack) {
-            console.log("\n>>>>>>>>>> BEFORE SEND START <<<<<<<<<<");
             if (index == 0) {
                 window.uploading = true;
                 files.uploadSequence = [];
@@ -2071,8 +2036,6 @@ $("#canvas_file_upload").fileUploadUI({
                 $("#new_artifacts").show();
                 $("#uploadArea_title_div #total").html(files.length);
                 files.numError = 0;
-                //console.log("updating artifact divs because we just showed the new artifacts uploader pane");
-                console.log("Just showed the new_artifacts area");
                 _calculateCrop();
                 window.artifactDivList.render();
             } 
@@ -2136,14 +2099,12 @@ $("#canvas_file_upload").fileUploadUI({
             if (index + 1 === files.length) {
                 files.uploadSequence.start(0);
             }
-            console.log(">>>>>>>>>> BEFORE SEND END <<<<<<<<<<\n");
         },
         onComplete: function (event, files, index, xhr, handler) {
             handler.onCompleteAll(files);
             files.uploadSequence.start(index + 1);
         },
         onCompleteAll: function (files) {
-            console.log("\n---------- ON COMPLETE START ----------");
 
             if (!files.uploadCounter) {
                 files.uploadCounter = 1;
@@ -2152,7 +2113,6 @@ $("#canvas_file_upload").fileUploadUI({
             }
             $("#uploadArea_title_div #current").html(files.uploadCounter);
 
-            console.log("onCompleteAll: " + files.uploadCounter);
             if (files.uploadCounter >= (files.length - files.numError)) {
                 /* your code after all uploads have completed */
                 /*
@@ -2166,7 +2126,6 @@ $("#canvas_file_upload").fileUploadUI({
                     window.uploadError == false &&
                     $("#new_artifacts:visible").length > 0) {
                     $("#new_artifacts").hide('fast', function() {
-                        console.log("Hid new artifacts because onCompleteAll decided all uploads had finished. This also means there are no more staging, or proccessing items");
                         _calculateCrop();
                         window.artifactDivList.render();
                     });
@@ -2175,7 +2134,6 @@ $("#canvas_file_upload").fileUploadUI({
 
             }
 
-            console.log("---------- ON COMPLETE END ----------\n");
         },
         buildUploadRow: function (files, index) {
             return $(
@@ -2183,10 +2141,8 @@ $("#canvas_file_upload").fileUploadUI({
             );
         },
         buildDownloadRow: function (file) {
-            console.log("\n========== BUILD DOWNLOAD ROW START ==========");
             var artifactDiv = window.artifactDivList.get(file.id);
             if (artifactDiv === undefined) {
-                console.log("MADE FIRST FROM BUILD DOWNLOAD ROW");
                 var artifactDiv = new ArtifactDiv();
                 artifactDiv['id'] = file.id;
                 artifactDiv['noCrop'] = false; // Assuming it's always a cropable artifact
@@ -2213,7 +2169,6 @@ $("#canvas_file_upload").fileUploadUI({
                 // Remove from the staging area
             }
 
-            console.log("========== BUILD DOWNLOAD ROW END ==========\n");
 
             return $(
                 // We need to return something silly otherwise, it won't continue
@@ -2232,13 +2187,10 @@ $(document).ready(function(){
     _loadArtifacts(0,LOAD_SIZE);
 
 
-    DOCUMENT_HEIGHT = $(document).height(); // so we don't need to look this up every time
     iOS_running();
 
     var memoryID = $("#memory_id").html();
     setupSocket(memoryID);
-
-    loadartifacts(0,LOAD_SIZE);
 
     window.canvasTitle = $("#canvas_title .click").html();
 
@@ -2247,64 +2199,68 @@ $(document).ready(function(){
      * **************************************************/
   if (is_iOS == false) {
     $("#artifact_wrapper").delegate(".hide_photo", "mouseenter", function(){
-        $(this).parent(".artifact").addClass("opacity40");
-        if ($(this).parent(".artifact").hasClass("artifact_hidden")) {
-            // Don't do anything, keep it lit.
-        } else {
-            $(this).parent(".artifact").css("opacity", "0.5");
-            $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=.5)");
-            $(this).parent(".artifact").css("filter", "alpha(opacity=.5)");
+        if (window.zoomedIn == false) {
+            $(this).parent(".artifact").addClass("opacity40");
+            if ($(this).parent(".artifact").hasClass("artifact_hidden")) {
+                // Don't do anything, keep it lit.
+            } else {
+                $(this).parent(".artifact").css("opacity", "0.5");
+                $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=.5)");
+                $(this).parent(".artifact").css("filter", "alpha(opacity=.5)");
+            }
         }
     });
     $("#artifact_wrapper").delegate(".hide_photo", "mouseleave", function(){
-        $(this).parent(".artifact").removeClass("opacity40");
-        if($(this).parent(".artifact").hasClass("artifact_hidden")) {
-            // Do nothing
-        } else {
-            $(this).parent(".artifact").css("opacity", "1");
-            $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=1)");
-            $(this).parent(".artifact").css("filter", "alpha(opacity=1)");
+        if (window.zoomedIn == false) {
+            $(this).parent(".artifact").removeClass("opacity40");
+            if($(this).parent(".artifact").hasClass("artifact_hidden")) {
+                // Do nothing
+            } else {
+                $(this).parent(".artifact").css("opacity", "1");
+                $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=1)");
+                $(this).parent(".artifact").css("filter", "alpha(opacity=1)");
+            }
         }
     });
   
     $("#artifact_wrapper").delegate(".hide_photo", "click", function(){
-        var visible;
-        window.lastScrollPos = $(window).scrollTop();
+        if (window.zoomedIn == false) {
+            var visible;
+            window.lastScrollPos = $(window).scrollTop();
 
-        // Note, IDs of artifacts are prefixed with 'artifact_'. We must strip this first
-        id = parsePrefixToString($(this).parent().attr("id"),"_artifact");
+            // Note, IDs of artifacts are prefixed with 'artifact_'. We must strip this first
+            id = parsePrefixToString($(this).parent().attr("id"),"_artifact");
 
-        if ($(this).parent().hasClass("artifact_hidden")) {
-            visible = 0;
-            $.post("/toggle_visibility", {'visibility':visible, 'id':id});
-            $(this).parent(".artifact").css("opacity", "1");
-            $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=1)");
-            $(this).parent(".artifact").css("filter", "alpha(opacity=1)");
-            $(this).html("<a href='#'>hide</a>");
-            $(this).parent().removeClass("artifact_hidden");
-            window.justChangedHidden = true;
-        } else { 
-            visible = 1; 
-            $.post("/toggle_visibility", {'visibility':visible, 'id':id});
-
-            if ($("#hidden_prompt").hasClass("showing_hidden")) {
-                $(this).parent(".artifact").css("opacity", "0.5");
-                $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=.5)");
-                $(this).parent(".artifact").css("filter", "alpha(opacity=.5)");
-                $(this).parent().addClass("artifact_hidden");
-                $(this).html("hidden photo<br/><a href='#'>show</a>");
+            if ($(this).parent().hasClass("artifact_hidden")) {
+                visible = 0;
+                $.post("/toggle_visibility", {'visibility':visible, 'id':id});
+                $(this).parent(".artifact").css("opacity", "1");
+                $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=1)");
+                $(this).parent(".artifact").css("filter", "alpha(opacity=1)");
+                $(this).html("<a href='#'>hide</a>");
+                $(this).parent().removeClass("artifact_hidden");
                 window.justChangedHidden = true;
-            } else {
-                window.artifactDivList.remove(id);
-                
-                //console.log("updating artifact divs because we just hid a photo");
-                _calculateCrop();
-                window.artifactDivList.render();
+            } else { 
+                visible = 1; 
+                $.post("/toggle_visibility", {'visibility':visible, 'id':id});
+
+                if ($("#hidden_prompt").hasClass("showing_hidden")) {
+                    $(this).parent(".artifact").css("opacity", "0.5");
+                    $(this).parent(".artifact").css("-ms-filter", "alpha(opacity=.5)");
+                    $(this).parent(".artifact").css("filter", "alpha(opacity=.5)");
+                    $(this).parent().addClass("artifact_hidden");
+                    $(this).html("hidden photo<br/><a href='#'>show</a>");
+                    window.justChangedHidden = true;
+                } else {
+                    window.artifactDivList.remove(id);
+                    
+                    _calculateCrop();
+                    window.artifactDivList.render();
+                }
             }
+
+            $(window).scrollTop(window.lastScrollPos);
         }
-
-        $(window).scrollTop(window.lastScrollPos);
-
     });
   }
 
@@ -2460,15 +2416,12 @@ $(document).ready(function(){
         }
     });
     $(window).scroll(function(){
-        var offset = window.numPhotosLoaded;
-        if (offset >= LOAD_SIZE &&  
-            $(window).scrollTop() + $(window).height() >= 
+        if ($(window).scrollTop() + $(window).height() >= 
             DOCUMENT_HEIGHT - ARTIFACT_HEIGHT ) {
-
 
             // If we're near the bottom
             if (window.loadingMoreArtifacts == false) {
-                loadartifacts(offset, LOAD_SIZE, true);
+                _loadArtifacts(window.loadOffset, LOAD_SIZE);
             }
 
         } else {

@@ -371,10 +371,11 @@
 }
 .canvas_upload_div {
     /* Nominal width of 70px */
-    width:68px;
-    height:68px;
+    width:58px;
+    height:58px;
     border:1px dashed #666;
     margin:5px;
+    padding:5px;
     float:right;
     overflow:hidden;
 }
